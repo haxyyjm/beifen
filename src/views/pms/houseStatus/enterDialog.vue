@@ -296,8 +296,8 @@
                 <!-- <el-button style="height: 50px; width: 100px" type="primary"  @click="handlePicture()">上传照片</el-button> -->
                 <el-button style="height: 50px; width: 100px" type="primary"  @click="handlePolice()">上传公安</el-button>
                 <el-button style="height: 50px; width: 100px" type="primary" @click="handleBreakfastList()">早餐</el-button>
-                <!-- <el-button :loading="isLoading" style="height: 50px; width: 100px;" type="success" @click="confirmEnter()">确认入住</el-button> -->
-                <el-button style="height: 50px; width: 100px;" type="success" @click="confirmEnter()">确认入住</el-button>
+                <el-button :loading="isLoading" style="height: 50px; width: 100px;" type="success" @click="confirmEnter()">确认入住</el-button>
+                <!-- <el-button style="height: 50px; width: 100px;" type="success" @click="confirmEnter()">确认入住</el-button> -->
                 </div>
             </el-row>
         </el-dialog>
@@ -3234,11 +3234,11 @@ export default {
         //入住单=>确认入住
         confirmEnter(){
           this.isLoading = true
-          // if(!this.validatePreviewData() || !this.validatePreData() || !this.validateEnterData()){
-          //     // this.isErrorClass=true
-          //   this.isLoading = false
-          //   return false
-          // }
+          if(!this.validatePreviewData() || !this.validatePreData() || !this.validateEnterData()){
+              // this.isErrorClass=true
+            this.isLoading = false
+            return false
+          }
           this.getCardList()
           //   this.postEnter()  //这个方法暂且注销==>搬地方了
           // for(var item of this.preBillParam.master_base){
@@ -3334,14 +3334,79 @@ export default {
               }
             }
           }
-          this.getPriceFromType(scopeParam)
           scopeParam.lock_arrary = this.lock_arrary[0] //锁号数组map
+          this.getPriceFromType(scopeParam) //进行入住前得准备
           // console.log('roomNo_data_list,所有可选房间号',this.roomNo_data_list)
-          setTimeout(() => {
-            console.log('scopeParam=====传入param',scopeParam)
-            console.log('this.rate_other_listxiaixiai',this.rate_other_list)
-            scopeParam.master_rtrate = this.rate_other_list 
-          }, 2000);
+          // this.truePostEnter(scopeParam)
+          // setTimeout(() => {
+          //   console.log('this.rate_other_listxiaixiai',this.rate_other_list)
+          //   scopeParam.master_rtrate =  _.cloneDeep(this.rate_other_list) 
+          // }, 1000);
+          // console.log('scopeParam===111==传入param',scopeParam)
+          // setTimeout(() => {
+          //   console.log('scopeParam==222',scopeParam)
+          //   that.$axios.post(url1,scopeParam).then(res=>{
+          //     // if(res.data.message === 'fail'){
+          //     //   this.$message.warning('已有在住的人身份证号为')
+          //     // }
+          //     if(res.data.message === 'success'){
+          //         console.log(res.data.data)
+          //       if(res.data.data.error){
+          //         console.log('进入一个')
+          //         this.$message.warning(res.data.data.error)
+          //       }else{
+          //         console.log('进入另一个')
+          //         // this.openAccount() //入住成功直接开帐
+          //         this.enterFormVisible = false
+          //         this.$message.success('开始入住!')
+          //         // this.enterPreviewDialog = true //打开入预收界面 此时收房费
+          //         console.log('res.data.data.data',res.data.data.data)
+          //         Object.keys(res.data.data.data.main).length===0 ? res.data.data.data.main = res.data.data.data.member : res.data.data.data.main
+          //         this.returnEnterParam = res.data.data.data.main
+          //         console.log('this.returnEnterParam=====入住单返回xinxi=======',this.returnEnterParam,Object.values(this.returnEnterParam))
+          //         // this.$router.go(0)//废弃
+          //         try {
+          //           let mainAccount_id = Object.values(this.returnEnterParam)
+          //           this.mainAccount_id = mainAccount_id[0]
+          //           console.log('mainAccount_id',this.mainAccount_id)
+          //           this.$confirm('是否添加预授权?','提示',{
+          //             confirmButtonText: '是',
+          //             cancelButtonText: '否',
+          //             type: 'warning'
+          //           }).then(()=>{
+          //             this.flushByEnter()
+          //             this.handleAuthorization()//打开预授权界面
+          //           }).catch(()=>{
+          //             this.flushByEnter()
+          //             // this.$router.go(0)
+          //             console.log('关闭')
+          //           })
+          //         } catch (error) {
+          //           console.log('error')
+          //         }
+          //       }
+          //       this.isLoading = false
+          //     }else{
+          //       this.isLoading = false
+          //       this.$message.error('入住失败!')
+          //       // this.enterPreviewDialog = false //入预收操作
+          //     }
+          //     // this.enterPreviewDialog = true
+          //     }).catch(error=>{
+          //       this.isLoading = false
+          //       this.$message.error('入住失败,请确认数据正确!')
+          //       console.log('error======',error)
+          //   })
+          // }, 1200);
+        },
+        /**
+         * @desc 真正得进行入住
+         */
+        truePostEnter(scopeParam){
+          let that = this
+          // let url= that.api.api_bill_9202 + '/v1/' + `checkin/nobooking_checkin/`
+          let url= 'http://192.168.2.165:9005/v2/' + `checkin/nobooking_checkin/`
+          console.log('scopeParam===true==传入param',scopeParam)
           setTimeout(() => {
             that.$axios.post(url,scopeParam).then(res=>{
               // if(res.data.message === 'fail'){
@@ -3349,10 +3414,10 @@ export default {
               // }
               if(res.data.message === 'success'){
                   console.log(res.data.data)
-                if(res.data.data.error){
-                  console.log('进入一个')
-                  this.$message.warning(res.data.data.error)
-                }else{
+                // if(res.data.data.error){
+                //   console.log('进入一个')
+                //   this.$message.warning(res.data.data.error)
+                // }else{
                   console.log('进入另一个')
                   // this.openAccount() //入住成功直接开帐
                   this.enterFormVisible = false
@@ -3382,7 +3447,7 @@ export default {
                   } catch (error) {
                     console.log('error')
                   }
-                }
+                // }
                 this.isLoading = false
               }else{
                 this.isLoading = false
@@ -3463,6 +3528,8 @@ export default {
                   }
                 }
                 this.rate_other_list = rate_other_list
+                item.master_rtrate = this.rate_other_list
+                this.truePostEnter(item)
                 console.log('组装后的==>rate_other_list',this.rate_other_list) 
                 // need_rateAllPrice_Object = need_rateAllPrice_Object.concat(rate_other_list)
                 console.log('need_rateAllPrice_Object---------',need_rateAllPrice_Object)
@@ -3471,7 +3538,7 @@ export default {
                 //   rate_list.includes(Object.keys(item))  
                 //   // Object.keys(item)
                 // })
-              },0);
+              },300);
               console.log('success')
             }
             let temprate = res.data.data.price

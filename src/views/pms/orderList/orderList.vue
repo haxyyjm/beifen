@@ -560,7 +560,6 @@
           salary: null,
           education: null,
           marital: null,
-          company_id: null,
           company_na: '',
           pic_photo: null,
           pic_sign: null,
@@ -575,7 +574,6 @@
           city_id: null,
           zipcode: null,
           reserve_base_id: '',
-          guest_id: ''
           }]
         },//prop值
         preEnterInfoParam: {},
@@ -674,7 +672,6 @@
           salary: null,
           education: null,
           marital: null,
-          company_id: null,
           company_na: '',
           pic_photo: null,
           pic_sign: null,
@@ -689,7 +686,6 @@
           city_id: null,
           zipcode: null,
           reserve_base_id: '',
-          guest_id: ''
         }
         //线上
         // UrLHeader_9103: 'http://code.crowncrystalhotel.com/v1/',
@@ -781,7 +777,7 @@
       deleteReserve(row){
         console.log('row..',row)
         let that = this
-        let url = 'http://192.168.4.217:9005/v2/' + `booking/remove_reserve/`
+        let url = 'http://192.168.2.165:9005/v2/' + `booking/remove_reserve/`
         // let url = that.api.api_bill_9202 + '/v1/' + `booking/get_order_reserve_info/`
         let scopeParam = {
           order_no: row.reserve_base[0].order_no
@@ -832,7 +828,7 @@
           search_type: "2" //根据预订单号查询预订单=== value值为2
         }
         let that = this
-        let url = 'http://192.168.4.217:9005/v2/' + `booking/get_reserve_method/`
+        let url = 'http://192.168.2.165:9005/v2/' + `booking/get_reserve_method/`
         // let url = that.api.api_bill_9202 + '/v1/' + `booking/get_order_reserve_info/`
         that.$axios.post(url,scopeParams).then(res=>{
           if(res.data.message === 'success'){
@@ -931,8 +927,8 @@
           email_master: param.email_master,
           weixin_master: param.weixin_master,
           mobile_master: param.mobile_master,
-          ID_no: param.ID_no,
-          fix_rate: param.fix_rate,
+          id_no: param.id_no,
+          fix_rate: param.room_price,
           rate_code: param.rate_code,//房价码
           is_change_rate: param.is_change_rate,
           AR_id: param.AR_id,
@@ -1099,7 +1095,7 @@
            * 所有预定的查询
            */
           console.info(that.room_types);
-          let url = 'http://192.168.4.217:9005' + '/v2/booking/get_all_reserve_list/';
+          let url = 'http://192.168.2.165:9005' + '/v2/booking/get_all_reserve_list/';
           that.$axios({
             method: 'post',
             url: url,
@@ -1287,7 +1283,7 @@
        */
       search_all_res() {
         let that = this;
-        let url = 'http://192.168.4.217:9005' + '/v2/booking/get_all_reserve_list/';
+        let url = 'http://192.168.2.165:9005' + '/v2/booking/get_all_reserve_list/';
         that.$axios({
           method: 'post',
           url: url,
@@ -1355,7 +1351,7 @@
               break;
             case '2' : url = that.api.api_bill_9202 + '/v1/checkin/get_leave_list/?page=' + currentPage;
               break;
-            case '3' : url = 'http://192.168.4.217:9005' + '/v2/booking/get_all_reserve_list/?page=' + currentPage;
+            case '3' : url = 'http://192.168.2.165:9005' + '/v2/booking/get_all_reserve_list/?page=' + currentPage;
               break;
             case '4' : url = that.api.api_bill_9202 + '/v1/checkin/exception_list/?page=' + currentPage;
               break;
