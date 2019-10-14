@@ -1,0 +1,2 @@
+webpackJsonp([31],{"3DlN":function(e,t){},OyC9:function(e,t,n){"use strict";Object.defineProperty(t,"__esModule",{value:!0});var i={render:function(){var e=this.$createElement;return(this._self._c||e)("div",[this._v("\n  "+this._s("折扣方案")+"\n")])},staticRenderFns:[]};var s=n("VU/8")({name:"discountidea"},i,!1,function(e){n("3DlN")},"data-v-0921d221",null);t.default=s.exports}});
+//# sourceMappingURL=31.7ba19aa4600298ef416f.js.map

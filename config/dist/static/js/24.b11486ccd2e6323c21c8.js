@@ -1,0 +1,2 @@
+webpackJsonp([24],{"06KV":function(e,n,t){"use strict";Object.defineProperty(n,"__esModule",{value:!0});var i={render:function(){var e=this.$createElement;return(this._self._c||e)("div",[this._v("\n  "+this._s("佣金方案")+"\n")])},staticRenderFns:[]};var s=t("VU/8")({name:"commissionidea"},i,!1,function(e){t("XMAa")},"data-v-550cd256",null);n.default=s.exports},XMAa:function(e,n){}});
+//# sourceMappingURL=24.b11486ccd2e6323c21c8.js.map
