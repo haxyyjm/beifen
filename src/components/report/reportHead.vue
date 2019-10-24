@@ -381,7 +381,7 @@
             //本日续住
             getReport_continueLive(){
                 let that = this
-                let url = that.api.api_bill_9202+ '/v1/' + `depend_ex/today_continued_houses_report/`
+                let url = that.api.api_newBill_9204 + '/v2/' + `depend_ex/today_continued_houses_report/`
                 let scopeParam = {
                     biz_date_min: that.startTime ? `${that.startTime} 00:00:00` : that.startTime,
                     biz_date_max: that.startTime ? `${that.endTime} 00:00:00`: that.startTime,
@@ -401,7 +401,7 @@
             },
             getReport_changeRoom(){
                 let that = this
-                let url = that.api.api_bill_9202+ '/v1/' + `depend_ex/today_exchange_houses_report/`
+                let url = that.api.api_newBill_9204 + '/v2/' + `depend_ex/today_exchange_houses_report/`
                 let scopeParam = {
                     biz_date_min: that.startTime ? `${that.startTime} 00:00:00` : that.startTime,
                     biz_date_max: that.startTime ? `${that.endTime} 00:00:00`: that.startTime,
@@ -422,7 +422,7 @@
             //本日将离客人报表
             getReport_preLeaveRoom(){
                 let that = this
-                let url = that.api.api_bill_9202+ '/v1/' + `checkin/get_leave_today_report/`
+                let url = that.api.api_newBill_9204 + '/v2/' + `checkin/get_leave_today_report/`
                 let scopeParam = {
                     biz_date_min: that.startTime ? `${that.startTime} 00:00:00` : that.startTime,
                     biz_date_max: that.startTime ? `${that.endTime} 00:00:00`: that.startTime,
@@ -442,7 +442,7 @@
             },
             getReport_dayLive(){
                 let that = this
-                let url = that.api.api_bill_9202+ '/v1/' + `checkin/get_living_today_report/`
+                let url = that.api.api_newBill_9204 + '/v2/' + `checkin/get_living_today_report/`
                 let scopeParam = {
                     biz_date_min: that.startTime ? `${that.startTime} 00:00:00` : that.startTime,
                     biz_date_max: that.startTime ? `${that.endTime} 00:00:00`: that.startTime,
@@ -463,7 +463,7 @@
             //当前在住客人报表
             getReport_currentLive(){
                 let that = this
-                let url = that.api.api_bill_9202+ '/v1/' + `checkin/get_living_report/`
+                let url = that.api.api_newBill_9204 + '/v2/' + `checkin/get_living_report/`
                 let scopeParam = {
                     biz_date_min: that.startTime ? `${that.startTime} 00:00:00` : that.startTime,
                     biz_date_max: that.startTime ? `${that.endTime} 00:00:00`: that.startTime,
@@ -484,7 +484,7 @@
             //本日离店客人报表
             getReport_haveLeaveRoom(){
                 let that = this
-                let url = that.api.api_bill_9202+ '/v1/' + `checkin/get_left_today_report/`
+                let url = that.api.api_newBill_9204 + '/v2/' + `checkin/get_left_today_report/`
                 let scopeParam = {
                     biz_date_min: that.startTime ? `${that.startTime} 00:00:00` : that.startTime,
                     biz_date_max: that.startTime ? `${that.endTime} 00:00:00`: that.startTime,
@@ -506,7 +506,7 @@
             getReport_feeRoom(labelparam){
                 console.log('......................免费房')
                 let that = this
-                let url = that.api.api_bill_9202+ '/v1/' + `checkin/get_master_type_report/`
+                let url = that.api.api_newBill_9204 + '/v2/' + `checkin/get_master_type_report/`
                 let scopeParam = {
                     biz_date_min: that.startTime ? `${that.startTime} 00:00:00` : that.startTime,
                     biz_date_max: that.startTime ? `${that.endTime} 00:00:00`: that.startTime,

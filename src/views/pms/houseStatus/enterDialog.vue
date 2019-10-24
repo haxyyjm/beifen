@@ -1077,7 +1077,6 @@ export default {
                 // code_name: '77777',
                 // descript: null,
                 // descript_en: null,
-                list_order: 1,
                 last_name: null,
                 first_name: null,
                 name2: null,
@@ -1100,7 +1099,7 @@ export default {
                 marital: null,
                 company_id: null,
                 company_na: '222',
-                pic_sign: null,
+                pic_now: null,
                 pic_photo: null,
                 remark: '222',
                 is_anonymo: false,
@@ -1344,12 +1343,12 @@ export default {
         console.log('接收从子组件传来的入住人对应的入住照片!',param)
         // for(var item in this.preBillParam.master_guest){
         //   if(item == param.index){
-        //     this.preBillParam.master_guest[item].pic_sign = param.imageUrl
+        //     this.preBillParam.master_guest[item].pic_now = param.imageUrl
         //   }
         // }
         this.preBillParam.master_guest.forEach((item,index)=>{
           if(index == param.index){
-            item.pic_sign =  param.imageUrl
+            item.pic_now =  param.imageUrl
           }
         })
         console.log('this.preBillParam.master_guest=====end',this.preBillParam.master_guest)
@@ -2247,8 +2246,8 @@ export default {
                   that.$message.success('上传图片成功!')
                   console.log('。。。。',this.preBillParam.master_guest)
                   for(var item of that.preBillParam.master_guest){
-                     if(!item.pic_sign && !item.pic_photo){
-                          item.pic_sign = that.imageUrl  //拍摄照片传入
+                     if(!item.pic_now && !item.pic_photo){
+                          item.pic_now = that.imageUrl  //拍摄照片传入
                           item.pic_photo = that.card_imgUrl //该入住人得证件照
                           break
                       }
@@ -2319,7 +2318,6 @@ export default {
             // code_name: '77777',
             // descript: null,
             // descript_en: null,
-            list_order: 1,
             last_name: null,
             first_name: null,
             name2: null,
@@ -2342,7 +2340,7 @@ export default {
             marital: null,
             company_id: null,
             company_na: '222',
-            pic_sign: null,
+            pic_now: null,
             pic_photo: null,
             remark: '222',
             is_anonymo: false,
@@ -2786,7 +2784,6 @@ export default {
                 // descript_en: '123',
                 // hotel_group_id: 123,
                 // hotel_id: 123,
-                // list_order: 123,
                 // modify_user_id: 0,
                 account_id: null,
                 team_id: 2,
@@ -2846,7 +2843,6 @@ export default {
             // code_name: '77777',
             // descript: null,
             // descript_en: null,
-            list_order: 1,
             last_name: null,
             first_name: null,
             name2: null,
@@ -2869,7 +2865,7 @@ export default {
             marital: null,
             company_id: null,
             company_na: '222',
-            pic_sign: null,
+            pic_now: null,
             pic_photo: null,
             remark: '222',
             is_anonymo: false,
@@ -3304,8 +3300,7 @@ export default {
           let that = this
           // let url= `http://192.168.4.147:9005/v1/checkin/nobooking_checkin/`
           // let url= that.api.api_bill_9202 + '/v1/' + `checkin/nobooking_checkin/`
-          let url= 'http://192.168.2.165:9005/v2/' + `checkin/nobooking_checkin/`
-          // that.preBillParam.pic_sign = that.imageUrl //这个暂时为空的数据废弃
+          // that.preBillParam.pic_now = that.imageUrl //这个暂时为空的数据废弃
           let scopeParam = _.cloneDeep(that.preBillParam)
           scopeParam = this.handleDeleteAttribute(scopeParam)
           let array = scopeParam.room_list.filter(item=>item != this.previewEnterBill.room_no_value)
@@ -3330,6 +3325,7 @@ export default {
             for(var itemm of this.roomTypeList){
               if(item.room_type === itemm.descript){
                 item.code_name = itemm.code
+                item.room_type_descript_en = itemm.code
                 break
               }
             }
@@ -3405,7 +3401,7 @@ export default {
         truePostEnter(scopeParam){
           let that = this
           // let url= that.api.api_bill_9202 + '/v1/' + `checkin/nobooking_checkin/`
-          let url= 'http://192.168.2.165:9005/v2/' + `checkin/nobooking_checkin/`
+          let url= that.api.api_newBill_9204 + '/v2/' + `checkin/nobooking_checkin/`
           console.log('scopeParam===true==传入param',scopeParam)
           setTimeout(() => {
             that.$axios.post(url,scopeParam).then(res=>{
@@ -3423,13 +3419,10 @@ export default {
                   this.enterFormVisible = false
                   this.$message.success('开始入住!')
                   // this.enterPreviewDialog = true //打开入预收界面 此时收房费
-                  console.log('res.data.data.data',res.data.data.data)
-                  Object.keys(res.data.data.data.main).length===0 ? res.data.data.data.main = res.data.data.data.member : res.data.data.data.main
-                  this.returnEnterParam = res.data.data.data.main
-                  console.log('this.returnEnterParam=====入住单返回xinxi=======',this.returnEnterParam,Object.values(this.returnEnterParam))
+                  this.returnEnterParam = res.data.data
                   // this.$router.go(0)//废弃
                   try {
-                    let mainAccount_id = Object.values(this.returnEnterParam)
+                    let mainAccount_id = Object.values(this.returnEnterParam.account_id.master)
                     this.mainAccount_id = mainAccount_id[0]
                     console.log('mainAccount_id',this.mainAccount_id)
                     this.$confirm('是否添加预授权?','提示',{
@@ -3451,7 +3444,7 @@ export default {
                 this.isLoading = false
               }else{
                 this.isLoading = false
-                this.$message.error('入住失败!')
+                this.$message.error(res.data.message)
                 // this.enterPreviewDialog = false //入预收操作
               }
               // this.enterPreviewDialog = true
@@ -4163,7 +4156,6 @@ export default {
             // code_name: '77777',
             // descript: null,
             // descript_en: null,
-            list_order: 1,
             last_name: null,
             first_name: null,
             name2: null,
@@ -4186,7 +4178,7 @@ export default {
             marital: null,
             company_id: null,
             company_na: '222',
-            pic_sign: null,
+            pic_now: null,
             pic_photo: null,
             remark: '222',
             is_anonymo: false,
@@ -4222,6 +4214,8 @@ export default {
             extra_flag: '',
             lock_number:'',
             rate_code: this.rateCodeValue,//房价码  这里标记一下，整个页面只有一个房价码
+            code_market: this.preBillParam.master_base[0].code_market,
+            code_src: this.preBillParam.master_base[0].code_src,
             is_change_rate: '',
             room_amount: 1,
             master_lable: 0,
@@ -4253,8 +4247,6 @@ export default {
             allowed_ar: 1,
             ar_id: 0,
             code_commision_id: '1',
-            code_market: '',
-            code_src: '',
             reference_id: 1,
             master_status_lable: null,
             total_chartge: 0,
@@ -4359,7 +4351,7 @@ export default {
               this.$message.warning("房间号是必填项!")
               return false
             }
-            if(!item.pic_sign){
+            if(!item.pic_now){
               this.$message.warning(item.name + '没有上传照片,' + '请上传照片!')
               return false
             }

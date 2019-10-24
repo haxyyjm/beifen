@@ -259,6 +259,18 @@
           </div>
           <div class="room-type">
             <div style="float: left">
+              <label>异常类型</label>
+              <button class="common-btn disabled">不限</button>
+            </div>
+            <div class="room-select-top">
+             <el-checkbox-group :max="1" @change="unusualEvent" v-model="unusualList">
+                <el-checkbox label="预定异常"></el-checkbox>
+                <el-checkbox label="入住异常"></el-checkbox>
+              </el-checkbox-group>
+            </div>
+          </div>
+          <div class="room-type">
+            <div style="float: left">
               <label>房间类型</label>
               <button class="common-btn">不限</button>
             </div>
@@ -309,7 +321,7 @@
     </div>
     <div class="order-table">
       <!--table 这里的table是所有的tab选项里面的，数据是根据tab的不同进行不同的数据渲染的，所以这里是一个table-->
-      <el-table @row-click="rowClick" :data="tableData_orderlist" :cell-style="{textAlign:'center'}" style="width: 100%" size="mini" height="350px" :header-cell-style="{background:'#303A41',color:'white',textAlign:'center'}" stripe>
+      <el-table @row-dblclick="rowClick" :data="tableData_orderlist" :cell-style="{textAlign:'center'}" style="width: 100%" size="mini" height="350px" :header-cell-style="{background:'#303A41',color:'white',textAlign:'center'}" stripe>
       <!--  <el-table-column prop="order_no" fixed width="160" label="预定编号">
         </el-table-column>-->
         <el-table-column type="expand" v-if="rsc_peo_flag">
@@ -334,8 +346,8 @@
           </template>
         </el-table-column>
         <el-table-column prop="reserve_guest" label="预订人" :key="Math.random()" width="160" v-if="rsc_peo_flag">
-          <template slot-scope="scope" v-if="scope.row.reserve_base">
-            <span>{{scope.row.reserve_base[0].rsv_person_name}}</span>
+          <template slot-scope="scope">
+            <span v-if="scope.row.reserve_base">{{scope.row.reserve_base[0].rsv_person_name}}</span>
           </template>
         </el-table-column>
         <el-table-column prop="master_guest" label="入住人" :key="Math.random()" width="160" v-if="!rsc_peo_flag">
@@ -361,8 +373,8 @@
           </template>
         </el-table-column>
         <el-table-column prop="reserve_rate" width="140" label="排房" :key="Math.random()" v-if="room_type_array_flag">
-          <template slot-scope="scope" v-if="scope.row.reserve_base">
-              <span> <el-button :disabled="scope.row.reserve_base[0].rsv_status_lable !=0" style="color: #8e8e8e" @click="chooseRoom(scope.row)" round>排房</el-button></span>
+          <template slot-scope="scope">
+              <span v-if="scope.row.reserve_base"> <el-button :disabled="scope.row.reserve_base[0].rsv_status_lable !=0" style="color: #8e8e8e" @click="chooseRoom(scope.row)" round>排房</el-button></span>
           </template>
         </el-table-column>
         <el-table-column prop="master_guest" width="140" label="在住人联系电话" :key="Math.random()" v-if="!rsc_peo_flag" type="expand">
@@ -371,8 +383,8 @@
           </template>
         </el-table-column>
         <el-table-column prop="reserve_guest" width="240" label="预定人联系电话" :key="Math.random()" v-if="rsc_peo_flag">
-          <template slot-scope="scope" v-if="scope.row.reserve_base">
-            <span>{{scope.row.reserve_base[0].telephone_master}}</span>
+          <template slot-scope="scope">
+            <span v-if="scope.row.reserve_base">{{scope.row.reserve_base[0].telephone_master}}</span>
           </template>
         </el-table-column>
         <el-table-column :formatter="dateFormat_arr" prop="arr_time" label="预抵时间" width="140px">
@@ -402,13 +414,14 @@
         <el-table-column prop="remark" label="备注">
         </el-table-column>
         <el-table-column prop="operation" label="操作" width="250px" fixed="right">
-          <template slot-scope="scope" v-if="scope.row.reserve_base">
-            <el-button v-if="rsc_peo_flag && scope.row.reserve_base[0].rsv_status_lable ===0" type="danger" class="tabel_right"  @click="enterRoom(scope.row)" size="small">入住</el-button>
-            <el-button v-if="rsc_peo_flag && scope.row.reserve_base[0].rsv_status_lable ===1" type="text" class="tabel_right" size="small">已入住</el-button>
-            <el-button v-if="rsc_peo_flag && scope.row.reserve_base[0].rsv_status_lable ===2" type="text" class="tabel_right" size="small">部分入住</el-button>
-            <el-button v-if="rsc_peo_flag && scope.row.reserve_base[0].rsv_status_lable ===3" type="text" class="tabel_right" size="small">已结账</el-button>
-            <el-button v-if="rsc_peo_flag && scope.row.reserve_base[0].rsv_status_lable ===0" type="danger" class="tabel_right"  @click="getQr_code(scope.row)" size="small">二维码</el-button>
-            <el-button v-if="rsc_peo_flag && scope.row.reserve_base[0].rsv_status_lable ===0" type="danger" class="tabel_right"  @click="deleteReserve(scope.row)" size="small">删除</el-button>
+          <template slot-scope="scope" v-if="scope.row.reserve_base || scope.row.master_guest">
+            <el-button type="primary" size="small" v-if="!rsc_peo_flag" @click="handleChangeRoom(scope.row)">换房升降</el-button>
+            <el-button v-if="rsc_peo_flag && scope.row.reserve_base && scope.row.reserve_base[0].rsv_status_lable ===0" type="danger" class="tabel_right"  @click="enterRoom(scope.row)" size="small">入住</el-button>
+            <el-button v-if="rsc_peo_flag && scope.row.reserve_base && scope.row.reserve_base[0].rsv_status_lable ===1" type="text" class="tabel_right" size="small">已入住</el-button>
+            <el-button v-if="rsc_peo_flag && scope.row.reserve_base && scope.row.reserve_base[0].rsv_status_lable ===2" type="text" class="tabel_right" size="small">部分入住</el-button>
+            <el-button v-if="rsc_peo_flag && scope.row.reserve_base && scope.row.reserve_base[0].rsv_status_lable ===3" type="text" class="tabel_right" size="small">已结账</el-button>
+            <el-button v-if="rsc_peo_flag && scope.row.reserve_base && scope.row.reserve_base[0].rsv_status_lable ===0" type="danger" class="tabel_right"  @click="getQr_code(scope.row)" size="small">二维码</el-button>
+            <el-button v-if="rsc_peo_flag && scope.row.reserve_base && scope.row.reserve_base[0].rsv_status_lable ===0" type="danger" class="tabel_right"  @click="deleteReserve(scope.row)" size="small">删除</el-button>
             <!-- <el-button @click="handleClick(tableData2[scope.$index].id)" size="small">编辑</el-button> -->
             <!-- <el-button type="danger" @click="deleteClick(scope.$index, scope.row,tableData_orderlist)" style="float: right;margin-right: 20px" size="small">删除</el-button> -->
           </template>
@@ -417,11 +430,62 @@
       <el-pagination @current-change="handleCurrentChange_list" :current-page.sync="currentPage" :page-size="page_size" layout="total, prev, pager, next, jumper" :total="total">
       </el-pagination>
     </div>
-    <div class="order-page">
+    <!-- <div class="order-page">
       <label>当前合计：</label>
       <label>订金：</label>
       <label>￥</label>
-    </div>
+    </div> -->
+    <!--换房升级房-->
+      <el-dialog @close="flushData" width="35%" class="houseTypeClass background" title="换房升降级" :visible.sync="changeRoomVisible">
+        <div style="height: 340px; overflow: auto">
+          <div class="roomClass">
+            <el-input size="mini" style="width: 13vw" v-model="roomParam.oldType"></el-input>
+            <span>换房型</span>
+            <el-select @focus="getRoomType()" style="width: 12vw" size="mini" v-model="roomParam.newType">
+              <el-option
+                v-for="item in roomTypeList"
+                :key="item.id"
+                :label="item.room_type_desc"
+                :value="item.room_type">
+              </el-option>
+            </el-select>
+          </div>
+         <div class="roomClass">
+            <el-input size="mini" style="width: 13vw" v-model="roomParam.oldNumber"></el-input>
+            <span>换房号</span>
+            <el-select  @focus="getRoomNo()" style="width: 12vw" size="mini" v-model="roomParam.newNumber">
+              <el-option
+                v-for="item in roomNoList"
+                :key="item.id"
+                :label="item.room_no"
+                :value="item.room_no">
+              </el-option>
+            </el-select>
+          </div>
+          <el-row style="padding-left: 12px" class="roomClass_third">
+            是否免费换房: 
+            <el-radio style="padding-left: 12px" v-model="roomParam.isFee" label="1">是</el-radio>
+            <el-radio v-model="roomParam.isFee" label="2">否</el-radio>
+          </el-row>
+          <el-row style="padding-left: 12px">
+            <span style="padding-left: 15px">原房价:</span> 
+            <el-input @input="roomParam.oldPrice = roomParam.oldPrice.replace(/[^\d.]/g,'')" size="mini" class="roomClass_third width" v-model="roomParam.oldPrice"></el-input>
+          </el-row>
+          <el-row style="padding-left: 12px">
+          <span style="padding-left: 30px">折扣:</span> 
+          <el-input @blur="computeData" @input="roomParam.discount = roomParam.discount.replace(/[^\-?\d.]/g,'')" placeholder="示例:100或者-100" size="mini" class="roomClass_third width" v-model="roomParam.discount"></el-input>
+          </el-row>
+          <el-row style="padding-left: 12px">
+            <span style="padding-left: 15px">现房价:</span> <el-input size="mini" class="roomClass_third width" v-model="roomParam.newPrice"></el-input>
+          </el-row>
+          <el-row style="padding-left: 12px">
+            <span style="display: inline-block;height: 55px;">换房理由:</span> <el-input type="textarea" class="roomClass_third width" :rows="2" v-model="roomParam.reason"></el-input>
+          </el-row>
+        </div>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="confirmChangeRoom()" type="primary">确认</el-button>
+        </div>
+        </el-dialog>
     <!--遮罩层-->
     <div class="mask" v-show="maskShow">
       <div class="mask-suspen">
@@ -523,6 +587,23 @@
     name: "orderList",
     data() {
       return {
+        unusualList: [],//异常类型数组
+        roomTypeList: [],//房型数组
+        roomNoList: [],//可选房号数组
+        rowParam: {},//行内对象
+        /**换房升降级param */
+        roomParam:{
+          oldType: '',
+          newType: '',
+          oldNumber: '',
+          newNumber: '',
+          isFee: '1',
+          oldPrice: '',
+          discount: '',
+          newPrice: '',
+          reason: ''
+        },
+        changeRoomVisible: false,
         qrCode_dialog: false,
         preBillParam: {
           reserve_guest: [{
@@ -634,9 +715,9 @@
         //线下
         url: 'http://47.98.113.173:9202',
         // url: 'http://192.168.2.224:9005',
-        UrLHeader_9103: 'http://47.98.113.173:9103/v1/',
-        UrLHeader_bill: 'http://47.98.113.173:9202/v1/',
-        UrLHeader_room: 'http://47.98.113.173:8091/v1/',
+        UrLHeader_9103: 'http://47.98.113.173:9103/v2/',
+        UrLHeader_bill: 'http://47.98.113.173:9202/v2/',
+        UrLHeader_room: 'http://47.98.113.173:8091/v2/',
         reserve_guest:{
           liveCount: 0,//可选数
           room_number: null,//房间号
@@ -688,9 +769,9 @@
           reserve_base_id: '',
         }
         //线上
-        // UrLHeader_9103: 'http://code.crowncrystalhotel.com/v1/',
-        // UrLHeader_bill: 'http://192.168.2.224:9005/v1/',
-        // UrLHeader_room: 'http://room.crowncrystalhotel.com/v1/',
+        // UrLHeader_9103: 'http://code.crowncrystalhotel.com/v2/',
+        // UrLHeader_bill: 'http://192.168.2.224:9005/v2/',
+        // UrLHeader_room: 'http://room.crowncrystalhotel.com/v2/',
         // url: 'http://bill.crowncrystalhotel.com',
       };
     },
@@ -725,6 +806,162 @@
       that.get_room_type_list();
     },
     methods: {
+      flushData(){
+        this.roomParam.newType = ''
+        this.roomParam.oldType = '',
+        this.roomParam.oldNumber= '',
+        this.roomParam.newNumber= '',
+        this.roomParam.oldPrice = '',
+        this.roomParam.discount = '',
+        this.roomParam.newPrice = '',
+        this.roomParam.reason = ''
+      },
+      /**
+       * 对异常单进行筛选 综合查询
+       */
+      unusualEvent(){
+        let that = this
+        console.log('zhi',this.unusualList)
+        if(this.unusualList[0] === '预定异常'){
+          that.rsc_peo_flag = true;
+          that.room_type_flag = false;
+          that.room_type_array_flag = true;
+          that.search_bookingAbnormal_list() //预定异常
+        }else{
+          that.room_type_flag = true;
+          that.room_type_array_flag = false;
+          that.rsc_peo_flag = false;
+          this.search_abnormal_list() //入住异常单
+        }
+      },
+      /**通过折扣和原价自动计算新的房价 */
+      computeData(){
+        this.roomParam.newPrice = Number(this.roomParam.oldPrice) + Number(this.roomParam.discount)
+      },
+      /**
+       * @desc 确定进行换房
+       */
+      confirmChangeRoom(){
+        let that = this
+        if (that.roomParam.oldNumber && that.roomParam.newNumber && that.roomParam.oldType && that.roomParam.newType && that.roomParam.oldPrice && that.roomParam.discount){
+          console.log('kaishi',this.rowParam)
+          console.log('roomParam',this.roomParam)
+          // let url = 'http://192.168.2.224:9005' + '/v2/' + `depend_ex/exchange_houses/`
+          let url = that.api.api_newBill_9204 + '/v2/' + `depend_ex/exchange_houses/`
+          let scopeParam ={
+            order_no:  that.rowParam.order_no,
+            old_room: that.roomParam.oldNumber, //原房间
+            new_room: that.roomParam.newNumber,
+            discount: Number(that.roomParam.discount), //折扣
+            is_free: that.roomParam.isFee,
+            new_fix_rate: Number(that.roomParam.newPrice),
+            old_fix_rate: Number(that.roomParam.oldPrice),
+            old_room_type: that.roomParam.oldType,
+            new_room_type: that.roomParam.newType,
+            change_result: that.roomParam.reason
+          }
+          console.log(scopeParam)
+          that.$axios.post(url,scopeParam).then(res=>{
+            if(res.data.message === 'success'){
+              that.$message.success(res.data.data.result.message)
+              that.changeRoomVisible = false
+              that.search_live();
+              that.tab_pane_flag = '0';
+            }else{
+              that.$message.warning('换房失败!')
+            }
+            }).catch(error=>{
+          })
+        }else{
+          this.$message.warning('有数据没填充!')
+        }
+        console.log('this.multipleSelectionget',this.multipleSelection)
+      },
+      /**
+       * @desc 换房升级 可以换房间，也可以更改房价
+       */
+      handleChangeRoom(row){
+        this.getRateCode_price(row)
+        this.changeRoomVisible = true
+        console.log('row',row)
+        this.roomParam.oldNumber = row.room_number
+        this.roomParam.oldType = row.room_type
+        this.rowParam.order_no = row.order_no
+        // this.roomParam.newType = row.room_type //默认老值 error
+        this.rowParam = row
+        // this.roomParam.oldPrice = row.
+      },
+      /**
+         * @desc_1 根据房型得到对应房价(入住过后当天的房价)
+      */
+      getRateCode_price(param){
+        // this.preBillLinkParam.room_type_name
+        let that = this
+        let url = that.api.api_price_9101 + '/v1/' +  `room/rate_code/get_rate_code/`
+        // let temp = []
+        // temp.push(param.room_type)
+        let scopeParam ={
+          rate_code: param.rate_code,
+          begin_date:  moment(new Date()).format('YYYY-MM-DD'),
+          end_date: moment(new Date()).add(1,'days').format('YYYY-MM-DD'),
+          room_type_list: [param.room_type_descript_en]
+        }
+        that.$axios.post(url,scopeParam).then(res=>{
+          // that.rate_breakfastList = res.data.data.price
+          let temprate = res.data.data.price
+          let key1 = param.room_type_descript_en
+          let temprateValue = temprate[key1]
+          let key2 = moment(new Date()).format('YYYY-MM-DD') //对象嵌套对象里的key值
+          this.roomParam.oldPrice = temprateValue[key2]  //获取当天房价码===>房价
+          }).catch(error=>{
+        })
+      },
+      getRoomNo(){
+        let that = this
+        let start 
+        let end
+        if(this.rowParam.arr_time && this.rowParam.leave_time){
+          start = moment(this.rowParam.arr_time).format('YYYY-MM-DD')
+          end = moment(this.rowParam.leave_time).format('YYYY-MM-DD')
+        }
+        let url= that.api.api_price_9101 + '/v1/' + `room/room_status/can_live_room_list/`
+        let scopeParam = {
+          room_type: this.roomParam.newType,
+          start_time: start,
+          end_time: end
+        }
+        that.$axios.post(url,scopeParam).then(res=>{
+          that.roomNoList = res.data.data.data  //选房号tabel数组
+        }).catch(error=>{
+
+        })
+      },
+      //获取房型
+      getRoomType(){
+        let that = this
+        let url =  that.api.api_price_9101 + '/v1/' + 'room/room_status/get_room_type_occupy_list/'
+        let start 
+        let end
+        if(this.rowParam.arr_time && this.rowParam.leave_time){
+          start = moment(this.rowParam.arr_time).format('YYYY-MM-DD')
+          end = moment(this.rowParam.leave_time).format('YYYY-MM-DD')
+        }
+        that.$axios({
+          url : url,
+          method : 'get',
+          params:{
+            biz_date__gte: start,
+            biz_date__lt:  end
+          },
+        }).then(res=>{
+          if(res.data.message === 'success'){
+            this.roomTypeList = res.data.data.results
+          }else{
+              that.$message.error('获取房型失败!')
+          }
+        }).catch(error=>{
+        })
+      },
       dateFormat_arr: function (row) {
         return moment(row.arr_time).format("YYYY-MM-DD HH:mm:ss")
       },
@@ -742,8 +979,9 @@
           room_number: param
         }
         let that = this
-        // let url = `http://192.168.2.224:9005/v1/checkin/all_master_info/`
-        let url = that.api.api_bill_9202 + `/v1/checkin/all_master_info/`
+        // let url = `http://192.168.2.224:9005/v2/checkin/all_master_info/`
+        // let url = that.api.api_bill_9202 + `/v2/checkin/all_master_info/`
+        let url = that.api.api_newBill_9204 + `/v2/checkin/all_master_info/`
         that.$axios({
            method : 'get',
             url : url,
@@ -777,8 +1015,8 @@
       deleteReserve(row){
         console.log('row..',row)
         let that = this
-        let url = 'http://192.168.2.165:9005/v2/' + `booking/remove_reserve/`
-        // let url = that.api.api_bill_9202 + '/v1/' + `booking/get_order_reserve_info/`
+        let url = that.api.api_newBill_9204 + '/v2/' + `booking/remove_reserve/`
+        // let url = that.api.api_bill_9202 + '/v2/' + `booking/get_order_reserve_info/`
         let scopeParam = {
           order_no: row.reserve_base[0].order_no
         }
@@ -828,8 +1066,8 @@
           search_type: "2" //根据预订单号查询预订单=== value值为2
         }
         let that = this
-        let url = 'http://192.168.2.165:9005/v2/' + `booking/get_reserve_method/`
-        // let url = that.api.api_bill_9202 + '/v1/' + `booking/get_order_reserve_info/`
+        let url = that.api.api_newBill_9204 + '/v2/' + `booking/get_reserve_method/`
+        // let url = that.api.api_bill_9202 + '/v2/' + `booking/get_order_reserve_info/`
         that.$axios.post(url,scopeParams).then(res=>{
           if(res.data.message === 'success'){
             that.preInfoParam = res.data.data.results[0]
@@ -1017,7 +1255,8 @@
            * 在住单的查询
            */
           console.info(that.room_types);
-          let url = that.api.api_bill_9202 + '/v1/checkin/all_master_list/';
+          let url = that.api.api_newBill_9204 + '/v2/checkin/all_master_list/';
+          // let url = that.api.api_bill_9202 + '/v2/checkin/all_master_list/';
           that.$axios({
             method: 'post',
             url: url,
@@ -1042,7 +1281,8 @@
            * 应到未到的查询
            */
           console.info(that.room_types);
-          let url = that.api.api_bill_9202 + '/v1/booking/get_not_arrive_list/';
+          // let url = that.api.api_bill_9202 + '/v2/booking/get_not_arrive_list/';
+          let url = that.api.api_newBill_9204 + '/v2/booking/get_not_arrive_list/';
           that.$axios({
             method: 'post',
             url: url,
@@ -1070,7 +1310,8 @@
            * 应离未离的查询
            */
           console.info(that.room_types);
-          let url = that.api.api_bill_9202 + '/v1/checkin/get_leave_list/';
+          // let url = that.api.api_bill_9202 + '/v2/checkin/get_leave_list/';
+          let url = that.api.api_newBill_9204 + '/v2/checkin/get_leave_list/';
           that.$axios({
             method: 'post',
             url: url,
@@ -1095,7 +1336,7 @@
            * 所有预定的查询
            */
           console.info(that.room_types);
-          let url = 'http://192.168.2.165:9005' + '/v2/booking/get_all_reserve_list/';
+          let url = that.api.api_newBill_9204 + '/v2/booking/get_all_reserve_list/';
           that.$axios({
             method: 'post',
             url: url,
@@ -1123,7 +1364,8 @@
            * 异常单的查询
            */
           console.info(that.room_types);
-          let url = that.api.api_bill_9202 + '/v1/checkin/exception_list/';
+          // let url = that.api.api_bill_9202 + '/v2/checkin/exception_list';
+          let url = that.api.api_newBill_9204 + '/v2/checkin/exception_list/';
           that.$axios({
             method: 'post',
             url: url,
@@ -1151,6 +1393,7 @@
        */
       handleClick(tab) {
         let that = this;
+        this.unusualList = [] // 置空异常筛选操作
         that.tab_pane_flag = tab.index;
         console.log(tab.index);
         if(tab.index === '0') {
@@ -1201,7 +1444,8 @@
       search_live() {
         let that = this;
         console.info(that.tab_pane_flag);
-        let url = that.api.api_bill_9202 + '/v1/checkin/all_master_list/';
+        // let url = that.api.api_bill_9202 + '/v2/checkin/all_master_list/';
+        let url = that.api.api_newBill_9204 + '/v2/checkin/all_master_list/';
         that.$axios({
           method: 'post',
           url: url,
@@ -1228,7 +1472,8 @@
       search_should_to() {
         let that = this;
         console.info(that.tab_pane_flag);
-        let url = that.api.api_bill_9202 + '/v1/booking/get_not_arrive_list/';
+        // let url = that.api.api_bill_9202 + '/v2/booking/get_not_arrive_list/';
+        let url = that.api.api_newBill_9204 + '/v2/booking/get_not_arrive_list/';
         that.$axios({
           method: 'post',
           url: url,
@@ -1257,7 +1502,8 @@
        */
       search_should_leave() {
         let that = this;
-        let url = that.api.api_bill_9202 + '/v1/checkin/get_leave_list/';
+        // let url = that.api.api_bill_9202 + '/v2/checkin/get_leave_list/';
+        let url = that.api.api_newBill_9204 + '/v2/checkin/get_leave_list/';
         that.$axios({
           method: 'post',
           url: url,
@@ -1283,7 +1529,7 @@
        */
       search_all_res() {
         let that = this;
-        let url = 'http://192.168.2.165:9005' + '/v2/booking/get_all_reserve_list/';
+        let url = that.api.api_newBill_9204 + '/v2/booking/get_all_reserve_list/';
         that.$axios({
           method: 'post',
           url: url,
@@ -1308,11 +1554,12 @@
         })
       },
       /**
-       * @search_abnormal_list  异常单
+       * @search_abnormal_list  异常单-入住
        */
       search_abnormal_list() {
         let that = this;
-        let url = that.api.api_bill_9202 + '/v1/checkin/exception_list/';
+        // let url = that.api.api_bill_9202 + '/v2/checkin/exception_list';
+        let url = that.api.api_newBill_9204 + '/v2/checkin/exception_list/';
         that.$axios({
           method: 'post',
           url: url,
@@ -1323,6 +1570,36 @@
               code_market: [], //市场码
               code_src: [] //来源码
             }
+          }
+        }).then((res) => {
+          console.info(res);
+          // that.$axios.defaults.headers.common['authorization'] = res.data.new_authorization;
+          that.tableData_orderlist = res.data.data.results;
+          that.total = res.data.data.count;
+        }).catch((err) => {
+          console.error(err);
+        })
+      },
+            /**
+       * @search_abnormal_list  异常单-预定
+       */
+      search_bookingAbnormal_list() {
+        let that = this;
+        // let url = that.api.api_bill_9202 + '/v2/checkin/exception_list';
+        let url = that.api.api_newBill_9204 + '/v2/booking/exception_list/';
+        that.$axios({
+          method: 'post',
+          url: url,
+          data: {
+              reserve_base: {
+              code_market: that.code_market_ids,
+              code_src: that.src_codes
+              },
+              reserve_guest: {},
+              reserve_rate: {
+                room_type: that.room_types,
+                room_class: []
+              }
           }
         }).then((res) => {
           console.info(res);
@@ -1345,15 +1622,15 @@
          */
         if(that.tab_pane_flag){
           switch (that.tab_pane_flag) {
-            case '0' : url = that.api.api_bill_9202 + '/v1/checkin/all_master_list/?page=' + currentPage;
+            case '0' : url = that.api.api_newBill_9204 + '/v2/checkin/all_master_list/?page=' + currentPage;
               break;
-            case '1' : url = that.api.api_bill_9202 + '/v1/booking/get_not_arrive_list/?page=' + currentPage;
+            case '1' : url = that.api.api_newBill_9204 + '/v2/booking/get_not_arrive_list/?page=' + currentPage;
               break;
-            case '2' : url = that.api.api_bill_9202 + '/v1/checkin/get_leave_list/?page=' + currentPage;
+            case '2' : url = that.api.api_newBill_9204 + '/v2/checkin/get_leave_list/?page=' + currentPage;
               break;
-            case '3' : url = 'http://192.168.2.165:9005' + '/v2/booking/get_all_reserve_list/?page=' + currentPage;
+            case '3' : url = that.api.api_newBill_9204 + '/v2/booking/get_all_reserve_list/?page=' + currentPage;
               break;
-            case '4' : url = that.api.api_bill_9202 + '/v1/checkin/exception_list/?page=' + currentPage;
+            case '4' : url = that.api.api_newBill_9204 + '/v2/checkin/exception_list/?page=' + currentPage;
               break;
             default : break;
           }
@@ -1422,13 +1699,13 @@
            * 删除的是入住单
            * @type {string}
            */
-          url = that.api.api_bill_9202 + '/v1/checkin/remove_master_all/';
+          url = that.api.api_bill_9202 + '/v2/checkin/remove_master_all/';
         } else {
           /**
            * 删除的是在住单
            * @type {string}
            */
-          url = that.api.api_bill_9202 + '/v1/booking/remove_reserve/';
+          url = that.api.api_bill_9202 + '/v2/booking/remove_reserve/';
         }
         that.$axios({
           method: 'post',
@@ -1474,6 +1751,26 @@
  @import "../../../assets/styles/topDialog.less";
 </style>
 <style scoped lang="less">
+  .roomClass{
+    margin-top: 12px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    .el-input{
+      padding-left: 10px;
+      padding-right: 20px;
+    }
+    .el-select{
+      padding-right: 10px;
+    }
+  }
+  .roomClass_third{
+    width: 100%;
+    margin-top: 12px;
+  }
+  .roomClass_third.width{
+    width: 14vw;
+  }
   .order_class_style{
     span{
       margin-left: 10px;
@@ -1671,6 +1968,9 @@
       border: none;
       margin-right: 40px;
     }
+    .common-btn.disabled{
+      background: #DCDFE6;
+    }
 
     .select-sty {
       /*margin-top: 10px;*/
@@ -1780,6 +2080,11 @@
     }
   }
 
+</style>
+<style scoped>
+  .houseTypeClass>>> .el-dialog__header{
+    background-color: #303A41FF;
+}
 </style>
 <!--<style>
   .el-input-number__decrease {

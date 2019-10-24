@@ -240,7 +240,7 @@
                      <!-- <el-button slot="reference" style="margin-right: 10px;">明细</el-button> -->
                     </el-popover>
                 <!-- <el-button style="height: 50px; width: 100px" type="primary" @click="authorizationDialog = true">预授权</el-button> -->
-                <el-button style="height: 50px; width: 100px;" type="success" @click="senToParent();confirmPreview()">确认预定</el-button>
+                <el-button :loading="isLoading" style="height: 50px; width: 100px;" type="success" @click="senToParent();confirmPreview()">确认预定</el-button>
                 </div>
             </el-row>
         </el-dialog>
@@ -476,6 +476,7 @@ import cDialog from './consumeDialog'
 export default {
     data(){
         return {
+          isLoading: false,
           changeTime: false,
           rateCode_list: [],
           mainAccount_id: '',
@@ -788,7 +789,7 @@ export default {
               company_id: null,
               company_na: '',
               pic_photo: null,
-              pic_sign: null,
+              pic_now: null,
               remark: '',
               is_anonymo: false,
               weixin: '',
@@ -1397,7 +1398,7 @@ export default {
             company_id: null,
             company_na: '',
             pic_photo: null,
-            pic_sign: null,
+            pic_now: null,
             remark: '',
             is_anonymo: false,
             weixin: '',
@@ -1443,8 +1444,10 @@ export default {
         },
         //预订单=>确认预定 ===>光是预定
         confirmPreview(){
+          this.isLoading = true
           console.log('enter 预定')
           if(!this.validatePreviewData() || !this.validatePreData()){
+            this.isLoading = false
             return false
           }else{
             // this.enterPreviewDialog = true //入预付
@@ -1685,26 +1688,21 @@ export default {
           this.authorizationDialog = true;
         },
         //update_account_id
-        updateAccountId(){
+        /***
+         * 这里时rj版本,垃圾代码可忽略
+         * @param 主账户id Object.values(this.returnPreviewParam.account_id.master)
+         */
+        resloveAccountId(){
           let that = this
-          // let url = `http://192.168.2.224:9005/v1/booking/update_account_id/`
-          let url= that.api.api_bill_9202 + '/v1/' + `booking/update_account_id/`
-          // let url= 'http://172.168.3.206:9005' + '/v1/' + `booking/update_account_id/`
-          let scopeParam = {
-           order_no: this.returnPreviewParam.order_no
-          }
-          that.$axios.post(url,scopeParam).then(res=>{
-            console.log('ressss===更新后得到',res.data.data.account_id)
-            this.mainAccount_id = res.data.data.account_id
-            console.log('this.mainAccount_id',this.mainAccount_id)
-            this.handleAuthorization()//打开预授权界面
-          }).catch(()=>{
-            console.log('error')
-          })
+          console.log('this.returnPreviewParam.account_id.master',this.returnPreviewParam.account_id.master)
+          this.mainAccount_id = Object.values(this.returnPreviewParam.account_id.master)[0] //获取唯一账户id
+          console.log('this.mainAccount_id',this.mainAccount_id)
+          this.handleAuthorization()//打开预授权界面
+        
         },
         postPreview : _.debounce(function () {
           let that = this
-          let url = `http://192.168.2.165:9005/v2/booking/add_reserve/`
+          let url = that.api.api_newBill_9204 + `/v2/booking/add_reserve/`
           // let url= that.api.api_bill_9202 + '/v1/' + `booking/add_reserve/`
           // let url= 'http://172.168.3.206:9005' + '/v1/' + `booking/add_reserve/`
           // let url= that.UrLHeader_bill + `booking/add_reserve/`
@@ -1726,7 +1724,9 @@ export default {
           console.log('scopeParam',scopeParam)
           that.$axios.post(url,scopeParam).then(res=>{
             if(res.data.message === 'success'){
+              this.isLoading = false
               that.returnPreviewParam = res.data.data
+              console.log('...zhanghu...',res.data)
               console.log('this.returnPreviewParam===>预定返回得加上account_ID',this.returnPreviewParam)
               try {
                 console.log(',,,,,,,,')
@@ -1736,23 +1736,27 @@ export default {
                   type: 'warning'
                 }).then(()=>{
                   console.log('jinrururuuru')
-                  that.updateAccountId()//更新主账户
+                  that.resloveAccountId()//更新主账户
                   this.previewFormVisible = false
                   // this.handleAuthorization()//打开预授权界面
-                }).catch(()=>{
+                }).catch((error)=>{
                   console.log('jinrururuuru========')
                   this.previewFormVisible = false
+                  // this.$message.error('后台错误!')
                   console.log('关闭')
                 })
                 } catch (error) {
                 console.log('error')
               }
+              this.isLoading = false
               that.$message.success('预定成功!')
             }else{
-              that.$message.warning('预定失败!')
+              this.isLoading = false
+              that.$message.warning(res.data.message)
             }
             console.log('res结果',res)
             }).catch(error=>{
+              this.isLoading = false
           })
         },300),
         //传入后台去掉多余属性 更改值
@@ -2195,7 +2199,7 @@ export default {
             company_id: null,
             company_na: '',
             pic_photo: null,
-            pic_sign: null,
+            pic_now: null,
             remark: '',
             is_anonymo: false,
             weixin: '',
@@ -2242,8 +2246,6 @@ export default {
             // room_type_code: '123',
             // descript: '123',
             // descript_en: '123',
-
-            // list_order: 123,
             reserve_base_id: '',
             checkin_date: '2018-12-01 10:10:01',
             checkin_time: '2018-12-01 10:10:01',

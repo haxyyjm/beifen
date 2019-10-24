@@ -322,7 +322,8 @@
               width="370"
               ref="popover4"
               placement="bottom-end"
-              trigger="click">
+              :open-delay="300"
+              trigger="hover">
               <!--单击时弹出浮动小方块-->
               <div>
                 <!-- 浮动框的v-if====>不同状态下的房间弹出的内容不一样 净房-->
@@ -498,7 +499,7 @@
                 </div>
               </div>
               <!-- 小方块即房间的v-if===>start 净房-->
-              <div v-if="item.room_state === 'VC'"  slot="reference"  @mouseover="hoverIndex = index" @mouseout="hoverIndex = -1"   @click="popoverClick(item,index)"  :class="{popoverActive: activeClassName == index && isActive, lockCss: activeClassName == index && lockCss_active, hoverActive: true}"   @dblclick="sendEnter(item);flushData()"  class="boxActive">
+              <div v-if="item.room_state === 'VC'"  slot="reference"  @mouseover="hoverIndex = index;mouseOver()" @mouseout="hoverIndex = -1;mouseOut()"   @click="popoverClick(item,index)"  :class="{popoverActive: activeClassName == index && isActive, lockCss: activeClassName == index && lockCss_active, hoverActive: true}"   @dblclick="sendEnter(item);flushData()"  class="boxActive">
                 <!--单个房间(小方块)第一行-->
                 <div  style="display: flex; justify-content: space-between;">
                     <span style="font-size: 14px">{{item.room_type_name}}</span>
@@ -515,7 +516,7 @@
                 </div> -->
               </div>
             <!-- card入住房 住净-->
-             <div v-if="item.room_state === 'OC'"  @mouseover="hoverIndex = index" @mouseout="hoverIndex = -1"   @click="popoverClick(item,index)"  slot="reference" :class="{popoverActive: activeClassName == index && isActive,lockCss: activeClassName == index && lockCss_active, hoverActive: true}"   @dblclick="openOrderInfo(item)"  class="boxActive_6">
+             <div v-if="item.room_state === 'OC'"  @mouseover="hoverIndex = index;mouseOver()" @mouseout="hoverIndex = -1;mouseOut()"   @click="popoverClick(item,index)"  slot="reference" :class="{popoverActive: activeClassName == index && isActive,lockCss: activeClassName == index && lockCss_active, hoverActive: true}"   @dblclick="openOrderInfo(item)"  class="boxActive_6">
                 <!--单个房间(小方块)第一行-->
                 <div  style="display: flex; justify-content: space-between;">
                     <span style="font-size: 14px">{{item.room_type_name}}</span>
@@ -539,7 +540,7 @@
                 </div>
             </div>
                <!-- card入住房 住脏-->
-             <div v-if="item.room_state === 'OD'"  @mouseover="hoverIndex = index" @mouseout="hoverIndex = -1"   @click="popoverClick(item,index)"  slot="reference" :class="{popoverActive: activeClassName == index && isActive,lockCss: activeClassName == index && lockCss_active, hoverActive: true}"   @dblclick="openOrderInfo(item)"  class="boxActive_2">
+             <div v-if="item.room_state === 'OD'"  @mouseover="hoverIndex = index;mouseOver()" @mouseout="hoverIndex = -1;mouseOut()"   @click="popoverClick(item,index)"  slot="reference" :class="{popoverActive: activeClassName == index && isActive,lockCss: activeClassName == index && lockCss_active, hoverActive: true}"   @dblclick="openOrderInfo(item)"  class="boxActive_2">
                 <!--单个房间(小方块)第一行-->
                 <div  style="display: flex; justify-content: space-between;">
                     <span style="font-size: 14px">{{item.room_type_name}}</span>
@@ -563,7 +564,7 @@
                 </div>
               </div>
               <!-- card脏房 -->
-             <div v-if="item.room_state === 'VD'"  @mouseover="hoverIndex = index" @mouseout="hoverIndex = -1"   @click="popoverClick(item,index)"  slot="reference" :class="{popoverActive: activeClassName == index && isActive, lockCss: activeClassName == index && lockCss_active, hoverActive: true}"    class="boxActive_3">
+             <div v-if="item.room_state === 'VD'"  @mouseover="hoverIndex = index;mouseOver()" @mouseout="hoverIndex = -1;mouseOut()"   @click="popoverClick(item,index)"  slot="reference" :class="{popoverActive: activeClassName == index && isActive, lockCss: activeClassName == index && lockCss_active, hoverActive: true}"    class="boxActive_3">
                 <!--单个房间(小方块)第一行-->
                 <div  style="display: flex; justify-content: space-between;">
                     <span style="font-size: 14px">{{item.room_type_name}}</span>
@@ -579,7 +580,7 @@
                 </div>
               </div>
               <!-- card锁定房间 -->
-             <div v-if="item.room_state === 'OS'"  @mouseover="hoverIndex = index" @mouseout="hoverIndex = -1"   @click="popoverClick(item,index)" slot="reference" :class="{popoverActive: activeClassName == index && isActive,  hoverActive: true}"    class="boxActive_5">
+             <div v-if="item.room_state === 'OS'"  @mouseover="hoverIndex = index;mouseOver()" @mouseout="hoverIndex = -1;mouseOut()"   @click="popoverClick(item,index)" slot="reference" :class="{popoverActive: activeClassName == index && isActive,  hoverActive: true}"    class="boxActive_5">
                 <!--单个房间(小方块)第一行-->
                 <div  style="display: flex; justify-content: space-between;">
                     <span style="font-size: 14px">{{item.room_type_name}}</span>
@@ -595,7 +596,7 @@
                 </div>
               </div>
               <!-- 维修 -->
-             <div v-if="item.room_state === 'OO'"  @mouseover="hoverIndex = index" @mouseout="hoverIndex = -1"  slot="reference" :class="{popoverActive: activeClassName == index && isActive,lockCss: activeClassName == index && lockCss_active,  hoverActive: true}"   @dblclick="openOrderInfo()"  class="boxActive_4">
+             <div v-if="item.room_state === 'OO'"  @mouseover="hoverIndex = index;mouseOver()" @mouseout="hoverIndex = -1;mouseOut()"  slot="reference" :class="{popoverActive: activeClassName == index && isActive,lockCss: activeClassName == index && lockCss_active,  hoverActive: true}"   @dblclick="openOrderInfo()"  class="boxActive_4">
                 <!--单个房间(小方块)第一行-->
                 <div  style="display: flex; justify-content: space-between;">
                   <span style="font-size: 14px">{{item.room_type_name}}</span>
@@ -795,6 +796,7 @@
     name: 'firstIndex',
     data(){
       return {
+        clickOrHover: 'hover',
         newCardList: [],
         cardList_t: [[{
            label: '身份证',
@@ -1702,14 +1704,13 @@
         console.log('paramparam--------order----------',param)
         let scopeParams = {
           // room_number: param.room_no
-          // order_no: param.order_no
-          order_no: 'C5d8b00d5c52cf153a4c8a876'
+          order_no: param.order_no
         }
         let that = this
         // this.linInfoParam = {}//置空 防止后台取出数据紊乱造成进一步错误
         // let url = `http://192.168.2.224:9005/v1/checkin/all_master_info/`
         // let url = that.api.api_bill_9202 + '/v1/' + `checkin/all_master_info/`
-        let url = 'http://192.168.4.217:9005' + '/v2/' + `checkin/all_master_info/`
+        let url = that.api.api_newBill_9204 + '/v2/' + `checkin/all_master_info/`
         // let url = that.api.api_bill_9202 + '/v1/' + `checkin/all_master_info_order/`
         that.$axios({
            method : 'get',
@@ -1763,19 +1764,13 @@
         })
       },
       getEndpayInfoListByAccount(id){
-        console.log('idd==================',id)
           let that = this
-          let param ={
-            with_collections: 1,
-            related_objects: 1
-          }
-          id = 1
-          let url= that.api.api_9022_9519+ '/v1/' + `finance/account/get_info_pms/` + id
+          // let url= that.api.api_9022_9519+ '/v1/' + `finance/account/get_info_pms/` + id
+          let url= 'http://192.168.4.168:8000'+ '/v1/' + `accounts/get_account_base_info/` + id + '/'
           console.log('kajhisssssssssssssss',url)
           that.$axios({
             method : 'get',
             url : url,
-            params: param
         }).then(res=>{
             that.popverParam = res.data.data
             console.log('this.popverParam===================================》》》》》》最终账户',that.popverParam)
@@ -2000,8 +1995,16 @@
           this.current_houseStatus = false
         }
       },
+      //切换效果
+      mouseOver(){
+        this.clickOrHover = 'hover' //触发显示
+      },
+      mouseOut(){
+        this.clickOrHover = 'hover' //触发显示
+      },
       //单击点击方法
       popoverClick(item,index){
+        this.clickOrHover = 'click' //点击显示
         clearTimeout(this.clickTimeId);
         this.activeClassName = index //判断list单个样式标记量
         this.isActive =!this.isActive;

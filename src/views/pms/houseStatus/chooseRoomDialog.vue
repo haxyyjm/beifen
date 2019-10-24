@@ -1948,7 +1948,7 @@ export default {
         // }
         console.log('preBillParam确认排房',this.preBillParam)
         let that = this
-        let url= 'http://192.168.4.217:9005/v2/' + `booking/update_reserve/`
+        let url= that.api.api_newBill_9204 + '/v2/' + `booking/update_reserve/`
         // let url=  that.api.api_bill_9202 + `/v1/booking/update_reserve/`
         console.log('关闭详情页面 编辑传进去的数据',that.preBillParam)
         let scopeParam = _.cloneDeep(that.preBillParam) //此处必须深拷贝

@@ -16,6 +16,7 @@ const api_9111 = process.env.api_9111;  //后端调用price房价，房态rpc服
 const api_9503 = process.env.api_9503;  //森哥的所有线下接口
 const api_8094 = process.env.api_8094;  //支付宝的支付线下接口
 const api_8082 = process.env.api_8082;
+const api_9204 = process.env.api_9204;//dyl新版
 
 /**
  * 线上接口
@@ -35,25 +36,28 @@ const api_9019 = process.env.api_9019;    //后端调用price房价，房态rpc�
 const api_9530 = process.env.api_9530;    //森哥的所有线上接口
 const api_pay = process.env.api_pay;  //支付宝的支付线下接口
 const api_icon = process.env.api_icon;  //支付宝的支付线下接口
+const api_newBill = process.env.api_newBill;  //dyl 新
 
 
 export default {
   /**
    * 线上接口
    */
-  //  api_9022_9519 : api_9022,
-  //  api_price_9101 : api_price,
-  //  api_member_9102 : api_member,
-  //  api_code_9103 : api_code,
-  //  api_service_9104 : api_service,
-  //  api_equipments_8002 : api_equipments,
-  //  api_bill_9202 : api_bill,
-  //  api_room_8091 : api_room,
-  //  api_9021_9518 : api_9021,
-  //  api_9019_9111 : api_9019,
-  //  api_9530_9503 : api_9530,
-  //  api_pay_8094 : api_pay,
-  //  api_icon_8082 : api_icon,
+/*   api_9022_9519 : api_9022,
+   api_price_9101 : api_price,
+   api_member_9102 : api_member,
+   api_code_9103 : api_code,
+   api_service_9104 : api_service,
+   api_equipments_8002 : api_equipments,
+   api_bill_9202 : api_bill,
+   api_room_8091 : api_room,
+   api_9021_9518 : api_9021,
+   api_9019_9111 : api_9019,
+   api_9530_9503 : api_9530,
+   api_pay_8094 : api_pay,
+   api_icon_8082 : api_icon,
+   api_newBill_9204: api_newBill
+   */
 
   /**
    * 线下接口
@@ -71,4 +75,5 @@ export default {
    api_9530_9503 : api_9503,
    api_pay_8094 : api_8094,
    api_icon_8082: api_8082,
+   api_newBill_9204: api_9204
 }

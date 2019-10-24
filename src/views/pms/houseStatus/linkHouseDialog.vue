@@ -47,6 +47,7 @@
             <el-tab-pane :label="tabValue" name="1">
               <div>
                 <el-row class="buttonStyle">
+                  <el-button  type="info" :disabled="banDisable()" @click="handleChangeRoom(preBillLinkParam)" round  size="mini">换房升降</el-button>
                   <el-button  type="info" :disabled="banDisable()" @click="changeNo()" round  size="mini">换房号</el-button>
                   <!-- <el-button type="info" @click="houseTypeDialog = true" round  size="small">换房型</el-button> -->
                   <!-- <el-button type="info" :disabled="banDisable()" @click="editPriceDialog = true" round  size="mini">修改价格</el-button> -->
@@ -124,7 +125,7 @@
                 </el-table-column>
                 <el-table-column  label="房间号">
                   <template slot-scope="scope">
-                    {{scope.row.account_id.room_num}}
+                    {{scope.row.room_num}}
                   </template>
                 </el-table-column>
                 <el-table-column  label="类别">
@@ -137,26 +138,27 @@
                 </el-table-column>
                 <el-table-column  label="入账代码">
                   <template slot-scope="scope">
-                    {{scope.row.code_income_type_id.name}}
+                    {{scope.row.incoming_account_code_desc}}
                   </template>
                 </el-table-column>
-                    <el-table-column  label="支付方式">
+                <!--支付方式/付款原因-->
+                <el-table-column  label="付款方式">
                   <template slot-scope="scope">
-                    <span v-if="scope.row.related_pay_id">{{scope.row.related_pay_id.pay_mode_id.model_name}}</span>
+                    <span>{{scope.row.incoming_account_reason_desc}}</span>
                   </template>
                 </el-table-column>
                 <el-table-column prop="charge_amount" label="消费总数"></el-table-column>
-                <el-table-column prop="related_pay_id.usable_amount" label="剩余金额"></el-table-column>
+                <el-table-column prop="can_arrange" label="剩余金额"></el-table-column>
                 <!-- <el-table-column prop="pay_amount" label="付款"></el-table-column> -->
                 <!-- <el-table-column prop="number" label="房号"></el-table-column> -->
-                <el-table-column prop="gen_time" label="时间"></el-table-column>
+                <el-table-column prop="create_time" label="时间"></el-table-column>
                 <el-table-column label="状态">
                   <template slot-scope="scope">
                     <el-tooltip effect="light" placement="bottom">
                       <div slot="content">{{scope.row.desc}}</div>
                       <span v-if="(scope.row.pay_status === 1 || 2 )&& scope.row.transfer_out_detail">已转账</span>
                       <!-- <span v-if="scope.row.pay_status === 2 && scope.row.transfer_out_detail">挂账</span> -->
-                      <span v-else-if="scope.row.pay_status === 1 && scope.row.subject === 'pay'">已付款(入预收)</span>
+                      <span v-else-if="scope.row.subject === 'pay'">已付款(入预收)</span>
                       <span v-else-if="scope.row.pay_status === 0 && scope.row.subject === 'consume'" style="color: #E6A23C">待结账</span>
                       <span v-else-if="scope.row.subject === 'refund'">已退款</span>
                       <span v-else>已结账</span>
@@ -192,8 +194,8 @@
                 <span style="float: left;">
                   <span>消费: &nbsp;<span style="color: #FC6784">¥{{moneydesc.total_consumption}}</span></span>
                   <span style="margin-left: 5px">预收:&nbsp;(含预授权): &nbsp;<span style="color: #96BAF1">¥{{moneydesc.pay_amount}}</span></span>
-                  <span style="margin-left: 5px">余额:&nbsp;: &nbsp;<span style="color: #FC6784">¥{{-moneydesc.balance}}</span></span>
-                  <span style="margin-right: 20px"><span v-if="moneydesc.balance>0">应付:</span> <span v-else>应退:</span> &nbsp;<span style="color: #96BAF1">¥{{Math.abs(moneydesc.balance)}}</span></span>
+                  <span style="margin-left: 5px">余额:&nbsp;: &nbsp;<span style="color: #FC6784">¥{{moneydesc.balance}}</span></span>
+                  <span style="margin-right: 20px"><span v-if="moneydesc.balance<0">应付:</span> <span v-else>应退:</span> &nbsp;<span style="color: #96BAF1">¥{{Math.abs(moneydesc.balance)}}</span></span>
                 </span>
                 <span style="float: right">
                   <el-button-group>
@@ -335,6 +337,57 @@
         <el-button type="info" :disabled="banDisable()" @click="enterBillDialog = true;consume_check_flag = false;fee_check_flag= false;handleEnterBill()" size="small">入消费</el-button>
         <!-- <el-button type="info" :disabled="banDisable()" size="small">打印单据</el-button> -->
       </div>
+      </el-dialog>
+        <!--换房升级房-->
+      <el-dialog @close="flushChangeData" width="35%" class="houseTypeClass background" title="换房升降级" :visible.sync="changeRoomVisible">
+        <div style="height: 340px; overflow: auto">
+          <div class="roomClass">
+            <el-input size="mini" style="width: 13vw" v-model="roomParam.oldType"></el-input>
+            <span>换房型</span>
+            <el-select @focus="getOnlyRoomType()" style="width: 12vw" size="mini" v-model="roomParam.newType">
+              <el-option
+                v-for="item in roomOnlyTypeList"
+                :key="item.id"
+                :label="item.room_type_desc"
+                :value="item.room_type">
+              </el-option>
+            </el-select>
+          </div>
+         <div class="roomClass">
+            <el-input size="mini" style="width: 13vw" v-model="roomParam.oldNumber"></el-input>
+            <span>换房号</span>
+            <el-select  style="width: 12vw" size="mini" v-model="roomParam.newNumber">
+              <el-option
+                v-for="item in roomNo_data_list"
+                :key="item.id"
+                :label="item.room_no"
+                :value="item.room_no">
+              </el-option>
+            </el-select>
+          </div>
+          <el-row style="padding-left: 12px" class="roomClass_third">
+            是否免费换房: 
+            <el-radio style="padding-left: 12px" v-model="roomParam.isFee" label="1">是</el-radio>
+            <el-radio v-model="roomParam.isFee" label="2">否</el-radio>
+          </el-row>
+          <el-row style="padding-left: 12px">
+            <span style="padding-left: 15px">原房价:</span> 
+            <el-input @input="roomParam.oldPrice = roomParam.oldPrice.replace(/[^\d.]/g,'')" size="mini" class="roomClass_third width" v-model="roomParam.oldPrice"></el-input>
+          </el-row>
+          <el-row style="padding-left: 12px">
+          <span style="padding-left: 30px">折扣:</span> 
+          <el-input @blur="computeData" @input="roomParam.discount = roomParam.discount.replace(/[^\-?\d.]/g,'')" placeholder="示例:100或者-100" size="mini" class="roomClass_third width" v-model="roomParam.discount"></el-input>
+          </el-row>
+          <el-row style="padding-left: 12px">
+            <span style="padding-left: 15px">现房价:</span> <el-input size="mini" class="roomClass_third width" v-model="roomParam.newPrice"></el-input>
+          </el-row>
+          <el-row style="padding-left: 12px">
+            <span style="display: inline-block;height: 55px;">换房理由:</span> <el-input type="textarea" class="roomClass_third width" :rows="2" v-model="roomParam.reason"></el-input>
+          </el-row>
+        </div>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="confirmChangeRoom()" type="primary">确认</el-button>
+        </div>
       </el-dialog>
       <!--计算结账-->
        <el-dialog class="houseTypeClass" title="结账" :visible.sync="calculateDialog">
@@ -727,8 +780,8 @@
                 <el-select size="mini" @change="previewEnterBill.enterAccountCode=''" clearable  @focus="getPayReason()" placeholder="付款原因"  v-model="previewEnterBill.payReasonValue">
                   <el-option
                     v-for="item in this.payInfoList"
-                    :key="item.code"
-                    :label="item.name"
+                    :key="item.id"
+                    :label="item.desc"
                     :value="item.id">
                   </el-option>
                 </el-select>
@@ -738,7 +791,7 @@
                 <el-option
                   v-for="item in incomingAccoutList"
                   :key="item.id"
-                  :label="item.name"
+                  :label="item.desc"
                   :value="item.id">
                 </el-option>
               </el-select>
@@ -749,7 +802,7 @@
                     <el-option
                       v-for="item in incomingAccoutList"
                       :key="item.id"
-                      :label="item.name"
+                      :label="item.desc"
                       :value="item.id">
                     </el-option>
                   </el-select>
@@ -973,7 +1026,7 @@
                 <li>
                   账户信息:<el-input v-model="previewEnterBill.billInfo"  size="mini" style="width: 20vw;margin-left:10px"></el-input>
                 </li>
-                <li>
+                <!-- <li>
                   支付方式:<el-select clearable @change="get_fields_by_payId"   @focus="get_list_by_hotel" v-model="previewEnterBill.payMode" size="mini" style="width: 20vw; margin-top: 10px;margin-left:10px"  placeholder="请选择">
                             <el-option
                               v-for="item in payModelist_other"
@@ -982,7 +1035,7 @@
                               :value="item.id">
                             </el-option>
                           </el-select>
-                </li>
+                </li> -->
                  <li>
                   <span style="margin-left: 15px">收银点:</span><el-select clearable   @focus="getCashRegister" v-model="previewEnterBill.cashValue" size="mini" style="width: 20vw; margin-top: 10px;margin-left:10px"  placeholder="请选择">
                             <el-option
@@ -999,12 +1052,12 @@
                   <el-radio v-model="scan_code" label="1">客户扫码</el-radio>
                 </li>
                 <li>
-                  <span>付款原因:</span>
+                  <span>付款方式:</span>
                   <el-select clearable @change="previewEnterBill.enterAccountCode=''" size="mini" style="width: 20vw; margin-top: 10px;margin-left:10px"  @focus="getPayReason()" placeholder="付款原因"  v-model="previewEnterBill.payReasonValue">
                     <el-option
                       v-for="item in this.payInfoList"
-                      :key="item.code"
-                      :label="item.name"
+                      :key="item.id"
+                      :label="item.desc"
                       :value="item.id">
                     </el-option>
                   </el-select>
@@ -1015,7 +1068,7 @@
                     <el-option
                       v-for="item in incomingAccoutList"
                       :key="item.id"
-                      :label="item.name"
+                      :label="item.desc"
                       :value="item.id">
                     </el-option>
                   </el-select>
@@ -1135,12 +1188,12 @@
                           </el-select>
                 </li> -->
                 <li>
-                  <span>付款原因:</span>
+                  <span>付款方式:</span>
                   <el-select clearable size="mini" @change="enterBill.enterAccountCode=''" style="width: 20vw; margin-top: 10px;margin-left:10px"  @focus="getPayReason()" placeholder="付款原因"  v-model="previewEnterBill.payReasonValue">
                     <el-option
                       v-for="item in this.payInfoList"
-                      :key="item.code"
-                      :label="item.name"
+                      :key="item.id"
+                      :label="item.desc"
                       :value="item.id">
                     </el-option>
                   </el-select>
@@ -1151,7 +1204,7 @@
                             <el-option
                               v-for="item in incomingAccoutList"
                               :key="item.id"
-                              :label="item.name"
+                              :label="item.desc"
                               :value="item.id">
                             </el-option>
                           </el-select>
@@ -1415,6 +1468,21 @@ export default {
       //   return data;
       // };
         return {
+          roomOnlyTypeList: [],
+          rowParam: {},//行内对象
+          /**换房升降级param */
+          roomParam:{
+            oldType: '',
+            newType: '',
+            oldNumber: '',
+            newNumber: '',
+            isFee: '1',
+            oldPrice: '',
+            discount: '',
+            newPrice: '',
+            reason: ''
+          },
+          changeRoomVisible: false,
           current_rate_price: 0,//当日价
           updateVisible: false,
           invoiceOptions:[
@@ -2041,6 +2109,75 @@ export default {
       }
     },
     methods: {
+      flushChangeData(){
+        this.roomParam.newType = ''
+        this.roomParam.oldType = '',
+        this.roomParam.oldNumber= '',
+        this.roomParam.newNumber= '',
+        this.roomParam.oldPrice = '',
+        this.roomParam.discount = '',
+        this.roomParam.newPrice = '',
+        this.roomParam.reason = ''
+      },
+      /**通过折扣和原价自动计算新的房价 */
+      computeData(){
+        this.roomParam.newPrice = Number(this.roomParam.oldPrice) + Number(this.roomParam.discount)
+      },
+      /**
+       * @desc 确定进行换房
+       */
+      confirmChangeRoom(){
+        let that = this
+        if (that.roomParam.oldNumber && that.roomParam.newNumber && that.roomParam.oldType && that.roomParam.newType && that.roomParam.oldPrice && that.roomParam.discount){
+          console.log('kaishi',this.rowParam)
+          console.log('roomParam',this.roomParam)
+          // let url = 'http://192.168.2.224:9005' + '/v2/' + `depend_ex/exchange_houses/`
+          let url = that.api.api_newBill_9204 + '/v2/' + `depend_ex/exchange_houses/`
+          let scopeParam ={
+            order_no:  that.rowParam.order_no,
+            old_room: that.roomParam.oldNumber, //原房间
+            new_room: that.roomParam.newNumber,
+            discount: Number(that.roomParam.discount), //折扣
+            is_free: that.roomParam.isFee,
+            new_fix_rate: Number(that.roomParam.newPrice),
+            old_fix_rate: Number(that.roomParam.oldPrice),
+            old_room_type: that.roomParam.oldType,
+            new_room_type: that.roomParam.newType,
+            change_result: that.roomParam.reason
+          }
+          console.log(scopeParam)
+          that.$axios.post(url,scopeParam).then(res=>{
+            if(res.data.message === 'success'){
+              that.$message.success(res.data.data.result.message)
+              that.changeRoomVisible = false
+              //  this.linkHouseFornVisible = false;
+              //     this.flushByLink()//刷新数据
+            }else{
+              that.$message.warning('换房失败!')
+            }
+            }).catch(error=>{
+          })
+        }else{
+          this.$message.warning('有数据没填充!')
+        }
+        console.log('this.multipleSelectionget',this.multipleSelection)
+      },
+      /**
+       * @desc 换房升级 可以换房间，也可以更改房价
+       */
+      handleChangeRoom(row){
+        console.log('row',row)
+        this.getLiveRoom(row.room_type_name)
+        this.changeRoomVisible = true
+        console.log('row',row)
+        this.roomParam.oldNumber = row.room_number
+        this.roomParam.oldType = row.room_type
+        this.rowParam.order_no = row.order_no
+        this.roomParam.oldPrice = this.current_rate_price
+        // this.roomParam.newType = row.room_type //默认老值 error
+        this.rowParam = row
+        // this.roomParam.oldPrice = row.
+      },
         /**
          * 更新接口数据
         */
@@ -2048,7 +2185,7 @@ export default {
           this.updateVisible = true
         },
         /**
-         *@current_rate_price 从多个数据里获取当日价
+         *@current_rate_price 从多个数据里获取当日价  
          */
         getRateCode_price_self(){
           console.log('this.preBillLinkParam',this.preBillLinkParam.room_price)
@@ -2061,6 +2198,7 @@ export default {
           }
         },
         /**
+           注意:此方法已废弃<=========
          * @desc_1 根据房型得到对应房价(入住过后当天的房价)
          * @desc_2 以后住几天每天的房价都要展示清楚 构造了房型的英文名字，以后需要后端提供
          */
@@ -2244,15 +2382,20 @@ export default {
         }
       },
       refundDisable(row){
-        if(row.hasOwnProperty('related_pay_id') === true && (row.related_pay_id.pre_authorized_detail != undefined && row.related_pay_id.pre_authorized_detail.status === 1)){
+        // if(row.hasOwnProperty('related_pay_id') === true && (row.related_pay_id.pre_authorized_detail != undefined && row.related_pay_id.pre_authorized_detail.status === 1)){
+        //   return true
+        // }else {
+        //   if(row.hasOwnProperty('related_pay_id') === true && row.related_pay_id != null && row.related_pay_id.pay_status === 0){
+        //     return false
+        //   }else{
+        //     return true
+        //     console.log('false')
+        //   }
+        // }
+        if(row.subject === 'pay' && row.can_arrange>0){
+          return false
+        }else{
           return true
-        }else {
-          if(row.hasOwnProperty('related_pay_id') === true && row.related_pay_id != null && row.related_pay_id.pay_status === 0){
-            return false
-          }else{
-            return true
-            console.log('false')
-          }
         }
         // if(related_pay_id)
       },
@@ -2387,13 +2530,12 @@ export default {
         console.log('param-----',param)
         let scopeParams = {
           // room_number: param
-          // order_no: param
-          order_no: 'C5d8b00d5c52cf153a4c8a876'
+          order_no: param
         }
         let that = this
         // let url = `http://192.168.2.224:9005/v1/checkin/all_master_info/`
         // let url = that.api.api_bill_9202 + '/v1/' + `checkin/all_master_info/`
-        let url = 'http://192.168.4.217:9005' + '/v2/' + `checkin/all_master_info/`
+        let url = that.api.api_newBill_9204 + '/v2/' + `checkin/all_master_info/`
         that.$axios({
           method : 'get',
           url : url,
@@ -2729,7 +2871,7 @@ export default {
       getLinkRoomData(){
         let that = this
         // let url= `http://192.168.2.224:9005/v1/checkin/get_combine_list_post/`
-        let url= that.api.api_bill_9202 + '/v1/' + `checkin/get_combine_list_post/`
+        let url= that.api.api_newBill_9204 + '/v2/' + `checkin/get_combine_list_post/`
           // method : 'post',
           // url : url,
           // params: {
@@ -2739,9 +2881,9 @@ export default {
           order_no: that.preBillLinkParam.order_no
         }
         that.$axios.post(url,scopeParam).then(res=>{
-          console.log('res',res.data.data.results)
+          console.log('res',res.data.data)
           let array = []
-          for(var item of res.data.data.results){
+          for(var item of res.data.data){
             item.master_guest.length === 0 ? item.master_guest.push({name: ''}) : item.master_guest//暂时放这儿，可能有副作用
             for(var itemm of item.master_guest){
               array.push({
@@ -3048,31 +3190,40 @@ export default {
         this.handleExtraParam()
         let that = this
         // let url= that.api.api_9022_9519+ '/v1/' + `finance/pay_detail/pay_by_charges`
-        let url_1= that.api.api_9022_9519+ '/v1/' + `finance/pay_detail/pay_money_pms`
-        let url_2 = that.api.api_9022_9519+ '/v1/' + `finance/pay_detail/pay_money_by_author_pms`//预授权付款,即预授权转预收
-        let url = this.previewEnterBill.pre_author_id != '' && this.jie_authorization_flag == true ? url_2 : url_1
+        // let url_1= that.api.api_9022_9519+ '/v1/' + `finance/pay_detail/pay_money_pms`
+        // let url_2 = that.api.api_9022_9519+ '/v1/' + `finance/pay_detail/pay_money_by_author_pms`//预授权付款,即预授权转预收
+        // let url = this.previewEnterBill.pre_author_id != '' && this.jie_authorization_flag == true ? url_2 : url_1
+        let url = 'http://192.168.4.168:8000' + '/v1/' + 'accounts/pay/'
         // let url= `http://192.168.5.96:9519/v1/finance/pay_detail/pay_by_charges`
-        let scopeParam_1 = {
-          account_id: that.preBillLinkParam.account_id, //主账id
-          pay_mode_id: that.previewEnterBill.payMode,
-          code_pay_for_id: that.previewEnterBill.payReasonValue === '' ? 1 : that.previewEnterBill.payReasonValue, //因为是必填选项
-          pay_amount: that.previewEnterBill.money,
-          code_income_type_id: that.previewEnterBill.enterAccountCode,   //入账类型代码id
-          // biz_date: moment(new Date()).format('YYYY-MM-DD'),
-          original_pay_id: that.order_form == '' ? '': that.order_form, //	微信/淘宝/第三方支付订单的id,现金支付没有此参数
-          // ar_account_id: '',//	ar账户id, ar支付必须.
-          cashier_id:	9,
-          original_pay_dict: that.extraParam.length>0 ? JSON.stringify(that.extraParam) : null
+        // let scopeParam_1 = {
+        //   account_id: that.preBillLinkParam.account_id, //主账id
+        //   pay_mode_id: that.previewEnterBill.payMode,
+        //   code_pay_for_id: that.previewEnterBill.payReasonValue === '' ? 1 : that.previewEnterBill.payReasonValue, //因为是必填选项
+        //   pay_amount: that.previewEnterBill.money,
+        //   code_income_type_id: that.previewEnterBill.enterAccountCode,   //入账类型代码id
+        //   // biz_date: moment(new Date()).format('YYYY-MM-DD'),
+        //   original_pay_id: that.order_form == '' ? '': that.order_form, //	微信/淘宝/第三方支付订单的id,现金支付没有此参数
+        //   // ar_account_id: '',//	ar账户id, ar支付必须.
+        //   cashier_id:	9,
+        //   original_pay_dict: that.extraParam.length>0 ? JSON.stringify(that.extraParam) : null
+        // }
+        // let scopeParam_2={
+        //   code_pay_for_id: that.previewEnterBill.payReasonValue === '' ? 1 : that.previewEnterBill.payReasonValue, //因为是必填选项
+        //   code_income_type_id: that.previewEnterBill.enterAccountCode,   //入账类型代码id
+        //   pay_amount: that.previewEnterBill.money,
+        //   pay_mode_id: that.previewEnterBill.payMode,
+        //   pre_author_id: that.previewEnterBill.pre_author_id,
+        //   cashier_id:	null,
+        // }
+        // let scopeParam = this.previewEnterBill.pre_author_id != '' && this.jie_authorization_flag == true ? scopeParam_2 : scopeParam_1
+        let scopeParam = {
+          pay_amount: Number(that.previewEnterBill.money),
+          account: that.preBillLinkParam.account_id, //主账id
+          desc: '',
+          cashier_id:	'',
+          incoming_account_reason: that.previewEnterBill.payReasonValue,
+          incoming_account_code: that.previewEnterBill.enterAccountCode,
         }
-        let scopeParam_2={
-          code_pay_for_id: that.previewEnterBill.payReasonValue === '' ? 1 : that.previewEnterBill.payReasonValue, //因为是必填选项
-          code_income_type_id: that.previewEnterBill.enterAccountCode,   //入账类型代码id
-          pay_amount: that.previewEnterBill.money,
-          pay_mode_id: that.previewEnterBill.payMode,
-          pre_author_id: that.previewEnterBill.pre_author_id,
-          cashier_id:	null,
-        }
-        let scopeParam = this.previewEnterBill.pre_author_id != '' && this.jie_authorization_flag == true ? scopeParam_2 : scopeParam_1
         console.log('url',url,'scopeParam',scopeParam)
         let money_money  = Math.min(this.endPayListParam.usable_pre_authorized,this.moneydesc.total_consumption)
         console.log('money_money',money_money)//取总消费和预授权最小值
@@ -3304,26 +3455,17 @@ export default {
           // }
           let scopeParam = {
             cashier_id: this.enterBill.cashValue,//	收银点id
-            return_type: null,
-            account_id: this.preBillLinkParam.account_id,//主账户id
-            charges: [{
-              code_income_type_id: this.enterBill.enterAccountCode,   //入账类型代码id
-              pay_status: 0,//enterBill.payMode,   // 支付状态 0：未付，1：结清，2：挂账/AR支付，3：部分支付 4: 异常
-              charge_amount: this.enterBill.money,  // 消费金额
-              desc:  this.enterBill.summary,  // 说明===>此时为摘要
-              // reference_id: 1232,   // 关联消费单id
-              // biz_date: moment(new Date()).format('YYYY-MM-DD'),  // 营业日期
-              // gen_time: moment(new Date()).format('YYYY-MM-DD HH:mm:ss'),    // 业务发生的实际时间
-              // is_fixed: 0,  // 是否固定消费. 0 不是,1 是.
-              // fixed_name: '0',   // 固定消费名称.可空
-              // rate_code: 'ddf',   // 房价码, 不一定有
-              // pay_amount: 0,   // 已支付的部分,一般是0,
-            }], //消费明细字典组成的数组
+            subject: 'consume',
+            incoming_account_reason: this.previewEnterBill.payReasonValue, //付款原因
+            incoming_account_code: this.enterBill.enterAccountCode,//入账代码
+            account: this.preBillLinkParam.account_id,//主账户id
+            charge_amount: Number(this.enterBill.money),//消费金额
+            desc: this.enterBill.summary,
             // pay_mode_id: this.enterBill.payMode
           }
-          scopeParam.charges = JSON.stringify(scopeParam.charges)
           let that = this
-          let url = that.api.api_9022_9519+ '/v1/' + `finance/charge_detail/add_charges_pms`
+          // let url = that.api.api_9022_9519+ '/v1/' + `finance/charge_detail/add_charges_pms`
+          let url = 'http://192.168.4.168:8000' + '/v1/' + `accounts/add_charge_detail/`
           console.log('++++',scopeParam)
           that.$axios.post(url,scopeParam).then(res=>{
             console.log('res.data.mess',res.data.message)
@@ -3340,6 +3482,7 @@ export default {
                 that.enterBillDialog = false //关闭入账界面
                 that.room_fee_dialog = false//关闭加收房费界面
               }else{
+                console.log('入账之后==========>最终的进入')
                 that.enterBillDialog = false //关闭入账界面
                 that.only_consume_flag = 1
                 that.queryData()//根据账户查询消费明细
@@ -3365,11 +3508,12 @@ export default {
       },
       //打开入预收付钱
       handlePreviewEnterBill(){
+        this.previewEnterBill.money = ''
         this.preview_enter_flag = 0
         this.flushPreviewEnterBill() //刷新入预收对象
         console.log('this.preBillLinkParam',this.preBillLinkParam)
         this.previewEnterBill.billInfo =this.preBillLinkParam.master_guest.length > 0 ? this.preBillLinkParam.room_number + '-' + this.preBillLinkParam.master_guest[0].name : this.preBillLinkParam.room_number
-        this.getpayInfoListByAccount2() //按主帐id批量查看消费明细==>收支记录 /v1/finance/charge_detail/get_by_account_ids
+        // this.getpayInfoListByAccount2() //按主帐id批量查看消费明细==>收支记录 /v1/finance/charge_detail/get_by_account_ids
         this.preview_enterBillDialog = true;
         console.log('dadafilter=================',this.tableData)
       },
@@ -3487,8 +3631,9 @@ export default {
         console.log('multipleSelection_page',this.multipleSelection_page)
         console.log('multipleSelectionAll==flag',this.multipleSelectionAll)
         this.transferTabel = this.multipleSelectionAll
+        console.log('this.transferTabel',this.transferTabel)
         for(var item of this.multipleSelectionAll){
-          if(item.is_deleted === 0 && item.pay_status === 0){
+          if(item.subject == 'consume' && (item.pay_status == 0 || 1)){
             this.transferAccountDialog = true
             this.transferMoneyValue = this.transferMoneyValue + item.can_arrange
           }else{
@@ -3544,33 +3689,45 @@ export default {
           startTime =  moment(this.charge_date[0]).format('YYYY-MM-DD')
           endTime = moment(this.charge_date[1]).format('YYYY-MM-DD')
         }
-        // let array = []
-        // array.push(this.preBillLinkParam.account_id)
-          let array = []
-          array = JSON.stringify(array)
+        console.log('checkList',this.checkList)
           let that = this
-          // let url= that.api.api_9022_9519+ '/v1/' + `finance/charge_detail/get_by_account_ids `
-          let url= that.api.api_9022_9519+ '/v1/' + `finance/charge_detail/get_by_account_id_pms`
+          let url 
+          let subject_param = this.checkList.join(',')
+          that.pagination.pageSize = Number(that.pagination.pageSize)
+          // let url= that.api.api_9022_9519+ '/v1/' + `finance/charge_detail/get_by_account_id_pms`
+          if(startTime && endTime){
+            if(subject_param){
+              url= 'http://192.168.4.168:8000'+ '/v1/' + `accounts/get_charge_detail_list/?page_size=${that.pagination.pageSize}&page=${that.pagination.pageNumber}&subject__in=${subject_param}&biz_date__gte=${startTime}&biz_date__lt=${endTime}&ordering=-create_datetime`
+            }else{
+              url= 'http://192.168.4.168:8000'+ '/v1/' + `accounts/get_charge_detail_list/?page_size=${that.pagination.pageSize}&page=${that.pagination.pageNumber}&biz_date__gte=${startTime}&biz_date__lt=${endTime}&ordering=-create_datetime`
+            }
+          }else{
+            if(subject_param){
+              url= 'http://192.168.4.168:8000'+ '/v1/' + `accounts/get_charge_detail_list/?page_size=${that.pagination.pageSize}&page=${that.pagination.pageNumber}&subject__in=${subject_param}&ordering=-create_datetime`
+            }else{
+              url= 'http://192.168.4.168:8000'+ '/v1/' + `accounts/get_charge_detail_list/?page_size=${that.pagination.pageSize}&page=${that.pagination.pageNumber}&ordering=-create_datetime`
+            }
+          }
           console.log('this.checkList进入',this.checkList)
           let scopeParam = {
-            account_id: that.preBillLinkParam.account_id,
-            subjects: JSON.stringify(this.checkList), //	科目id的数组
-            in_or_out: '',
-            code_income_type_ids: null,
-            begin_date: startTime,//开始时间
-            end_date: endTime,//结束时间
-            page_num: that.pagination.pageNumber,//分页
-            page_size: that.pagination.pageSize
+            only_self:1,
+            account: [].concat(that.preBillLinkParam.account_id),
+            // subjects: JSON.stringify(this.checkList), //	科目id的数组
+            // in_or_out: '',
+            // code_income_type_ids: null,
+            // begin_date: startTime,//开始时间
+            // end_date: endTime,//结束时间
           }
           that.$axios.post(url,scopeParam).then(res=>{
-            that.tableData = res.data.list
+            that.tableData = res.data.data.results
+            console.log('that.tableData',that.tableData)
             // this.only_consume_flag = 0
             // that.getEndpayInfoListByAccount()
             // that.total = res.data.totoal_count
               that.getEndpayInfoListByAccount()
-              that.pagination.totalRows = res.data.totoal_count
-              that.total_consumption_value = that.tableData[0].account_id.total_consumption
-              that.need_pay_value = that.tableData[0].account_id.need_pay
+              that.pagination.totalRows = res.data.data.count
+              // that.total_consumption_value = that.tableData[0].account_id.total_consumption
+              // that.need_pay_value = that.tableData[0].account_id.need_pay
             setTimeout(() => {
               this.setSelectRow();
             }, 20);
@@ -4257,7 +4414,7 @@ export default {
         console.log('preBillLinkParam.master_guest',this.master_guest_value)
         if(that.master_guest_value){
           // let url= that.api.api_bill_9202 + '/v1/' + `checkin/add_master_guest_list/`
-          let url= 'http://192.168.4.217:9005' + '/v2/' + `checkin/add_master_guest/`
+          let url= that.api.api_newBill_9204 + '/v2/' + `checkin/add_master_guest/`
           // let url= `http://192.168.2.224:9005/v1/checkin/add_master_guest_list/`
           that.$axios.post(url, that.master_guest_value).then(res=>{
             // that.enterPersonVisible=false;
@@ -4276,8 +4433,8 @@ export default {
        */
       confirmContinueRoom(){
         let that = this
-        let url= that.api.api_bill_9202 + '/v1/' + `checkin/extend_check/`
-        // let url= `http://192.168.2.224:9005/v1/checkin/extend_check/`
+        let url= that.api.api_newBill_9204 + '/v2/' + `depend_ex/extend_check/`
+        // let url= `http://192.168.2.224:9005/v1/depend_ex/extend_check/`
         let scopeParam = {
           order_no: this.preBillLinkParam.order_no,
           chang_leave_time: moment(this.after_leave_time_2).format('YYYY-MM-DD 14:00:00'),
@@ -4394,6 +4551,7 @@ export default {
        * 根据账户id查询消费及对应支付记录=>详细  /v1/finance/account/get_info/
        */
       getpayInfoListByAccount2(interParam){
+        return //新(老)版本不请求
         console.log('charge_date',this.charge_date)
         let startTime = null
         let endTime = null
@@ -4432,24 +4590,24 @@ export default {
           console.log('this.preBillLinkParam.account_id值',this.preBillLinkParam)
             let id =  params ? params : this.preBillLinkParam.account_id
             let that = this
-            let param ={
-              with_collections: 1,
-              related_objects: 1
-            }
-            id = 1
-            let url= that.api.api_9022_9519+ '/v1/' + `finance/account/get_info_pms/` + id
+            // let param ={
+            //   with_collections: 1,
+            //   related_objects: 1
+            // }
+            // id = 1
+            // let url= that.api.api_9022_9519+ '/v1/' + `finance/account/get_info_pms/` + id
+            let url= 'http://192.168.4.168:8000'+ '/v1/' + `accounts/get_account_base_info/` + id + '/'
             that.$axios({
               method : 'get',
               url : url,
-              params: param
           }).then(res=>{
               that.endPayListParam = res.data.data
               console.log('this.accoutInfoById_param===================================》》》》》》最终账户',that.endPayListParam)
               try {
-                that.moneydesc.pay_amount = that.endPayListParam.pay_amount + that.endPayListParam.usable_pre_authorized//添加了预授权
-                that.moneydesc.total_consumption = that.endPayListParam.general_consumption
-                that.moneydesc.balance = that.endPayListParam.balance
-                that.moneydesc.need_pay = that.endPayListParam.need_pay
+                that.moneydesc.pay_amount = Number(that.endPayListParam.pay_amount) + Number(that.endPayListParam.usable_pre_authorized)//添加了预授权
+                that.moneydesc.total_consumption = that.endPayListParam.general_consumption //消费
+                that.moneydesc.balance = that.endPayListParam.balance //余额
+                that.moneydesc.need_pay = that.endPayListParam.balance //应收应退
               } catch (error) {
                 that.$message.warning('数据出错!')                
               }
@@ -4525,7 +4683,7 @@ export default {
         validatePayData(){
           return(
             util.validateBlank(this.previewEnterBill.enterAccountCode,'入账代码是必填项',this)&&
-            util.validateBlank(this.previewEnterBill.payMode,'支付方式是必填项',this)&&
+            // util.validateBlank(this.previewEnterBill.payMode,'支付方式是必填项',this)&&
             util.validateBlank(this.previewEnterBill.money,'请输入金额',this)
             // util.validateBlank(this.previewEnterBill.payReasonValue,'付(退)款原因是必填项',this)
           )
@@ -5023,16 +5181,17 @@ export default {
         //入账代码
         getIncomingAccount(){
           let that = this
-          let url =  that.api.api_9022_9519+ '/v1/' +  'finance/incoming_account_code/info_list'
-          let scopeParam = {
-            code_pay_for: that.previewEnterBill.payReasonValue,
-            in_or_out: null,
-            only_system: null,//	0或者1 一般不传传递此参数
-            page_size: 300
+          let parent_id = that.previewEnterBill.payReasonValue
+          console.log('id',that.previewEnterBill.payReasonValue)
+          if(!parent_id){
+            this.$message.warning('请先选择付款原因!')
+            return
           }
-          that.$axios.post(url,scopeParam).then(res=>{
-              console.log('res.data',res.data.data.list)
-              that.incomingAccoutList = res.data.data.list
+          // let url =  that.api.api_9022_9519+ '/v1/' +  'finance/incoming_account_code/info_list'
+          let url =  'http://192.168.4.168:8000' + '/v1/' +  'system/settings/get_code_pay_for_list/?parent_id=' + parent_id + '&page_size=300'
+          that.$axios.get(url).then(res=>{
+              console.log('res.data',res.data.data.results)
+              that.incomingAccoutList = res.data.data.results
             }).catch(error=>{
           })
         },
@@ -5069,12 +5228,14 @@ export default {
          */
         getCashRegister(){
           let that = this
-          let url= that.api.api_9022_9519+ '/v1/' + `finance/cash_register/info_list`
+          // let url= that.api.api_9022_9519+ '/v1/' + `finance/cash_register/info_list`
+          let url =  'http://192.168.4.168:8000' + '/v1/' +  'accounts/get_cash_register_list/'
+
           that.$axios({
             method : 'get',
             url : url,
           }).then(res=>{
-            that.cashRegisterList = res.data.data.list
+            that.cashRegisterList = res.data.data.results
           }).catch(error=>{
           })
         },
@@ -5097,12 +5258,13 @@ export default {
          */
         getPayReason(){
           let that = this
-          let url= that.api.api_9022_9519+ '/v1/' + `finance/code_pay_for/info_list?page_size=999`
+          // let url= that.api.api_9022_9519+ '/v1/' + `finance/code_pay_for/info_list?page_size=999`
+          let url= 'http://192.168.4.168:8000'+ '/v1/' + `system/settings/get_code_pay_for_list/?page_size=300&parent_id=`
           that.$axios({
             method : 'get',
             url : url,
           }).then(res=>{
-            that.payInfoList = res.data.data.list
+            that.payInfoList = res.data.data.results
           }).catch(error=>{
           })
         },
@@ -5115,6 +5277,34 @@ export default {
                 // that.reportData = res.data.data
                 // console.log('that.reportData',this.reportData)
             })
+        },
+        /**
+          @desc 获取能获取的房型 区别一下
+        */
+        getOnlyRoomType(){
+          let that = this
+          let url =  that.api.api_price_9101 + '/v1/' + 'room/room_status/get_room_type_occupy_list/'
+          let start 
+          let end
+          if(this.rowParam.arr_time && this.rowParam.leave_time){
+            start = moment(this.rowParam.arr_time).format('YYYY-MM-DD')
+            end = moment(this.rowParam.leave_time).format('YYYY-MM-DD')
+          }
+          that.$axios({
+            url : url,
+            method : 'get',
+            params:{
+              biz_date__gte: start,
+              biz_date__lt:  end
+            },
+          }).then(res=>{
+            if(res.data.message === 'success'){
+              this.roomOnlyTypeList = res.data.data.results
+            }else{
+                that.$message.error('获取房型失败!')
+            }
+          }).catch(error=>{
+          })
         },
         //获取房型数据
         getRoomType(){
@@ -5194,6 +5384,27 @@ export default {
         padding-left: 10px;
       }
     }
+  }
+  /**换房升降级 */
+  .roomClass{
+    margin-top: 12px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    .el-input{
+      padding-left: 10px;
+      padding-right: 20px;
+    }
+    .el-select{
+      padding-right: 10px;
+    }
+  }
+  .roomClass_third{
+    width: 100%;
+    margin-top: 12px;
+  }
+  .roomClass_third.width{
+    width: 14vw;
   }
   .activeColor{
     background-color: #FFF5F5F5;
