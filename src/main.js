@@ -49,15 +49,10 @@ axios.interceptors.request.use((request)=>{
    */
   let str = request.url
   console.log('str',str)
-  if(str.includes('https://image.eloadspider.com/resource/')){
-    console.log('jinru')
-     return request;
-  }else{
-      request.headers.common = {
-    'authorization' : localStorage.getItem('authorization') ? localStorage.getItem('authorization') : router.push({path:'/login'}),
-    };
-    return request;
-  }
+  request.headers.common = {
+  'authorization' : localStorage.getItem('authorization') ? localStorage.getItem('authorization') : router.push({path:'/login'}),
+  };
+  return request;
 
 
 

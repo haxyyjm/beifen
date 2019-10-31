@@ -753,6 +753,7 @@ import pictureDialog from './pictureDialog'
 export default {
     data(){
         return {
+          face_set: '',//获取face-set
           isLoading: false,
           rate_other_list: [],//最终组装的数据 
           rateAllPrice_list: [],//房价码价格数组
@@ -1099,6 +1100,7 @@ export default {
                 marital: null,
                 company_id: null,
                 company_na: '222',
+                face_id: null,
                 pic_now: null,
                 pic_photo: null,
                 remark: '222',
@@ -1349,6 +1351,7 @@ export default {
         this.preBillParam.master_guest.forEach((item,index)=>{
           if(index == param.index){
             item.pic_now =  param.imageUrl
+            item.face_id = param.face_id
           }
         })
         console.log('this.preBillParam.master_guest=====end',this.preBillParam.master_guest)
@@ -1362,7 +1365,38 @@ export default {
         // localStorage.setItem('pictureParam_guest',JSON.stringify(this.pictureParam))
         localStorage.setItem('pictureParam_guest',JSON.stringify(item))
         localStorage.setItem('pictureParam_index',index)
+        // localStorage.setItem('face_set',face_set)
         console.log('1111', JSON.parse(localStorage.getItem('pictureParam_guest')))
+        console.log('hotel_info',JSON.parse(localStorage.getItem('userInfo')))
+        let param = JSON.parse(localStorage.getItem('userInfo'))
+        console.log('param-param',param)
+        this.getFaceSet(param)
+      },
+      /**
+       *@desc 获取酒店的face_set
+       */
+      getFaceSet(param){
+        let that = this
+        that.$axios({
+          url: 'http://sms.crowncrystalhotel.com/v1/authentication/ht/rf/query_hotel_face_set/',
+          method: "post",
+          data:{
+            group_id: param.hotel_group_id,
+            hotel_id: param.hotel_id
+          },
+        }).then(res=>{
+            //如果扫码成功
+            if (res.data.message === "success"){
+              this.face_set = res.data.data.face_set
+              localStorage.setItem('face_set',this.face_set)
+              console.log('....',res.data)
+            }
+            else{
+            }
+          })
+        .catch(error=>{
+          console.log(error);
+        });
       },
       //筛选处理房价码
       handleRateCode(){
@@ -2340,6 +2374,7 @@ export default {
             marital: null,
             company_id: null,
             company_na: '222',
+            face_id: null,
             pic_now: null,
             pic_photo: null,
             remark: '222',
@@ -2865,6 +2900,7 @@ export default {
             marital: null,
             company_id: null,
             company_na: '222',
+            face_id: null,
             pic_now: null,
             pic_photo: null,
             remark: '222',
@@ -4178,6 +4214,7 @@ export default {
             marital: null,
             company_id: null,
             company_na: '222',
+            face_id: null,
             pic_now: null,
             pic_photo: null,
             remark: '222',
@@ -4352,7 +4389,11 @@ export default {
               return false
             }
             if(!item.pic_now){
-              this.$message.warning(item.name + '没有上传照片,' + '请上传照片!')
+              this.$message.warning(item.name + '没有上传照片或者没有录入正确人脸!,' + '请重新上传照片!')
+              return false
+            }
+            if(!item.face_id){
+              this.$message.warning(item.name + '上传照片不对,' + '请重新上传照片!')//没有获取sxm的token
               return false
             }
             // return(

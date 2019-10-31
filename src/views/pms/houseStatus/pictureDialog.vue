@@ -23,6 +23,7 @@
     export default {
         data () {
             return {
+                img_token:'',//需传给dyl
                 card_number: '',
                 cardType: '',
                 // uploadUrl: 'https://image.eloadspider.com/resource/employee/head_image/upload',
@@ -34,7 +35,8 @@
                 pictureParamIndex: '',
                 pictureUrl:{
                     imageUrl: '',
-                    index: ''
+                    index: '',
+                    face_id: ''
                 },
                 pictureComponentDialog: this.show,
             };
@@ -125,9 +127,10 @@
                         that.$message.success('上传图片成功!')
                         console.log('that.imageUrl=====',that.imageUrl)
                         console.log('。。。。',this.pictureParamInfo.reserve_guest)
-                        this.pictureUrl.imageUrl = that.imageUrl //获取拍摄的照片
+                        this.pictureUrl.imageUrl = that.imageUrl //获取拍摄的照片====>然后调取小萌的接口进行face判断
                         this.pictureUrl.index = that.pictureParamIndex//获取拍摄的照片与对应人的索引，从而找到相应index
-                        this.sendToParent()
+                        this.addFaceUrl(that.imageUrl)//添加图片地址给sxm 并传值给父级
+                        // this.sendToParent()
                         this.pictureComponentDialog = false
                         //暂时这样判断
                         // for(var item of that.pictureParamInfo.reserve_guest){
@@ -147,6 +150,40 @@
                          */
                     }
                 }
+            },
+            /**
+             * 添加每一行图片地址给sxm=>数据传到父级更新
+             */
+            addFaceUrl(imageUrl){
+                let that = this
+                let face_set = localStorage.getItem('face_set')
+                that.$axios({
+                url: 'http://sms.crowncrystalhotel.com/v1/authentication/ht/rf/faceset_add_face_url/',
+                method: "post",
+                data:{
+                   img_list: [{
+                       user_id:"sxm",
+                       img_url: imageUrl,
+                       id: ''
+                   }],
+                   outer_id: face_set,
+                },
+                }).then(res=>{
+                    //如果扫码成功
+                    console.log('..imgToken..',res)
+                    if (res.data.message === "success"){
+                        this.img_token = res.data.data.result[0].img_token
+                        this.pictureUrl.face_id = this.img_token//获取拍摄的照片与对应人的索引，从而找到相应index
+                        console.log('this.img_token',this.img_token)
+                        this.sendToParent()
+                    }
+                    else{
+                        this.$message.warning('请正对摄像头拍照!保持录入人脸!')
+                    }
+                })
+                .catch(error=>{
+                console.log(error);
+                });
             },
             //数据到父级更新prebillParam
             sendToParent(){

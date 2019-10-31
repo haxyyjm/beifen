@@ -5,20 +5,9 @@
           <div class="authorizationClass">
             <div class="div1">
               <el-table height="350" :data="authorizationList"  :header-cell-style="{background:'#373d41', color: '#FFFFFF'}">
-                <el-table-column  label="状态">
-                  <template slot-scope="scope">
-                    <span v-if="scope.row.status === 0">正常</span>
-                    <span v-if="scope.row.status === 1">已完成</span>
-                    <span v-if="scope.row.status === 2">已撤销</span>
-                    <span v-if="scope.row.status === 3">异常</span>
-                  </template>
+                <el-table-column prop="status_desc"  label="状态">
                 </el-table-column>
-                <el-table-column label="项目">
-                  <template slot-scope="scope">
-                    <span v-if="scope.row.card_type === 1">国内卡</span>
-                    <span v-if="scope.row.card_type === 2">国外卡</span>
-                    <span v-if="scope.row.card_type === 3">储值卡</span>
-                  </template>
+                <el-table-column prop="card_type_desc" label="项目">
                 </el-table-column>
                 <el-table-column prop="authorized_amount" label="金额"></el-table-column>
                 <el-table-column prop="authorize_num" label="授权号"></el-table-column>
@@ -62,6 +51,7 @@
                       <li>授权号:<el-input v-model="authorizationParam.authorize_num" size="mini" style="width: 10vw;height: 10px;margin-top:10px"></el-input></li>
                       <li>有效期:
                         <el-date-picker
+                          value-format = "yyyy-MM-dd"
                           size="mini" style="width: 10vw;height: 10px;margin-top:10px"
                           v-model="authorizationParam.card_expire"
                           type="date"
@@ -70,7 +60,7 @@
                       </li>
                     </ul>
                     <ul class="ul_2">
-                      <li>金额:<el-input v-model="authorizationParam.authorized_amount" size="mini" style="width: 10vw;height: 10px;margin-top:10px"></el-input></li>
+                      <li>金额:<el-input  @input="authorizationParam.authorized_amount = authorizationParam.authorized_amount.replace(/[^\d.]/g,'')" v-model="authorizationParam.authorized_amount" size="mini" style="width: 10vw;height: 10px;margin-top:10px"></el-input></li>
                       <li>卡号:<el-input v-model="authorizationParam.card_num" size="mini" style="width: 10vw;height: 10px;margin-top:10px"></el-input></li>
                       <li>备注:<el-input v-model="authorizationParam.desc" size="mini" style="width: 10vw;height: 10px;margin-top:10px"></el-input></li>
                     </ul>                          
@@ -184,7 +174,8 @@
             console.log('row,,',row)
             let that = this
             let id = row.id//缓存中获取
-            let url = this.api.api_9022_9519 + '/v1/' + 'finance/pre_authorized_detail/remove/' + id
+            // let url = this.api.api_9022_9519 + '/v1/' + 'finance/pre_authorized_detail/remove/' + id
+            let url= 'http://192.168.2.204:8000'+ '/v1/' + `accounts/remove_pre_authorized_detail/` + id + '/'
             that.$axios.post(url).then((res)=>{
                 console.log('res.data撤销',res.data)
                 if(res.data.message =='success'){
@@ -204,18 +195,22 @@
           addAuthorization(){
             if(this.authorizationParam.card_type && this.authorizationParam.authorize_num && this.authorizationParam.card_expire && this.authorizationParam.card_num  && this.authorizationParam.authorized_amount){
               let that = this
-              let url = this.api.api_9022_9519 + '/v1/' + 'finance/pre_authorized_detail/add'
+              // let url = this.api.api_9022_9519 + '/v1/' + 'finance/pre_authorized_detail/add'
+              let url= 'http://192.168.2.204:8000'+ '/v1/' + `accounts/add_pre_authorized_detail/`
               let scopeParam
               console.log('localStorage',localStorage.getItem('mainAccountId'))
               this.authorizationParam.mainAccount_id = localStorage.getItem('mainAccountId')
               scopeParam = {
-                account_id: this.authorizationParam.mainAccount_id,
-                card_type:  this.authorizationParam.card_type,
-                authorize_num: this.authorizationParam.authorize_num,
-                card_expire: this.authorizationParam.card_expire,
-                card_num: this.authorizationParam.card_num,
                 desc: this.authorizationParam.desc,
-                authorized_amount: this.authorizationParam.authorized_amount,
+                pay_amount: Number(this.authorizationParam.authorized_amount), //已支付金额
+                authorized_amount: this.authorizationParam.authorized_amount, //授权额度
+                card_type:  this.authorizationParam.card_type,
+                card_num: this.authorizationParam.card_num,
+                card_expire: this.authorizationParam.card_expire,
+                expire_date: this.authorizationParam.card_expire,//授权过期日期
+                authorize_num: this.authorizationParam.authorize_num,
+                code_cash_type: null,
+                account: this.authorizationParam.mainAccount_id,//关联主帐
               }
               console.log('scopeParam',scopeParam)
               that.$axios.post(url,scopeParam).then((res)=>{
@@ -258,29 +253,15 @@
           //批量查看预授权list(一个accountId下面)
           findAuthorizationList(){
             let that = this
-            let id = localStorage.getItem('mainAccountId')//缓存中获取
-            let account_ids = []
-            account_ids.push(id)
-            console.log('account_ids',account_ids)
-            let url = this.api.api_9022_9519 + '/v1/' + 'finance/pre_authorized_detail/list_by_account_ids'
-            let scopeParam = {
-              account_ids: JSON.stringify(account_ids),
-              page_num: 1,
-              page_size: 100,
-            }
-            that.$axios.post(url,scopeParam).then((res)=>{
-                console.log('res.data',res.data,this.authorizationList)
+            // let url = this.api.api_9022_9519 + '/v1/' + 'finance/pre_authorized_detail/list_by_account_ids'
+            let url= 'http://192.168.2.204:8000'+ '/v1/' + `accounts/get_pre_authorized_detail_list/?page_size=100&page=1`
+            that.$axios.get(url).then((res)=>{
                 if(res.data.message =='success'){
-                  that.authorizationList = res.data.data.list
-                    // that.$message({
-                    //     message: '添加成功',
-                    //     type: 'success'
-                    // });
+                  that.authorizationList = res.data.data.results
                 }else{
                     this.$message.error('查询失败');
                 }
             }).catch(error=>{
-                this.$message.error('请求服务端失败!');
             })
           },
         }

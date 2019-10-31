@@ -457,7 +457,7 @@
             </ul>
             <!--附加信息==>需要判断储值卡,银行卡,积分兑换-->
             <div style="margin-top: 30px; margin-bottom: 20px;">
-              <span v-if="extraInformation.length>0" style="color: #4488E9;margin-top: 10px;margin-left: 15px">附加信息</span>
+              <span style="color: #4488E9;margin-top: 10px;margin-left: 15px">附加信息</span>
               <ul v-for="(item,index) of extraInformation" :key="index">
                 <li>
                   <span style="margin-left: 28px">{{item.field_name_cn}}:</span>
@@ -611,6 +611,7 @@ import pictureDialog from './pictureDialog'
 export default {
     data(){
         return {
+          face_set: '',//获取face-set
           isLoading: false,
           rate_other_list: [],//最终组装的数据 
           rateAllPrice_list: [],//房价码价格数组
@@ -946,6 +947,7 @@ export default {
             //入住人
             reserve_guest:[{
               room_no: 0,
+              face_id: null,
               pic_photo: null,//证件照
               pic_now: null,//当前拍摄照片
               liveCount: 0,//可选数
@@ -1222,6 +1224,35 @@ export default {
         localStorage.setItem('pictureParam_guest',JSON.stringify(item))
         localStorage.setItem('pictureParam_index',index)
         console.log('1111', JSON.parse(localStorage.getItem('pictureParam_guest')))
+        let param = JSON.parse(localStorage.getItem('userInfo'))
+        console.log('param-param',param)
+        this.getFaceSet(param)
+      },
+        /**
+       *@desc 获取酒店的face_set
+       */
+      getFaceSet(param){
+        let that = this
+        that.$axios({
+          url: 'http://sms.crowncrystalhotel.com/v1/authentication/ht/rf/query_hotel_face_set/',
+          method: "post",
+          data:{
+            group_id: param.hotel_group_id,
+            hotel_id: param.hotel_id
+          },
+        }).then(res=>{
+            //如果扫码成功
+            if (res.data.message === "success"){
+              this.face_set = res.data.data.face_set
+              localStorage.setItem('face_set',this.face_set)
+              console.log('....',res.data)
+            }
+            else{
+            }
+          })
+        .catch(error=>{
+          console.log(error);
+        });
       },
       //子传父
       getPictureParam(param){
@@ -1229,6 +1260,7 @@ export default {
         this.preBillParam.reserve_guest.forEach((item,index)=>{
           if(index == param.index){
             item.pic_now =  param.imageUrl
+            item.face_id = param.face_id
           }
         })
         console.log('this.preBillParam.check_guest=====end',this.preBillParam.reserve_guest)
@@ -1257,7 +1289,8 @@ export default {
         this.policeComponentDialog = true
         console.log('this.policeComponentDialog',this.policeComponentDialog)
       },
-      //开始分情况处理1.有预定且有入住人的信息(包括多条的时候)2.无预定，直接刷身份证的时候
+      //开始分情况处理1.有预定且有入住人的信息(包括多条的时候)
+      //2.无预定，直接刷身份证的时候
       handlePoliceParam(){
         console.log('card身份',this.cardInfoParam)
         console.log('policeInfoParam',this.policeInfoParam)
@@ -1423,6 +1456,7 @@ export default {
           let enterValue = {
             room_no: 0,
             pic_photo: null,
+            face_id: null,
             pic_now: null,
             name: this.cardInfoParam.name, //姓名
             sex: this.cardInfoParam.sex,//性别
@@ -2111,6 +2145,7 @@ export default {
         this.preBillParam.reserve_guest = [{
           room_no: 0,
           pic_photo: null,
+          face_id: null,
           pic_now: null,
           // liveCount: 0,
           // room_number: '',
@@ -2715,7 +2750,12 @@ export default {
               return false
             }
             if(!item.pic_now){
-              this.$message.warning(item.name + '没有上传照片,' + '请上传照片!')
+              // this.$message.warning(item.name + '没有上传照片,' + '请上传照片!')
+              this.$message.warning(item.name + '没有上传照片或者没有录入正确人脸!,' + '请重新上传照片!')
+              return false
+            }
+            if(!item.face_id){
+              this.$message.warning(item.name + '上传照片不对,' + '请重新上传照片!')//没有获取sxm的token
               return false
             }
             // return(

@@ -464,8 +464,8 @@
           </div>
           <el-row style="padding-left: 12px" class="roomClass_third">
             是否免费换房: 
-            <el-radio style="padding-left: 12px" v-model="roomParam.isFee" label="1">是</el-radio>
-            <el-radio v-model="roomParam.isFee" label="2">否</el-radio>
+            <el-radio @change="witchRoom" style="padding-left: 12px" v-model="roomParam.isFee" label="1">是</el-radio>
+            <el-radio @change="witchRoom" v-model="roomParam.isFee" label="2">否</el-radio>
           </el-row>
           <el-row style="padding-left: 12px">
             <span style="padding-left: 15px">原房价:</span> 
@@ -473,7 +473,7 @@
           </el-row>
           <el-row style="padding-left: 12px">
           <span style="padding-left: 30px">折扣:</span> 
-          <el-input @blur="computeData" @input="roomParam.discount = roomParam.discount.replace(/[^\-?\d.]/g,'')" placeholder="示例:100或者-100" size="mini" class="roomClass_third width" v-model="roomParam.discount"></el-input>
+          <el-input :disabled="isDiscount" @blur="computeData" @input="roomParam.discount = roomParam.discount.replace(/[^\-?\d.]/g,'')" placeholder="示例:100或者-100" size="mini" class="roomClass_third width" v-model="roomParam.discount"></el-input>
           </el-row>
           <el-row style="padding-left: 12px">
             <span style="padding-left: 15px">现房价:</span> <el-input size="mini" class="roomClass_third width" v-model="roomParam.newPrice"></el-input>
@@ -587,6 +587,7 @@
     name: "orderList",
     data() {
       return {
+        isDiscount: false,
         unusualList: [],//异常类型数组
         roomTypeList: [],//房型数组
         roomNoList: [],//可选房号数组
@@ -597,7 +598,7 @@
           newType: '',
           oldNumber: '',
           newNumber: '',
-          isFee: '1',
+          isFee: '2',
           oldPrice: '',
           discount: '',
           newPrice: '',
@@ -806,6 +807,18 @@
       that.get_room_type_list();
     },
     methods: {
+      //是否免费 换房切换
+      witchRoom(){
+        if(this.roomParam.isFee == '1'){
+          this.roomParam.newPrice = this.roomParam.oldPrice
+          this.isDiscount  = true
+        }else{
+          // this.roomParam.oldPrice = ''
+          this.roomParam.newPrice = ''
+          this.isDiscount  = false
+        }
+        console.log('roomParam.isFee',this.roomParam.isFee) 
+      },
       flushData(){
         this.roomParam.newType = ''
         this.roomParam.oldType = '',
@@ -843,7 +856,7 @@
        */
       confirmChangeRoom(){
         let that = this
-        if (that.roomParam.oldNumber && that.roomParam.newNumber && that.roomParam.oldType && that.roomParam.newType && that.roomParam.oldPrice && that.roomParam.discount){
+        if (that.roomParam.oldNumber && that.roomParam.newNumber && that.roomParam.oldType && that.roomParam.newType && that.roomParam.oldPrice){
           console.log('kaishi',this.rowParam)
           console.log('roomParam',this.roomParam)
           // let url = 'http://192.168.2.224:9005' + '/v2/' + `depend_ex/exchange_houses/`
@@ -884,6 +897,8 @@
         this.getRateCode_price(row)
         this.changeRoomVisible = true
         console.log('row',row)
+        this.roomParam.isFee = '2' //切换===>重置
+        this.isDiscount  = false //切换===>重置
         this.roomParam.oldNumber = row.room_number
         this.roomParam.oldType = row.room_type
         this.rowParam.order_no = row.order_no
