@@ -861,10 +861,12 @@ export default {
           labelList:[{
             label: '全日房',
             value: 0
-            },{
-              label: '钟点房',
-              value: 1
-            },{
+            },
+            // {
+            //   label: '钟点房',
+            //   value: 1
+            // },
+            {
               label: '夜宵房',
               value: 2
             },{
@@ -1015,7 +1017,8 @@ export default {
           that.$axios.get(url,{
             params: {
               market: that.preBillParam.reserve_base.code_market,
-              src__icontains: that.preBillParam.reserve_base.code_src
+              src__icontains: that.preBillParam.reserve_base.code_src,
+              is_day_user: 1
             }
           }).then(res=>{
             console.log('res.data.data.results',res.data.data.results,res.data.data)

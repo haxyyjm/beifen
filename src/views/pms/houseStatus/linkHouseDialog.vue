@@ -2311,7 +2311,7 @@ export default {
       findAuthorizationList(){
         let that = this
         // let url = this.api.api_9022_9519 + '/v1/' + 'finance/pre_authorized_detail/list_by_account_ids'
-        let url= 'http://192.168.2.204:8000'+ '/v1/' + `accounts/get_pre_authorized_detail_list/?page_size=100&page=1`
+        let url= 'http://192.168.4.168:8000'+ '/v1/' + `accounts/get_pre_authorized_detail_list/?page_size=100&page=1`
         that.$axios.get(url).then((res)=>{
             console.log('res.data',res.data,this.authorizationList)
             if(res.data.message =='success'){
@@ -2341,7 +2341,7 @@ export default {
         let that = this
         let id = row.id
         // let url = this.api.api_9022_9519 + '/v1/' + 'finance/pre_authorized_detail/remove/' + id
-        let url= 'http://192.168.2.204:8000'+ '/v1/' + `accounts/remove_pre_authorized_detail/` + id + '/'
+        let url= 'http://192.168.4.168:8000'+ '/v1/' + `accounts/remove_pre_authorized_detail/` + id + '/'
         that.$axios.post(url).then((res)=>{
             console.log('res.data撤销',res.data)
             if(res.data.message =='success'){
@@ -2452,7 +2452,7 @@ export default {
               console.log('jinru')
               try {
                 // let url = this.api.api_9022_9519+ '/v1/' + `finance/account/calculate_pms`
-                let url = 'http://192.168.2.204:8000' + '/v1/' + 'accounts/add_calculate_record/'
+                let url = 'http://192.168.4.168:8000' + '/v1/' + 'accounts/add_calculate_record/'
                 this.$axios.post(url,scopeParam).then(res=>{
                   this.clearTable()
                   this.queryData()//刷新得到列表账务最新数据
@@ -3160,7 +3160,7 @@ export default {
         // let url_1= that.api.api_9022_9519+ '/v1/' + `finance/pay_detail/pay_money_pms`
         // let url_2 = that.api.api_9022_9519+ '/v1/' + `finance/pay_detail/pay_money_by_author_pms`//预授权付款,即预授权转预收
         // let url = this.previewEnterBill.pre_author_id != '' && this.jie_authorization_flag == true ? url_2 : url_1
-        let url = 'http://192.168.2.204:8000' + '/v1/' + 'accounts/pay/'
+        let url = 'http://192.168.4.168:8000' + '/v1/' + 'accounts/pay/'
         // let url= `http://192.168.5.96:9519/v1/finance/pay_detail/pay_by_charges`
         // let scopeParam_1 = {
         //   account_id: that.preBillLinkParam.account_id, //主账id
@@ -3492,7 +3492,7 @@ export default {
           }
           let that = this
           // let url = that.api.api_9022_9519+ '/v1/' + `finance/charge_detail/add_charges_pms`
-          let url = 'http://192.168.2.204:8000' + '/v1/' + `accounts/add_charge_detail/`
+          let url = 'http://192.168.4.168:8000' + '/v1/' + `accounts/add_charge_detail/`
           console.log('++++',scopeParam)
           that.$axios.post(url,scopeParam).then(res=>{
             console.log('res.data.mess',res.data.message)
@@ -3629,7 +3629,7 @@ export default {
           console.log('查探this.transferAccountId',this.transferAccountId)
           let that = this
           // let url= that.api.api_9022_9519+ '/v1/' + `finance/transfer_accounts_detail/batch_add`
-          let url= 'http://192.168.2.204:8000'+ '/v1/' + `accounts/add_transfer_detail/`
+          let url= 'http://192.168.4.168:8000'+ '/v1/' + `accounts/add_transfer_detail/`
           let scopeParam = {
             desc: null,//描述
             submit_reason_id: null,//转账原因
@@ -3741,15 +3741,15 @@ export default {
           // let url= that.api.api_9022_9519+ '/v1/' + `finance/charge_detail/get_by_account_id_pms`
           if(startTime && endTime){
             if(subject_param){
-              url= 'http://192.168.2.204:8000'+ '/v1/' + `accounts/get_charge_detail_list/?page_size=${that.pagination.pageSize}&page=${that.pagination.pageNumber}&subject__in=${subject_param}&biz_date__gte=${startTime}&biz_date__lt=${endTime}&ordering=-create_datetime`
+              url= 'http://192.168.4.168:8000'+ '/v1/' + `accounts/get_charge_detail_list/?page_size=${that.pagination.pageSize}&page=${that.pagination.pageNumber}&subject__in=${subject_param}&biz_date__gte=${startTime}&biz_date__lt=${endTime}&ordering=-create_datetime`
             }else{
-              url= 'http://192.168.2.204:8000'+ '/v1/' + `accounts/get_charge_detail_list/?page_size=${that.pagination.pageSize}&page=${that.pagination.pageNumber}&biz_date__gte=${startTime}&biz_date__lt=${endTime}&ordering=-create_datetime`
+              url= 'http://192.168.4.168:8000'+ '/v1/' + `accounts/get_charge_detail_list/?page_size=${that.pagination.pageSize}&page=${that.pagination.pageNumber}&biz_date__gte=${startTime}&biz_date__lt=${endTime}&ordering=-create_datetime`
             }
           }else{
             if(subject_param){
-              url= 'http://192.168.2.204:8000'+ '/v1/' + `accounts/get_charge_detail_list/?page_size=${that.pagination.pageSize}&page=${that.pagination.pageNumber}&subject__in=${subject_param}&ordering=-create_datetime`
+              url= 'http://192.168.4.168:8000'+ '/v1/' + `accounts/get_charge_detail_list/?page_size=${that.pagination.pageSize}&page=${that.pagination.pageNumber}&subject__in=${subject_param}&ordering=-create_datetime`
             }else{
-              url= 'http://192.168.2.204:8000'+ '/v1/' + `accounts/get_charge_detail_list/?page_size=${that.pagination.pageSize}&page=${that.pagination.pageNumber}&ordering=-create_datetime`
+              url= 'http://192.168.4.168:8000'+ '/v1/' + `accounts/get_charge_detail_list/?page_size=${that.pagination.pageSize}&page=${that.pagination.pageNumber}&ordering=-create_datetime`
             }
           }
           console.log('this.checkList进入',this.checkList)
@@ -3887,7 +3887,7 @@ export default {
       getArOption(){
         let that = this
         // let url=  that.api.api_9022_9519 + '/v1/' + `finance/ar_account/info_list`
-        let url=  'http://192.168.2.204:8000' + '/v1/' + `accounts/get_ar_account_list/`
+        let url=  'http://192.168.4.168:8000' + '/v1/' + `accounts/get_ar_account_list/`
         that.$axios({
           method : 'get',
           url : url,
@@ -4642,7 +4642,7 @@ export default {
             // }
             // id = 1
             // let url= that.api.api_9022_9519+ '/v1/' + `finance/account/get_info_pms/` + id
-            let url= 'http://192.168.2.204:8000'+ '/v1/' + `accounts/get_account_base_info/` + id + '/'
+            let url= 'http://192.168.4.168:8000'+ '/v1/' + `accounts/get_account_base_info/` + id + '/'
             that.$axios({
               method : 'get',
               url : url,
@@ -5266,7 +5266,7 @@ export default {
             return
           }
           // let url =  that.api.api_9022_9519+ '/v1/' +  'finance/incoming_account_code/info_list'
-          let url =  'http://192.168.2.204:8000' + '/v1/' +  'system/settings/get_code_pay_for_list/?parent_id=' + parent_id + '&page_size=300'
+          let url =  'http://192.168.4.168:8000' + '/v1/' +  'system/settings/get_code_pay_for_list/?parent_id=' + parent_id + '&page_size=300'
           that.$axios.get(url).then(res=>{
               console.log('res.data',res.data.data.results)
               that.incomingAccoutList = res.data.data.results
@@ -5293,7 +5293,7 @@ export default {
         getCashRegister(){
           let that = this
           // let url= that.api.api_9022_9519+ '/v1/' + `finance/cash_register/info_list`
-          let url =  'http://192.168.2.204:8000' + '/v1/' +  'accounts/get_cash_register_list/'
+          let url =  'http://192.168.4.168:8000' + '/v1/' +  'accounts/get_cash_register_list/'
 
           that.$axios({
             method : 'get',
@@ -5325,9 +5325,9 @@ export default {
           // let url= that.api.api_9022_9519+ '/v1/' + `finance/code_pay_for/info_list?page_size=999`
           let url
           if(this.preview_enter_flag === 0){
-            url= 'http://192.168.2.204:8000'+ '/v1/' + `system/settings/get_code_pay_for_list/?code_type=2&page_size=300&parent_id=`
+            url= 'http://192.168.4.168:8000'+ '/v1/' + `system/settings/get_code_pay_for_list/?code_type=2&page_size=300&parent_id=`
           }else{
-            url= 'http://192.168.2.204:8000'+ '/v1/' + `system/settings/get_code_pay_for_list/?code_type=1&page_size=300&parent_id=`
+            url= 'http://192.168.4.168:8000'+ '/v1/' + `system/settings/get_code_pay_for_list/?code_type=1&page_size=300&parent_id=`
           }
           that.$axios({
             method : 'get',

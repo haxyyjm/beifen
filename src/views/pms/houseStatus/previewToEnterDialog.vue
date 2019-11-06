@@ -1047,26 +1047,17 @@ export default {
               },{
               label: '钟点房',
               value: '1'
-            },{
-              label: '夜宵房',
-              value: '2'
-            },{
-              label: '常住房',
-              value: '3'
-            },{
-              label: '免费房',
-              value: '4'
             }
-          //   {
-          //   label: '钟点房',
-          //   value: 1
-          // },{
-          //   label: '自用房',
-          //   value: 2
-          // },{
-          //   label: '免费房',
-          //   value: 3
-          // }
+            // ,{
+            //   label: '夜宵房',
+            //   value: '2'
+            // },{
+            //   label: '常住房',
+            //   value: '3'
+            // },{
+            //   label: '免费房',
+            //   value: '4'
+            // }
           ],
           roomNo_data_list: [],//选房号数组
           building_value: '',
@@ -2701,7 +2692,7 @@ export default {
           room_no: that.room_no_value
         }
         let params = util.deleteNullParam(scopeParams)//删除对象里属性值为空的属性
-        let url = that.api.api_price_9101 + '/v1/' + `room/room_status/get_room_map_list?page_size=1000`
+        let url = that.api.api_price_9101 + '/v1/' + `room/room_status/get_room_map_list/?page_size=1000`
         that.$axios({
           method : 'get',
             url : url,
@@ -3404,7 +3395,7 @@ export default {
             room_no: that.room_no_value
           }
           let params = util.deleteNullParam(scopeParams)//删除对象里属性值为空的属性
-          let url = that.api.api_price_9101 + '/v1/' + `room/room_status/get_room_map_list?page_size=1000`
+          let url = that.api.api_price_9101 + '/v1/' + `room/room_status/get_room_map_list/?page_size=1000`
           that.$axios({
             method : 'get',
               url : url,
@@ -3752,7 +3743,8 @@ export default {
           that.$axios.get(url,{
             params: {
               market: that.preBillParam.reserve_base[0].code_market,
-              src__icontains: that.preBillParam.reserve_base[0].code_src
+              src__icontains: that.preBillParam.reserve_base[0].code_src,
+              is_day_user: 1
             }
           }).then(res=>{
             console.log('res.data.data.results',res.data.data.results,res.data.data)
@@ -3768,7 +3760,7 @@ export default {
           console.log('param-------',param)
           let that = this
           that.marketSrcList = []
-          let url =  that.api.api_code_9103+ '/v1/' + 'system/settings/get_code_base_list'
+          let url =  that.api.api_code_9103+ '/v1/' + 'system/settings/get_code_base_list/'
           let params = {}
           //src 代表市场码
           if(param == 'market'){

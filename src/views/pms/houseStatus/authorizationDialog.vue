@@ -175,7 +175,7 @@
             let that = this
             let id = row.id//缓存中获取
             // let url = this.api.api_9022_9519 + '/v1/' + 'finance/pre_authorized_detail/remove/' + id
-            let url= 'http://192.168.2.204:8000'+ '/v1/' + `accounts/remove_pre_authorized_detail/` + id + '/'
+            let url= 'http://192.168.4.168:8000'+ '/v1/' + `accounts/remove_pre_authorized_detail/` + id + '/'
             that.$axios.post(url).then((res)=>{
                 console.log('res.data撤销',res.data)
                 if(res.data.message =='success'){
@@ -196,7 +196,7 @@
             if(this.authorizationParam.card_type && this.authorizationParam.authorize_num && this.authorizationParam.card_expire && this.authorizationParam.card_num  && this.authorizationParam.authorized_amount){
               let that = this
               // let url = this.api.api_9022_9519 + '/v1/' + 'finance/pre_authorized_detail/add'
-              let url= 'http://192.168.2.204:8000'+ '/v1/' + `accounts/add_pre_authorized_detail/`
+              let url= 'http://192.168.4.168:8000'+ '/v1/' + `accounts/add_pre_authorized_detail/`
               let scopeParam
               console.log('localStorage',localStorage.getItem('mainAccountId'))
               this.authorizationParam.mainAccount_id = localStorage.getItem('mainAccountId')
@@ -254,7 +254,7 @@
           findAuthorizationList(){
             let that = this
             // let url = this.api.api_9022_9519 + '/v1/' + 'finance/pre_authorized_detail/list_by_account_ids'
-            let url= 'http://192.168.2.204:8000'+ '/v1/' + `accounts/get_pre_authorized_detail_list/?page_size=100&page=1`
+            let url= 'http://192.168.4.168:8000'+ '/v1/' + `accounts/get_pre_authorized_detail_list/?page_size=100&page=1`
             that.$axios.get(url).then((res)=>{
                 if(res.data.message =='success'){
                   that.authorizationList = res.data.data.results

@@ -1352,7 +1352,7 @@
           page_size : 300,
         }
         // let url = that.api.api_price_9101 + '/v1/' + `room/room_status/get_room_map_list?page_size=1000`
-        let url =  'http://192.168.2.204:8000' + '/v1/' +  'room/room_status/get_room_map_list?page_size=1000'
+        let url =  'http://192.168.4.168:8000' + '/v1/' +  'room/room_status/get_room_map_list/page_size=1000'
         that.$axios({
            method : 'get',
           url : url,
@@ -1483,7 +1483,7 @@
         }
         let params = util.deleteNullParam(scopeParams)//删除对象里属性值为空的属性
         // let url = that.api.api_price_9101 + '/v1/' + `room/room_status/get_room_map_list?page_size=1000`
-        let url =  'http://192.168.2.204:8000' + '/v1/' +  'room/room_status/get_room_map_list?page_size=1000'
+        let url =  'http://192.168.4.168:8000' + '/v1/' +  'room/room_status/get_room_map_list/?page_size=1000'
         that.$axios({
            method : 'get',
             url : url,
@@ -1769,7 +1769,7 @@
       getEndpayInfoListByAccount(id){
           let that = this
           // let url= that.api.api_9022_9519+ '/v1/' + `finance/account/get_info_pms/` + id
-          let url= 'http://192.168.2.204:8000'+ '/v1/' + `accounts/get_account_base_info/` + id + '/'
+          let url= 'http://192.168.4.168:8000'+ '/v1/' + `accounts/get_account_base_info/` + id + '/'
           console.log('kajhisssssssssssssss',url)
           that.$axios({
             method : 'get',

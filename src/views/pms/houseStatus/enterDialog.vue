@@ -77,7 +77,7 @@
                           </el-option>
                       </el-select>
                     </el-col>
-                      <el-col v-if="preBillParam.master_base[0].master_lable === 1" :span="12">
+                      <!-- <el-col v-if="preBillParam.master_base[0].master_lable === 1" :span="12">
                         <span>钟点房房价码:</span>
                         <el-select clearable style="width: 55%" @focus="getRateCode_hour" @change="getHour_time"  placeholder="房价码"  v-model="rateCode_hour">
                           <el-option
@@ -87,7 +87,7 @@
                             :value="item.check_out_time">
                           </el-option>
                         </el-select>
-                      </el-col>
+                      </el-col> -->
                   </li>
                   <li>
                     <el-col :span="10" v-if="liveoptions_Value.length>1">
@@ -1175,16 +1175,18 @@ export default {
               },{
               label: '钟点房',
               value: 1
-            },{
-              label: '夜宵房',
-              value: 2
-            },{
-              label: '常住房',
-              value: 3
-            },{
-              label: '免费房',
-              value: 4
             }
+            // ,{
+            //   label: '夜宵房',
+            //   value: 2
+            // },{
+            //   label: '常住房',
+            //   value: 3
+            // },{
+            //   label: '免费房',
+            //   value: 4
+            // }
+            //断开
             // ,{
             //   label: '自用房',
             //   value: 2
@@ -1399,8 +1401,11 @@ export default {
         });
       },
       //筛选处理房价码
-      handleRateCode(){
+      handleRateCode(param){
         this.rateCodeValue = this.preBillParam.master_base[0].rate_code
+        if(this.preBillParam.master_base[0].master_lable == 1){
+          this.getHour_time(param) //钟点房处理
+        }
         console.log('preBillParam.master_base[0].rate_code',this.preBillParam.master_base[0].rate_code)
         this.clearMaseterBase()
       },
@@ -1412,11 +1417,22 @@ export default {
         }
         let that = this
         let url = that.api.api_price_9101+ '/v1/' + `room/rate_code/get_rate_code_list/`
-        that.$axios.get(url,{
-          params: {
+        let scopeParam
+        if(this.preBillParam.master_base[0].master_lable != 1){
+          scopeParam = {
             market: that.preBillParam.master_base[0].code_market ,
-            src__icontains: that.preBillParam.master_base[0].code_src
+            src__icontains: that.preBillParam.master_base[0].code_src,
+            is_day_user: 1
           }
+        }else{
+          scopeParam = {
+            market: that.preBillParam.master_base[0].code_market ,
+            src__icontains: that.preBillParam.master_base[0].code_src,
+            is_day_user: 0
+          }
+        }
+        that.$axios.get(url,{
+          params: scopeParam
         }).then(res=>{
           console.log('res.data.data.results',res.data.data.results,res.data.data)
             if(res.data.message == 'success'){
@@ -3757,6 +3773,7 @@ export default {
           console.log('......this.preBillParam.master_base[0].master_lable',this.preBillParam.master_base[0].master_lable)
           // this.getRateCode_price()
           this.rateCode_hour = '' //置空操作
+          this.preBillParam.master_base[0].rate_code = ''
           if(this.preBillParam.master_base[0].master_lable != 1){
           console.log('......this.preBillParam.master_base[0].master_lable2222',this.preBillParam.master_base[0].master_lable)
             this.reSetData('非钟点房')
@@ -3832,8 +3849,9 @@ export default {
         getHour_time(param){
           this.reSetData('钟点房')//重置数据 必须要放在前面
           console.log('param',param)
+          this.rateCode_hour = param
           console.log('this.rateCode_hour2222',this.rateCode_hour)
-          param = param !=null ? param.slice(1,2) : ''
+          param = param !=null ? param.slice(0,1) : ''
           console.log('param',param)
           let time2 = moment().add(param,'hours').format('YYYY-MM-DD HH:mm:ss')
           this.preBillParam.master_base[0].leave_time =[new Date() ,time2]
@@ -3860,11 +3878,16 @@ export default {
           console.log('jinrrr',item,param)
           let that = this
           let url = that.api.api_price_9101+ '/v1/' + `room/rate_code/get_hours_rate_code/`
-          console.log('get_hours_rate_code',that.rateCodeList_hour)
+         if(this.preBillParam.master_base[0].master_lable == 1){
+            this.rateCodeList_hour = this.rateCode_list
+          }
+          console.log('this.rateCode_list',this.rateCode_list)
+          console.log('that.rateCode_hour111111',that.rateCodeList_hour)
+          console.log('that.rateCode_hour222',that.rateCode_hour)
           let rate_code
           let rate_code_value
           try {
-            rate_code = that.rateCodeList_hour.filter(item=> item.check_out_time == that.rateCode_hour)
+            rate_code = that.rateCodeList_hour.filter(item=> item.code == that.rateCode_hour)
             rate_code_value = rate_code[0].code
           } catch (error) {
             console.log('error,没有对应数据匹配')            
@@ -4759,7 +4782,7 @@ export default {
           let that = this
           this.preBillParam.master_base[0].rate_code = ''//置空房价码
           that.marketSrcList = []
-          let url =  that.api.api_code_9103+ '/v1/' + 'system/settings/get_code_base_list'
+          let url =  that.api.api_code_9103+ '/v1/' + 'system/settings/get_code_base_list/'
           let params = {}
           //src 代表市场码
           if(param == 'market'){
