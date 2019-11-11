@@ -845,7 +845,8 @@ export default {
           scan_code: '0',
           remark_roomNo: '',//备注中的房间号
           imageUrl: '',//图片地址
-          uploadUrl: 'https://image.eloadspider.com/resource/employee/head_image/upload',
+          // uploadUrl: 'https://image.eloadspider.com/resource/employee/head_image/upload',
+          uploadUrl: 'https://oss.crowncrystalhotel.com/resource/live/upload',
           isErrorClass: false,
           infoShow: '',
           changeTitle: '',//入住类型变动，不同的title
@@ -2043,76 +2044,27 @@ export default {
       encodeContent(data){  
         return encodeURI(data).replace(/&/g,'%26').replace(/\+/g,'%2B').replace(/\=/g, '%3D').replace(/\s/g,'%20').replace(/#/g,'%23');  
       }, 
-      //获取身份证token==废弃
-      getToken(){
-        let that = this
-        // let url = `http://117.186.167.138:8086/inn-app-rest/rest/appLogin/userLogin?`
-        // + 'identificationNumber=' +  encodeURIComponent(identificationNumber)
-        // + '&interfaceKey=' + encodeURIComponent(interfaceKey)
-        // + '&deviceCode=' + encodeURIComponent(deviceCode)
-        // let url = `http://117.186.167.138:8086/inn-app-rest/rest/appLogin/userLogin?identificationNumber=YtpvUxaoIQW38gjIt4xBAjc7fYf40YK1ORVqSULoxoM%3D&interfaceKey=qazwsxedc&deviceCode=yjzd001`
-        let url=  that.api.api_9022_9519 + '/v1/' + `outside/api/public_security_token_raw`
-        // url = encodeURI(url)
-        this.cardRegisterParam.identificationNumber = this.policeInfoParam.cardNo
-        // let appSimilarityDegreeVo = {
-          //   profilePhoto: crypt.encrypt(that.card_imgUrl),//证件照片（必填）
-        //   photo: crypt.encrypt(that.imageUrl),//现场照片（必填）
-        //   similarityDegree: crypt.encrypt(that.percent),//相似度（必填）
-        //   deviceType: crypt.encrypt("2")//设备类型1表示加密狗、2表示外接设备（必填）
-        // }
-        // let identificationNumber = 'U2FsdGVkX189L7IGkzxhm+yfu3w/c5ipHoWDcILtal6BAbNu3B9hu0OP4BU67pU/'
-        // let interfaceKey = 'nIva7aKEDP2+DEI6asO89mWIQTB9ehk+sy3KJaYkrpY='
-        // let deviceCode = '7bmCtHM/EJ3XcDGkloXVnGwiqE+6ZhHE8ukPY9zKJVs='
-        // let profilePhoto =  'U2FsdGVkX1+sXmTgq3JoPu4AxlI8RYJVZSLyV9PjAQv7JmlUEKhk8cgokCMLK7EjzHh5sQf5jSQ1VOZ4zzU4S60cRfHMpyA5ePPyjwNyaaOGO5IaOfP4wKuyKclFus+t'
-        // let photo= 'U2FsdGVkX19omirExbTvf8+j+xpK1wdy37cROjZdBr/26xUgqo/mR7mvkKIdAn24bJkypb2o6ovkg7kZS3DT3B83EjzU0m49LF8NXESPJMgGmudNwdz664OgFF6cSwbp'//现场照片（必填）
-        // let similarityDegree= 'U2FsdGVkX186QDUuuzNKiUZSNRpp+sbcu1TYOFGQaCA='//相似度（必填）
-        // let deviceType= 'U2FsdGVkX1/gDYFnKZS8abyC7ce1phytTpfI8v7jGxI='
-        // let identificationNumber = crypt.encrypt(that.cardRegisterParam.identificationNumber)
-        // let identificationNumber = crypt.encrypt('513021199401300326')
-        let identificationNumber = 'WjKbl/oI8eIMK3B+b7z1ADI9mpWkoWXSzY9761QQJds='
-        let profilePhoto =  crypt.encrypt(that.card_imgUrl)//身份证照片
-        let photo= crypt.encrypt(that.imageUrl)//现场照片（必填）
-        let interfaceKey = 'nIva7aKEDP2+DEI6asO89mWIQTB9ehk+sy3KJaYkrpY='//接口秘钥
-        let deviceCode = '7bmCtHM/EJ3XcDGkloXVnGwiqE+6ZhHE8ukPY9zKJVs='//设备号
-        console.log('crypt.decrypt(that.imageUrl)',crypt.decrypt(photo))
-        let similarityDegree= crypt.encrypt(that.percent)//相似度（必填）
-        let deviceType= 'Xx0EPrrDjjfH0a03ptmeFw==' //为'2'
-        console.log('deviceType=============开始====================',deviceType)
-        // let deviceType= crypt.encrypt('2') //为'2'
-        console.log('deviceType=================================',deviceType)
-        let scopeParam = {
-          interface_key: interfaceKey,
-          device_code: deviceCode,
-          id_num: identificationNumber,
-          id_code_photo: 'MZUI/VTcSiGiTSSFDgl9Z0lHe44Om5sEJZZ8/zadfvLGG52NUG44VS7Cu97ZizR1xSSYsI0+1Yv2QXN3uO+AtBJYb/HHTcTKMK9LJCQJIqjxzswy/kxPGbbCIaG8JBywNU95dPnijpDPpWRdlKdMUDzpoGmE/6RieuKLoDWw052QoQ2LiNAEs9lnmHlNEectznygAZBw3O8zhQs+n3Dc5hE9opGq2//gmk43Q6wQQaerwsSvZH0omkiMtIQ3zWoDGmwWRTgi+mh8KlbASKrPvZmWfkYD7BK0n9sHUIblzsjpB4PgZwZY3LSJX/D/DmVFLaZNvW43QMDyPP7yx496gGcw/iYmyKgp/ClRT4iYllqAtHS1SUC1AS3uy00meAqaTs1lWxxvG3IZgLflDSTLFmGBbcp9tyOJC1MSodkLM/TRnCftvMRsjZuRNeiHd3vF88XBbdWsG9uXkTYlW1cq1Wd89Bgi1BlEZMgsvs5dEpdsJ0zuQ0bqiDzjWJzcRZ93Bn9lWsrpxZANPs72F5MOz/8jFD2a3CNEOp4c8Xb7vX32p/AINrTCgrir/GSGGZcdIU/RmAa9gevM8vZ9JGVwVW+p7q++2SV5OS3h7XIpDmzxOVjAnLZ06kK6IK+qw9MXabNcaKkvQs2tKyAy9oyDk05JPW/CqZZ+N00XbU/44YPzkDr7kIDPsV3hv0mi3R7cPQXLzvMKU7MCXkD3K6PVuQa1QKCmmC2sjVA8UawaSahD28hfFjM1S2sTTj4Zgg5+D2f2YuZwSyrfKtFvpG9F9HDm6YuxHn/fHCABlobHnQ5vyZsn3LTRcQbDO037lbQnLU0RZx/dOKs/3UKr0LXESBreaIJrx1OVneYNwwZfPAWMCKJk/RtV/2uyHgqbY2nW5jMyXJDHDMpGa84Kw0Morrq9F+oINrLRkLJzUh8wQM7Ow2Hi7uCHsT4c6050i3VGL4JM4emGeDpVCJD3cPj92TfXLvhYNGJO8wjeqCe+H5/XVmIDoICxixiZPXF0aDVug7j3x3RDYkxjukBwAViUSxGXThmChx3T29kUieC7RB/CKsNVvbu/AsogwFFppXAimjsjCxcDgnqk9hWLuFMEyCOjpxik07aPlp0vvz9IcUlRb+IZIF6LysPMuce9tAsZlAU57VNSBX+gIV+RFbEYxGdotY61u4fhCP1K9rGe7J2enN08097HUUs4HWlPPepyWy9JWJpht6zB3OEk445UBlEAByObmorTv7HVHOB4THWWwQfKx5pCAJSfUguLRb/oWQfcpGHXdnW5ZcRt4Sihvj1IhL7oOp/k02oj78bivIQbLPcGtOKT/c/gmMLe3Uddg94FDhla6EupZP2OrDt+FtGrX83oZ6osoDvhsYbmXjWwI0ICj/5DrGXF9EdSMbxLyXVOy/4hcu48xHVWZBV5lqbETcMPN5fRaYFYErfVSaLEcQszgxsOyVL7MmqVLFCN4+p6BecJZlwFFo9gD87CmmViOIasjgKS5Q3uFpUl5K0LHnvwfxnyqgjUIowcga66nrbOP0CXIX7WsFKciouaj1iV2Gl39VTx9KQOHpXhqWNphTXnKMQhSiWyNi9scENTchStRhyFy/VRqARTv95xfvDZd3yEAdldkf+y4CG82kZIThZBTHZe6fur4Zs/kQesqhCOQjMYo8LdPZDHFUdQ6GDTQKHa7rcoh/p6yCOYgBOdYG+/BIneybdBsrLM/bkZn9JwEpaeGsQC3/JegPIJ1j7YbSmd3bsNKq4w6JjvBmFrrVin+8dV/7Uw9pBYntdVP/1srpwGv4KWu+0UeHtuvHAJMjGqoHKbQ9HkA53fXprqgbY6cV8hC+LK/vZBO7Tit3WBj3seJFh6mtz73oKVRyVdt5IOMKIGFeT3c7p6Gx2eu6XQRlI7By0gZNdUGE6OodMNJ0FqKU/oVFKUGMTYnthCJ7QantlcMj6udDb1AoWOf621ykEY4VDGN7N8t/g3fkwBHrgNvS7vEzEFaLwj6o8nrW9y0LbHSMu/nDGCN5GhWhUBtiI+UQGDqOfD73+rhUUUXLUfH7K+MoMZrk6ZJy9cKZy5WJlC7AcI3LTvkIQdOqGmH1sqCPm+YPpsDLg/U6mgEPZLfh3wN7RI7gANFUEDnfBTeaNH8v4LZLt4WlCeOCAULQC1gQpRQ2elggG2emEhYGAHR3OnRD6iCrp3WkaMRJHF4+O1//0Bm+GwG4YcW1RHKMs41JNatF9wDeC2wsyh+H2qz4wzSJI3ftw6gDQiQFMKHw+gi8V3MUeFo0yOzPhkeZOK0OXAd5tged2l0Fjd6g0GALsbpzzb2NSeB1Wc5gvHRqjm/IBtUDuWPfwHBnDxtajyotY/7OwoHsfvWawMmIYg+4wR4XyYyRsqeCRXbILzu0id/4cPzSKI6r8MS+eVH2qeyVuCDsUnGl6m4IiBqUkinLsI9a6YCdHQGJTJhTlrPOGzXOnqIVFMEW4FpbG0nDA9xBYcpcRh/sY+/Z6S+5f3W5o4ubGWJWGX9MQnPDfXKD0FQDfPO8ul6SE82cPH5MZ2MCfqZ/hBgyvAly5VVSBC2i8UylZhnJZy3+qNTQZGZjkHlfxbxzATAuQ6jiiKm4pgAtAAktjCONVppUzGi6IxVjSl8KLRqbghjeA8sUEzECY2vIKxBle8L4y4j9GGTKJJzimkbB2PcFlWbJ3FWEEPJEdtfPAK+mXd2acLEgYGkdfbGfG/Lz0NNC7UftTJTzQmagg6MKQyYn8V02c95JqEOqFwl+m9pYIJ4iyGTrBaVJk1YSR/qXGvNEoIIQkkb845jJSmwmxgX/FXP3tw/3qfb1sK6e7UyiLwjEYi5LHfTVp7P8hrOslfcYAVY/8jxI5+SS7VQJeppagrbYGJnxi5QHACiRAodLEDTh3OH9QUyfaWrDPTEB83eiBD8GKNUxyoo5+7+sDfEint6jE1BQvAYhoS76sYaS2fkr+7ypgomjQA6fcmRLS0cKdIAdtjVwqrZJAWVovR0cyz1N+e67ggA7yh/Nzi6rcD+gEUYsGy0Ly/6psEnApQqR+u+l9j1DCBXuVPTsigMYrBvI+5j9gGkmCDIIaUCZcNRZBIzFKyrnyGl70+bse5o13OvGkFm9HOqvdBSn0hhTwvt1PTZU+xhx/eywFhDc0Aundw8aOYCbbUWYZSg7auEzneZgLSWzQfj1LDH9LmFDEKppb44OApBAHFliNzYZEQFPgeHjUHOrhlt1UX3d600VFAFPFneVFfyOxKdDcU4cVwnVLxdqJNg+xX37b/ZAL7Sys4DihsFwgAIhs2qpx8GwC06/kXH+NQA5xoYH7dUvKFlDMQKmIVgzQIRbSXQ1UKZnWXFUdb1+Aic+GEUGYzau2CtSJkOFGUMNbOe6qUo6hnkHxxVIVvunC4wHOUbenYpNYqkQAaR2bvD14eIKkYz22kff9algq4ixY27OBktD2IwFxabxrDLRJ/ukvjYNS1oxWOqOKrAo8FlPqPl1FBOoWquWFhi1ogHhlinE48SgscM0u2Z4oCvKgcBXekQy9nW2KxkAOm+wmIFlEHBh9eo0aFGIjrWXthwZnfC0SpUZNb32hgqmTAcBn28SJ9w9aPaScthxCmPzI2JBnfe4wGSssyEGbj4amlDL/z4MvDE68cDzA7Q3KaOjt/DwbpT2+X68A0JR84NwXf5ZfwenH6TZ+N0F0w5n2ycuL6Uc8ekO4r6sQab+CtTn239MspP2R/eJy+gqXyQiYabyivaDvHaD+Zxy9hje6l9al56w68u0S0ZZJ4r+yEqJP+XeytDUUNFSguK7yetlby8w4AFMWT59A1XBlkac0Nzlm9ZEGLssxqVv3SotKppf2Kg7KwOX56v9CAhkd6D7OBuKGIYnkzSXsugVCchidP4qKZresFfOT+I3mTsk1+vyq3PxYoFMAtWWlniKxXlzHn8sBr8EKe9Deq+wGlobTToAvPOG/rZSXTWoa1+XD3mdHzoD/ffPPBIldRLY2DNWLSAA8Ba4Zrm0KO+oP6Ky6hEoTt0Wy6NbCfdf1Xczx7Lxvq9lYE5b0CazK8BS4saEHSmUjCUjNWar30akZBOjXsuCJU2FRvux1XJ0b23ffhTC+u37/QBNNrvPwqV/tX066N08T/1M6WnqUJieGh8po7fm0ydOZWtFbRZpKzJKdgGTNgrV22Yw3GzkU4T9dEHAvgnRRAnwagg60Kc74Pz3Muy6UOmvU2qlZr80+hH8gSSrqUkTVNuU6EU2Jhv7JiYw/FsRqD/ExrECbv99S9mcKAGV1/koXDuBu29w+Eli87J4xD48TntUaCAXcbUzKh+YMyS4FMX84IC01BsXA9pr/zQ7HiydNvsefIEspsoN64Rr248M5ZCccd1it2JL5/XfJHg2fcqk1zzA3guVC7JN4gWxSTM+AqCNMl6PP708tm6Ru1p9HXFguHIEMVtlo4VLBhA7E1rrLDsFfh3BPdiMBN7dewhSaTQ2aikqXKSasamMFjmxUTY6kB/ffh5I+5jz8rORD89EMs/DWQH15MjIKiROblNTClcUJ0tye/99zjc6UWWQ/XIEpfpserjOl9iYr92uAkv2o6uZpmCl9KFkziWIRNkSthl40BgEZydRGZRPA8tlL/wyrpUJ4VXxv+q3xOIjiwnlD6aXRM1reCWKKxweu02rk6lgEDsQZ9en75FBSXaKl19LVcanpXYmAMPPzgm8qlelhZ9ZuY5LHd3Yw3QUEoaWPqv+usPtJCgXhIS60K5Hq0/wMymnNz5bUb1UljX4g7GajB54QsXjtovDA58uwIwy5WIPsn69vcGaIsyJL+qCf+nZdIGgbZ6KMhtBEGSsP+DSJd87VkQVwH2QhM1YNMkFukpbEG61djLsTVGoIGp/b8MBHU5sMR6lawplQdTLoxu1HaZrvmeBygYhcL4kc8cuYdsoE1ctgw78kViQyIvrfZJ/QpEG8ysoheKINCM4QkohSLXqoFXCOOkS/XervJ9mcNZvAawVVpFjoEgWF1+Vr0QKl5Srs6fl2cjLskTXpP8C+cZuqDL8EYCLnoFc0lYImfKeac9C+HqD9cdtwgqIIQ8j6/v2HFmFu50Z5JqJ/Dc7FVTOEZ24vnKOZgtz1TkjihhtK0bq25o7zsij39bv3fFPCYFZEso5PlakC27TzgGNsne9Vpjnby4BXrHOm0y8GIfFaUv+6P6NUanMbv7TwmKND8lFPSxXt/nDqMhPjt8X/eXlXNtdhr6OPspxbgdsEA69aNLru8J2tOz6x9K0ESzAQPelD33u5cgYtiXvSrPMoHpyV0dRpSocvgzAy+luLY911D3KJ082jpMAWDAl8ep9DDawkqxOA8x2r2zF9Mh7jQ1OCvvtxKIt4WTZ2l1VKfmQ1zrZKm24SrxLy//lD56F6sV1MR6QGCO2PJthFkHCde1IZVfXNadw8EuVFR6W9xz+FLUdtoZ8dhRUEBDU49wMO8rkEpNcSQ3zEubzRRlYvg5gOkJU9DEhliuJPvgwOn9JBi9+pWhiPeL46sQ4q/SX4oBPsWO1DwQUfZW8s4Wd/KP7j13+Ejos0CYzg4vzOEB01h+48Tm0I3/GjS9B3fpzGEFWG0Mj9hLBhGekn2b/EFKxkAsOqr8/MGgxfg4mQE1pGdm67aoWTO0rUBm119Socw792Z0i3zcGAHrHjGeKcEdKQvWYA1LMgFhJSGonri1OUfVPWUs1oU2ZntMwgOD6I7KwGz1GQAX8wtkbag27VdArUfHrA32P7WSvQwwvzxYmHiviyLK2SWvEjWeACQcOPtk85CDIsn9OmB1DEQwzmKM1iOBc+fnMw/gs8LdiRDoIVQO6EERxAPtF+5oh4YqCTeOPsBnROH8pYNoeuqA+pjlzZ5LjbjTDrYZGge4MQ2BOpIWlACS5jnGUDPjmH6iY9c6EWbvtpNtsIFlbAiCmI2dXDx/lY3t5GiWSbJjzy/8JXLbX+qWK/Y0az7vfRRbFkwC6rFkNdXw1LevvmNNtUgXVslJaG4V6MZYUuZw20APbwnIHANR/vOwO3TN30gEDDMG2KZQmvd9nmbb0Xm3yBx8+GS/HdBdct2hVlg3HkmHJ33Mm01sfOri8DZsa3wv4jHIC+mSl0aYLSXnQ6O9AQ57V0B7m0uEDvcBAHV6JhAOTvaacKGWtyYpGzCboD3r6/hXUb6g4ZGr/RzrdoeG66oHGmlafmsHaHMX9CgZSc5zksGO3rbZiXH2xJGdnLM1QDm1YIW8kRdxtEGy0v1m34ISGid2dqUfBtBYgg1YxjWrqmq1jGfweZP+p58Xt33R4VWKPheFOhmzrdpwxQcOKjIHSgE8jcGkHjTwcj33A8/jR9sQzpgtbqIWXPKEdqALBcf9bwg5a1xoQwXtuf7+q7Cwfd/j7m5e4yW6Y4mS8ktXwkeCNzAXC4BJu9ChzAXNSEzVaxlS5j6ib4f2HwEZqfyEltThUWWleUO+yv7PdG/Q3SuNmvNk+begm8AQiq6yhJCpH6ouS7OyvAypZ1klLxDnZw/vFM4Ts3PbSaJRpW+Gn5I4o5PiIDDeMM8C0+wdjY9CM8w2J4+7XfVHkIWYWa4F82DoEyFr0Oozlj/c8XLITxd9iUjIeNnR1k898GOtUibuw==',
-          now_photo: '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',
-          similar_degree: 'XtylijEucmbdThsL7lv7gg==',//相似度（必填）
-          device_type: deviceType
-        }
-        // scopeParam = JSON.stringify(scopeParam)
-        console.log('socpe......集合',scopeParam)
-        that.$axios.post(url,scopeParam).then(res=>{
-          console.log('token',res.data.data)
-          let token = res.data.data.tokenId
-        })
-      },
       //注册身份证信息上传到公安(境内主入住人的人脸和身份信息到公安接口)
       registerInfo(){
-        console.log('if(policeInfoParam.liveStatus)',this.policeInfoParam.liveStatus)
-        console.log('this.policeInfoParam.birthday.length====',this.policeInfoParam.birthday.length)
+        let urerInfo = JSON.parse(localStorage.getItem('userInfo'))
+        let hotel_id = urerInfo['hotel_id']
         this.policeInfoParam.birthday.length > 9 ? this.policeInfoParam.birthday : this.policeInfoParam.birthday = this.policeInfoParam.birthday.slice(0,4) + '-' + this.policeInfoParam.birthday.slice(4,6) + '-' + this.policeInfoParam.birthday.slice(6,8)
         console.log('this.policeInfoParam.birthday...',this.policeInfoParam.birthday)
         let that = this
         let scopeParam
         let url
         // that.transferData()//转换处理数据
-        let url_enter= that.api.api_9022_9519+ '/v1/' + `outside/api/submit_check_in_master`
-        let url_same = that.api.api_9022_9519+ '/v1/' + `outside/api/submit_check_in_add` //提交同住人url
+        // let url_enter= that.api.api_9022_9519+ '/v1/' + `outside/api/submit_check_in_master`
+        // let url_same = that.api.api_9022_9519+ '/v1/' + `outside/api/submit_check_in_add` //提交同住人url
+        let url_enter = 'http://organ.crowncrystalhotel.com/v1/organization/ht/public_security/submit_check_in_master/'
+        let url_same = 'http://organ.crowncrystalhotel.com/v1/organization/ht/public_security/submit_check_in_add/'
         //入住人
         if(this.policeInfoParam.liveStatus === 0){
           let scopeParam_enter = {
-            card_type: this.policeInfoParam.cardType,//证件类型
-            register_type: 14,//登记类型
+            hotel_id: hotel_id,
+            // register_type: 14,//登记类型
+            device_code: 'ByA29WcYF94SoWTjo533RLeV3JBi9KcIsLdYTdzjnk4=',
+            card_type: this.policeInfoParam.cardType,//证件类型 一般为身份证
             similarity_degree: this.percent === '0' ? this.percent + '%'  : this.percent,
             room_number:  this.policeInfoParam.room_no,
             // room_number:  '1001',
@@ -2434,8 +2386,8 @@ export default {
       cardImport(){
         let that = this
         // that.cardInfoDialog = true //读卡器失败就不打开dialog
-        // let url = `http://127.0.0.1:32727/?startTime=2019-04-18%2009:12:49&endTime=2019-4-19%2012:00:00&type=5&IDC_Factory=HuaShiDianZi_IDC_Card&IDC_ComPort=1001&roomNo=undefined&lockNo=undefined&guestNum=undefined&Lock_EnableLock=True&Lock_Factory=LockSDK_Card&Lock_ComPort=USB&Lock_ReaderType=RF50&Lock_SysCode=&Lock_HotelCode=1703936&Lock_CancelCard=True&Lock_WriteCardNum=10&Lock_ElevatorlsTrue=True&Lock_BeforeHour=0&Lock_AfterHour=0&jsonp=angular.callbacks._0`
-        let url = `http://127.0.0.1:32727/?startTime=2019-04-18%2009:12:49&endTime=2019-4-19%2012:00:00&type=5&IDC_Factory=JingLunDianZi_IDC&IDC_ComPort=1001&roomNo=undefined&lockNo=undefined&guestNum=undefined&Lock_EnableLock=True&Lock_Factory=LockSDK_Card&Lock_ComPort=USB&Lock_ReaderType=RF50&Lock_SysCode=&Lock_HotelCode=1703936&Lock_CancelCard=True&Lock_WriteCardNum=10&Lock_ElevatorlsTrue=True&Lock_BeforeHour=0&Lock_AfterHour=0&jsonp=angular.callbacks._0`
+        let url = `http://127.0.0.1:32727/?startTime=2019-04-18%2009:12:49&endTime=2019-4-19%2012:00:00&type=5&IDC_Factory=HuaShiDianZi_IDC_Card&IDC_ComPort=1001&roomNo=undefined&lockNo=undefined&guestNum=undefined&Lock_EnableLock=True&Lock_Factory=LockSDK_Card&Lock_ComPort=USB&Lock_ReaderType=RF50&Lock_SysCode=&Lock_HotelCode=1703936&Lock_CancelCard=True&Lock_WriteCardNum=10&Lock_ElevatorlsTrue=True&Lock_BeforeHour=0&Lock_AfterHour=0&jsonp=angular.callbacks._0`
+        // let url = `http://127.0.0.1:32727/?startTime=2019-04-18%2009:12:49&endTime=2019-4-19%2012:00:00&type=5&IDC_Factory=JingLunDianZi_IDC&IDC_ComPort=1001&roomNo=undefined&lockNo=undefined&guestNum=undefined&Lock_EnableLock=True&Lock_Factory=LockSDK_Card&Lock_ComPort=USB&Lock_ReaderType=RF50&Lock_SysCode=&Lock_HotelCode=1703936&Lock_CancelCard=True&Lock_WriteCardNum=10&Lock_ElevatorlsTrue=True&Lock_BeforeHour=0&Lock_AfterHour=0&jsonp=angular.callbacks._0`
         url = url.replace('angular.callbacks._0','userHandler') //替换
         // let url = `http://127.0.0.1:32727/?startTime=2019-04-18%2009:12:49&endTime=2019-4-19%2012:00:00&type=5&IDC_Factory=HuaShiDianZi_IDC_Card&IDC_ComPort=1001&roomNo=undefined&lockNo=undefined&guestNum=undefined&Lock_EnableLock=True&Lock_Factory=LockSDK_Card&Lock_ComPort=USB&Lock_ReaderType=RF50&Lock_SysCode=&Lock_HotelCode=1703936&Lock_CancelCard=True&Lock_WriteCardNum=10&Lock_ElevatorlsTrue=True&Lock_BeforeHour=0&Lock_AfterHour=0`
         that.$http.jsonp(url,{
@@ -3453,7 +3405,8 @@ export default {
         truePostEnter(scopeParam){
           let that = this
           // let url= that.api.api_bill_9202 + '/v1/' + `checkin/nobooking_checkin/`
-          let url= that.api.api_newBill_9204 + '/v2/' + `checkin/nobooking_checkin/`
+          let url= 'http://192.168.2.165:9005' + '/v2/' + `checkin/nobooking_checkin/`
+          // let url= that.api.api_newBill_9204 + '/v2/' + `checkin/nobooking_checkin/`
           console.log('scopeParam===true==传入param',scopeParam)
           setTimeout(() => {
             that.$axios.post(url,scopeParam).then(res=>{

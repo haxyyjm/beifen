@@ -37,8 +37,11 @@
           <div>
               <el-table size="mini" @row-click="pingAccount_resolve" height="550px" v-show="noPing" :data="noPingData" :header-cell-style="{background:'#CCCCCCFF', color: '#333333'}" style="width: 100%">
                 <el-table-column type="index" width="90"  label="序号"></el-table-column>
-                <el-table-column prop="room_num" label="房间号"></el-table-column>
-                <el-table-column prop="guest_names" label="姓名"></el-table-column>
+                <el-table-column prop="room_number" label="房间号"></el-table-column>
+                <el-table-column prop="room_type" label="房型"></el-table-column>
+                <el-table-column prop="lock_number" label="锁号"></el-table-column>
+                <el-table-column prop="code_src" label="来源码"></el-table-column>
+                <el-table-column prop="code_market" label="市场码"></el-table-column>
                 <el-table-column prop="arr_time" label="到达时间"></el-table-column>
                 <el-table-column prop="leave_time" label="离店时间"></el-table-column>
               </el-table>
@@ -92,6 +95,26 @@
                 <el-table-column prop="leave_time" label="离开时间"></el-table-column>
               </el-table>
               <el-table size="mini" height="550px" v-show="noArrive" :data="noArriveData" :header-cell-style="{background:'#CCCCCCFF', color: '#333333'}" style="width: 100%">
+                <el-table-column type="index" width="90"  label="序号"></el-table-column>
+                <el-table-column prop="rsv_person_name" label="预定人"></el-table-column>
+                <el-table-column prop="rate_code" label="房价码"></el-table-column>
+                <el-table-column prop="mobile_master" label="电话"></el-table-column>
+                <el-table-column prop="code_market" label="市场码"></el-table-column>
+                <el-table-column prop="code_src" label="来源码"></el-table-column>
+                <el-table-column  label="房间">
+                  <template slot-scope="scope">
+                    <span v-for="(item,index) of scope.row.reserve_guest_list" :key="index">
+                      {{item.room_number}}、
+                    </span>
+                  </template>
+                </el-table-column>
+                <el-table-column prop="order_no" label="单号"></el-table-column>
+                <el-table-column prop="telephone_master" label="电话"></el-table-column>
+                <el-table-column prop="arr_time" label="到达时间"></el-table-column>
+                <el-table-column prop="leave_time" label="离开时间"></el-table-column>
+              </el-table>
+              <!-- //异常检查 -->
+              <el-table size="mini" height="550px" v-show="errorCheck" :data="errorCheckData" :header-cell-style="{background:'#CCCCCCFF', color: '#333333'}" style="width: 100%">
                 <el-table-column type="index" width="90"  label="序号"></el-table-column>
                 <el-table-column prop="rsv_person_name" label="预定人"></el-table-column>
                 <el-table-column label="入住人">
@@ -448,6 +471,7 @@ import _ from 'lodash'
         noPing: false,
         qingAccount: false,
         noArrive: false,
+        errorCheck: false,
         hourLeave: false,
         srcLack: false,
         noPay: false,
@@ -469,6 +493,7 @@ import _ from 'lodash'
         srcData: [],
         hourLeaveData:[],
         noArriveData: [],
+        errorCheckData: [],
         title: '',
         UrLHeader_9519:'http://47.98.113.173:9519/v1/',
         // UrLHeader_9519:'http://47.98.113.173:9022/v1/',//9022
@@ -631,6 +656,7 @@ import _ from 'lodash'
       this.getNight_noPing(row)
       this.noPing = true
       this.qingAccount = false
+      this.errorCheck = false
       this.noArrive = false
       this.hourLeave = false
       this.srcLack = false
@@ -1417,6 +1443,7 @@ import _ from 'lodash'
         switch (row.nightItem) {
           case '退房未平帐的主帐信息':
             this.getNight_noPing(row)
+            this.errorCheck = false
             this.noPing = true
             this.qingAccount = false
             this.noArrive = false
@@ -1436,6 +1463,7 @@ import _ from 'lodash'
             this.qingAccount = true
             this.noPing = false
             this.noArrive = false
+            this.errorCheck = false
             this.hourLeave = false
             this.srcLack = false
             this.noAddress = false
@@ -1453,6 +1481,7 @@ import _ from 'lodash'
             this.srcLack = false
             this.noPing = false
             this.noArrive = false
+            this.errorCheck = false
             this.noAddress = false
             this.noPay = false
             this.cancleOrder = false
@@ -1463,7 +1492,24 @@ import _ from 'lodash'
           break;
           case '应到未到客人列表':
             this.getNight_noArrive(row)
+            this.errorCheck = false
             this.noArrive = true
+            this.hourLeave = false
+            this.srcLack = false
+            this.noPing = false
+            this.qingAccount = false
+            this.noAddress = false
+            this.noPay = false
+            this.cancleOrder = false
+            this.authorizeExpire = false
+            this.cardRepeat = false
+            this.enterPreview = false
+            this.repairLock = false
+            break;
+          case '异常检查':
+            this.getNight_errorCheck(row)
+            this.errorCheck = true
+            this.noArrive = false
             this.hourLeave = false
             this.srcLack = false
             this.noPing = false
@@ -1478,6 +1524,7 @@ import _ from 'lodash'
             break;
           case '当日新增无地址宾客档案列表':
             this.getNight_noAddress(row)
+            this.errorCheck = false
             this.noAddress = true
             this.noPay = false
             this.noArrive = false
@@ -1493,6 +1540,7 @@ import _ from 'lodash'
           break;
           case '应到未到有效账务宾客列表':
             this.getNight_noPay(row)
+            this.errorCheck = false
             this.noPay = true
             this.noAddress = false
             this.noArrive = false
@@ -1510,6 +1558,7 @@ import _ from 'lodash'
             this.getNight_authorize(row)
             this.noPay = false
             this.noAddress = false
+            this.errorCheck = false
             this.noArrive = false
             this.hourLeave = false
             this.srcLack = false
@@ -1525,6 +1574,7 @@ import _ from 'lodash'
             this.getNight_cancleOrder(row)
             this.noPay = false
             this.noAddress = false
+            this.errorCheck = false
             this.noArrive = false
             this.hourLeave = false
             this.srcLack = false
@@ -1539,6 +1589,7 @@ import _ from 'lodash'
           case '证件号码重复登记主单':
             this.getNight_cardRepeat(row)
             this.noPay = false
+            this.errorCheck = false
             this.noAddress = false
             this.noArrive = false
             this.hourLeave = false
@@ -1556,6 +1607,7 @@ import _ from 'lodash'
             this.hourLeave = true
             this.noAddress = false
             this.noPay = false
+            this.errorCheck = false
             this.noArrive = false
             this.srcLack = false
             this.noPing = false
@@ -1568,6 +1620,7 @@ import _ from 'lodash'
           break;
           case '房租预审及入账':
             this.getNight_enterPreview(row)
+            this.errorCheck = false
             this.noPay = false
             this.noAddress = false
             this.noArrive = false
@@ -1703,20 +1756,43 @@ import _ from 'lodash'
       getNight_noPing(row){
         // row.number= 1
         let that = this
-        let url = that.api.api_9022_9519+ '/v1/' + `report/account/check_out_but_no_closed`
-        that.$axios.post(url).then(res=>{
+        let url = that.api.api_newPrice_9114+ '/v1/' + `report/check_out_but_no_closed/`
+        that.$axios.get(url).then(res=>{
           try {
-            row.number = res.data.data.length
+            row.number = res.data.data.data.length
             row.src = row.number == 0 ? '通过' : '异常'
             console.log('row.srcrow.src',row.src)
             if(row.src === '异常'){
               this.$message.warning('存在异常数据!')
             }
-            that.noPingData = res.data.data
+            that.noPingData = res.data.data.data
             console.log('that.noPingData',that.noPingData)
           } catch (error) {
             console.log('error')            
           }
+        })
+      },
+      //异常检查
+      getNight_errorCheck(){
+        let that = this;
+        let url = that.api.api_newPrice_9114+ '/v1/' + `report/get_abnormal_master_base/`
+        that.$axios({
+          method: 'get',
+          url: url,
+        }).then((res) => {
+            try {
+            row.number = res.data.data.data.length
+            row.src = row.number == 0 ? '通过' : '异常'
+            if(row.src === '异常'){
+              this.$message.warning('存在异常数据!')
+            }
+            that.errorCheckData = res.data.data.data
+            // localStorage.setItem('qingAccount',row.number)
+          } catch (error) {
+            console.log('error')
+          }
+        }).catch((err) => {
+          console.error(err);
         })
       },
       // 应离未离钟点房列表
@@ -1744,35 +1820,20 @@ import _ from 'lodash'
       },
       //应离未离宾客列表
       getNight_qingAccount(row){
-        // // row.number= 1
-        // let that = this
-        // let url = that.api.api_9022_9519+ '/v1/' + `report/account/need_close_before_night_check`
-        // that.$axios.post(url).then(res=>{
-        //   try {
-        //     row.number = res.data.data.length
-        //     row.src = row.number == 0 ? '通过' : '异常'
-        //     if(row.src === '异常'){
-        //       this.$message.warning('存在异常数据!')
-        //     }
-        //     that.qingAccountData = res.data.data
-        //     // localStorage.setItem('qingAccount',row.number)
-        //   } catch (error) {
-        //     console.log('error')
-        //   }
-        // })
         let that = this;
-        let url = that.api.api_bill_9202 + '/v1/checkin/get_leave_night_list/?page_size=300';
+        // let url = that.api.api_bill_9202 + '/v1/checkin/get_leave_night_list/?page_size=300';
+        let url = that.api.api_newPrice_9114+ '/v1/' + `report/should_leave_without_leave/`
         that.$axios({
-          method: 'post',
+          method: 'get',
           url: url,
         }).then((res) => {
             try {
-            row.number = res.data.data.results.length
+            row.number = res.data.data.data.length
             row.src = row.number == 0 ? '通过' : '异常'
             if(row.src === '异常'){
               this.$message.warning('存在异常数据!')
             }
-            that.qingAccountData = res.data.data.results
+            that.qingAccountData = res.data.data.data
             // localStorage.setItem('qingAccount',row.number)
           } catch (error) {
             console.log('error')
@@ -1805,29 +1866,20 @@ import _ from 'lodash'
       },
       //应到未到客人列表
       getNight_noArrive(row){
-        // row.number= 1
-        // let url = that.api.api_9022_9519+ '/v1/' + `report/account/no_whole_reached`
-        // that.$axios.post(url).then(res=>{
-          //   row.number = res.data.data.length
-        //   row.src = row.number == 0 ? '通过' : '异常'
-        //   if(row.src === '异常'){
-          //     this.$message.warning('存在异常数据!')
-        //   }
-        //   that.noArriveData = res.data.data
-        // })
         let that = this
-        let url = that.api.api_bill_9202 + '/v1/booking/get_not_arrive_night_list/?page_size=300';
+        // let url = that.api.api_bill_9202 + '/v1/booking/get_not_arrive_night_list/?page_size=300';
+        let url = that.api.api_newPrice_9114+ '/v1/' + `report/should_check_in_without_check_in/`
         that.$axios({
-          method: 'post',
+          method: 'get',
           url: url,
         }).then((res) => {
           try {
-            row.number = res.data.data.results.length
+            row.number = res.data.data.data.length
             row.src = row.number == 0 ? '通过' : '异常'
             if(row.src === '异常'){
               this.$message.warning('存在异常数据!')
             }
-            that.noArriveData = res.data.data.results
+            that.noArriveData = res.data.data.data
             // localStorage.setItem('qingAccount',row.number)
           } catch (error) {
             console.log('error')

@@ -1705,6 +1705,7 @@ export default {
         },
         postPreview : _.debounce(function () {
           let that = this
+          // let url= 'http://192.168.2.165:9005' + '/v2/' + `booking/add_reserve/`
           let url = that.api.api_newBill_9204 + `/v2/booking/add_reserve/`
           // let url= that.api.api_bill_9202 + '/v1/' + `booking/add_reserve/`
           // let url= 'http://172.168.3.206:9005' + '/v1/' + `booking/add_reserve/`

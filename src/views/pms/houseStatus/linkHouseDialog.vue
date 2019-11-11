@@ -4,7 +4,7 @@
       @close="$emit('update:show', false);refundHouse = true;"
       :show="show">
       <el-row style="background-color: #fff; height: 450px">
-        <el-col :span="7" style="background-color: #FFF; height: 100%">
+        <el-col :span="5" style="background-color: #FFF; height: 100%">
             <el-row >
             <div style="margin-top: 10px;margin-bottom: 10px">
               <!-- <el-checkbox style="margin-left: 15px; float: left; height: 50px;" :indeterminate="isIndeterminate" v-model="checkAll" @change="handleCheckAllChange">
@@ -42,7 +42,7 @@
               </ul>
           </el-row>
         </el-col>
-        <el-col :span="16">
+        <el-col :span="18">
           <el-tabs  v-model="activeName" @tab-click='tabClick' type="card" style="margin-left: 20px; width: 100%;">
             <el-tab-pane :label="tabValue" name="1">
               <div>
@@ -150,7 +150,7 @@
                 <el-table-column prop="charge_amount" label="消费总数"></el-table-column>
                 <el-table-column prop="can_arrange" label="剩余金额"></el-table-column>
                 <!-- <el-table-column prop="pay_amount" label="付款"></el-table-column> -->
-                <!-- <el-table-column prop="number" label="房号"></el-table-column> -->
+                <el-table-column prop="desc" label="备注"></el-table-column>
                 <el-table-column prop="create_time" label="时间"></el-table-column>
                 <el-table-column label="状态">
                   <template slot-scope="scope">
@@ -319,11 +319,11 @@
         <div style="float: left">
           <el-button :disabled="banDisable()" type="info" size="small" @click="linkRoomDialog = true; getLinkRoomData()" style="background-color: #FDB754;border-color: #FDB754">编辑联房</el-button>
           <!-- <el-button type="info" size="small" style="background-color: #CCCCCC; border-color: #CCCCCC; ">欠离</el-button> -->
-          <el-button :disabled="banDisable()" type="danger" size="small" :loading="!refundHouse"  @click="selectPerson();">
+          <!-- <el-button :disabled="banDisable()" type="danger" size="small" :loading="!refundHouse"  @click="selectPerson();">
             <span v-if="refundHouse == true">退房</span>
             <span v-else>查房</span>
-          </el-button>
-          <!-- <el-button type="danger" @click="pingAccount('退房')" size="small">退房</el-button> -->
+          </el-button> -->
+          <el-button type="danger" @click="pingAccount()" size="small">退房</el-button>
         </div>
         <!-- <el-button type="info" size="small">日志[1]</el-button> -->
         <el-button type="info" :disabled="banDisable()" @click="billDialog = true;billParam.invoice_type = 0" size="small">发票</el-button>
@@ -560,49 +560,39 @@
               最大可退款额度为<span style="color: red">{{maxRefundMoney}}</span>
             </el-form-item>
             <el-form-item>
-              <span style="margin-right: 20px">收银点:</span>
-                <el-select size="mini" clearable   @focus="getCashRegister" v-model="previewEnterBill.cashValue"  placeholder="请选择">
-                  <el-option
-                    v-for="item in cashRegisterList"
-                    :key="item.id"
-                    :label="item.desc"
-                    :value="item.id">
-                  </el-option>
-                </el-select>
+              <span style="margin-right: 22px">收银点:</span>
+              <el-select size="mini" clearable  style="width: 14vw"  @focus="getCashRegister" v-model="previewEnterBill.cashValue"  placeholder="请选择">
+                <el-option
+                  v-for="item in cashRegisterList"
+                  :key="item.id"
+                  :label="item.desc"
+                  :value="item.id">
+                </el-option>
+              </el-select>
             </el-form-item>
             <el-form-item label="退款方式:">
-              <!--付款方式-->
-              <!-- <el-select size="mini" disabled  @focus="get_list_by_hotel" v-model="previewEnterBill.payMode.substr(0,this.previewEnterBill.payMode.indexOf("-"))"   placeholder="请选择">
+              <el-select clearable @change="previewEnterBill.enterAccountCode=''" size="mini" style="width: 14vw; margin-top: 10px"  @focus="getPayReason()" placeholder="退款原因"  v-model="previewEnterBill.payReasonValue">
                 <el-option
-                  v-for="item in payModelist_other"
+                  v-for="item in this.payInfoList"
                   :key="item.id"
-                  :label="item.model_name"
+                  :label="item.desc"
                   :value="item.id">
                 </el-option>
-              </el-select> -->
-              {{refundParam.payMode.substr(0,refundParam.payMode.indexOf("-"))}}
-            </el-form-item>
-            <el-form-item label="退款原因:">
-                <!-- <el-select size="mini" disabled  @focus="getPayReason()" placeholder="付款原因"  v-model="previewEnterBill.payReasonValue">
-                  <el-option
-                    v-for="item in this.payInfoList"
-                    :key="item.code"
-                    :label="item.name"
-                    :value="item.id">
-                  </el-option>
-                </el-select> -->
-              {{refundParam.payReasonValue.substr(0,refundParam.payReasonValue.indexOf("-"))}}
+              </el-select>
             </el-form-item>
             <el-form-item label="入账代码:">
-              <!-- <el-select size="mini" disabled  @focus="getIncomingAccount('refund')" v-model="previewEnterBill.enterAccountCode"  placeholder="请选择">
-                <el-option
-                  v-for="item in incomingAccoutList"
-                  :key="item.id"
-                  :label="item.name"
-                  :value="item.id">
-                </el-option>
-              </el-select>  -->
-              {{refundParam.enterAccountCode.substr(0,refundParam.enterAccountCode.indexOf("-"))}}
+              <el-select clearable @change="showExpand"  @focus="getIncomingAccount()"  v-model="previewEnterBill.enterAccountCode" size="mini" style="width: 14vw; margin-top: 10px;"  placeholder="请选择">
+                    <el-option
+                      v-for="item in incomingAccoutList"
+                      :key="item.id"
+                      :label="item.desc"
+                      :value="item.id">
+                    </el-option>
+                  </el-select>
+            </el-form-item>
+            <el-form-item>
+               <span style="margin-right: 24px">备注:</span>
+              <el-input type="textarea" v-model.trim="previewEnterBill.remark" size="mini" :rows="2" style="width: 20vw; margin-top: 10px;margin-left:10px"></el-input>
             </el-form-item>
             <!-- <el-form-item label="备注:">
               <el-input type="textarea" :rows="4" style="width: 85%"></el-input>
@@ -792,13 +782,17 @@
             </el-form-item>
             <!--附加信息==>需要判断储值卡,银行卡,积分兑换-->
             <div style="margin-top: 30px; margin-bottom: 20px">
-              <span style="color: #4488E9;">附加信息</span>
+              <span style="color: #4488E9;margin-top: 10px;margin-left: -20vw">附加信息</span>
               <ul v-for="(item,index) of extraInformation" :key="index">
-                <li v-if="item.field_type != 'datetime'">
-                  <span style="margin-left: 28px">{{item.field_name_cn}}:</span>
-                  <el-input size="mini" v-model="item.field_name_value" style="width: 20vw; margin-top: 10px"></el-input>
+                <li v-if="item.is_show != 0">
+                  <span style="margin-left: 28px">{{item.fields_describe}}:</span>
+                  <el-input size="mini" v-model="item.acquiescence" style="width: 20vw; margin-top: 10px;margin-left:10px"></el-input>
                 </li>
               </ul>
+              <!-- <li>
+                <span style="color: #4488E9;margin-top: 10px;margin-left: -20vw">附加信息</span>
+              </li>
+                -->
             </div>
             <!-- <el-form-item label="封账:">
               <el-switch active-text="是" inactive-text="否"  v-model="switchValue"></el-switch>
@@ -810,8 +804,8 @@
         </div>
         <el-row style="height: 40px"></el-row>
         <div slot="footer" class="dialog-footer">
-          <el-button v-if="(previewEnterBill.payMode == 1 || previewEnterBill.payMode == 38) && moneydesc.balance <= 0" type="primary" @click="article_number();pay_amount_money_code = ''">结算</el-button>
-          <el-button v-if="(previewEnterBill.payMode != 1 && previewEnterBill.payMode != 38) && moneydesc.balance <= 0" @click="handlePayCharge();"  type="primary">结账</el-button>
+          <!-- <el-button v-if="(previewEnterBill.payMode == 1 || previewEnterBill.payMode == 38) && moneydesc.balance <= 0" type="primary" @click="article_number();pay_amount_money_code = ''">结算</el-button> -->
+          <el-button v-if="moneydesc.balance <= 0" @click="handlePayCharge()"  type="primary">结账(收钱)</el-button>
           <el-button type="primary" v-if="moneydesc.balance > 0" @click="jie_addChargeDetail">结账(退款)</el-button>
                 <!-- <el-button type="primary" v-if="(previewEnterBill.payMode != 1 && previewEnterBill.payMode != 38) &&moneydesc.balance > 0" @click="jie_addChargeDetail">结账(退款)</el-button>
           <el-button type="primary" v-if="(previewEnterBill.payMode == 1 || previewEnterBill.payMode == 38) && moneydesc.balance > 0" @click="refundByWxWay">退款</el-button> -->
@@ -1058,6 +1052,9 @@
                 </li>
                 <li>
                   <span style="margin-left: 28px">金额:</span><el-input type="text" v-model.trim="previewEnterBill.money" size="mini" style="width: 20vw; margin-top: 10px;margin-left:10px"></el-input>
+                </li>
+                 <li>
+                  <span style="margin-left: 28px">备注:</span><el-input type="textarea" v-model.trim="previewEnterBill.remark" size="mini" :rows="2" style="width: 20vw; margin-top: 10px;margin-left:10px"></el-input>
                 </li>
                 <!--附加信息==>需要判断储值卡,银行卡,积分兑换-->
                 <div style="margin-top: 30px">
@@ -1502,7 +1499,6 @@ export default {
           disableLength: 0,
           //退款的对象
           refundParam:{
-            payMode: '',
             payReasonValue: '',
             enterAccountCode: '',
           },
@@ -2053,7 +2049,7 @@ export default {
         setTimeout(() => {
           this.getEndpayInfoListByAccount() //查看主账
         }, 200);
-        this.getRoomInfoOther()//查询是否在查房，避免再次新建查房任务
+        // this.getRoomInfoOther()//查询是否在查房，避免再次新建查房任务 去掉了
         this.getMarketSrc('src')
         this.getMarketSrc('market')
         // this.getRateCode_price(this.preBillLinkParam)  //以后必须要的获取最新房价码
@@ -2311,7 +2307,7 @@ export default {
       findAuthorizationList(){
         let that = this
         // let url = this.api.api_9022_9519 + '/v1/' + 'finance/pre_authorized_detail/list_by_account_ids'
-        let url= 'http://192.168.4.168:8000'+ '/v1/' + `accounts/get_pre_authorized_detail_list/?page_size=100&page=1`
+        let url= that.api.api_newPrice_9114+ '/v1/' + `accounts/get_pre_authorized_detail_list/?page_size=100&page=1`
         that.$axios.get(url).then((res)=>{
             console.log('res.data',res.data,this.authorizationList)
             if(res.data.message =='success'){
@@ -2341,7 +2337,7 @@ export default {
         let that = this
         let id = row.id
         // let url = this.api.api_9022_9519 + '/v1/' + 'finance/pre_authorized_detail/remove/' + id
-        let url= 'http://192.168.4.168:8000'+ '/v1/' + `accounts/remove_pre_authorized_detail/` + id + '/'
+        let url= that.api.api_newPrice_9114+ '/v1/' + `accounts/remove_pre_authorized_detail/` + id + '/'
         that.$axios.post(url).then((res)=>{
             console.log('res.data撤销',res.data)
             if(res.data.message =='success'){
@@ -2417,6 +2413,7 @@ export default {
       },
       //结账==>合并计算结账
       calculateAccount(){
+        let that = this
         this.changePageCoreRecordData()//分页记忆勾选
         //有勾选项则存在
         this.pay_sum = 0
@@ -2451,12 +2448,14 @@ export default {
             }).then(() => {
               console.log('jinru')
               try {
+                console.log('jinru2')
                 // let url = this.api.api_9022_9519+ '/v1/' + `finance/account/calculate_pms`
-                let url = 'http://192.168.4.168:8000' + '/v1/' + 'accounts/add_calculate_record/'
+                let url = that.api.api_newPrice_9114 + '/v1/' + 'accounts/add_calculate_record/'
                 this.$axios.post(url,scopeParam).then(res=>{
+                  console.log('jinru2===>')
                   this.clearTable()
                   this.queryData()//刷新得到列表账务最新数据
-                  console.log('resx',res.data)
+                  console.log('jinru3',res.data)
                   if(res.data.message == 'success'){
                     this.$message.success('部分结账成功！')
                   }else{
@@ -2464,8 +2463,8 @@ export default {
                   }
                 })
               } catch (error) {
+                console.log(error)
                 this.$message.error('部分结账错误!')
-                console.log('error')
               }
             }).catch(() => {
               this.clearTable()
@@ -2550,11 +2549,9 @@ export default {
       },
       flushRefundData(){
         this.refundMoneyValue = '',
-        this.refundParam.enterAccountCode = ''
-        this.refundParam.payMode = ''
-        this.refundParam.payReasonValue = ''
         this.previewEnterBill.cashValue = ''
-        this.previewEnterBill.remark = ''
+        this.previewEnterBill.payReasonValue = '',
+        this.previewEnterBill.enterAccountCode = ''
       },
       //联房=》新增备注
         addAndUpdateRemarkInfo(){
@@ -2581,27 +2578,32 @@ export default {
         },
       //针对支付明细的==>开始退款时的处理
       handleRefund(row){
+        let that = this
+        this.preview_enter_flag = 0
         console.log('row',row)
         this.flushRefundData()
         this.refundRow = row
-        if(-row.account_id.balance <= 0){
+        console.log('that.moneydesc.balance',that.moneydesc.balance)
+        if(that.moneydesc.balance <= 0){
           this.$message.warning('余额为负或者0，不能进行退款!')
         }else{
           this.refunAccountDialog = true;
-          this.refundParam.payMode = row.related_pay_id.pay_mode_id.model_name + '-' + row.related_pay_id.pay_mode_id.id
-          this.refundParam.payReasonValue = row.related_pay_id.code_pay_for_id.name + '-' + row.related_pay_id.code_pay_for_id.id
-          this.refundParam.enterAccountCode = row.code_income_type_id.name + '-' + row.code_income_type_id.id
-          this.refundParam.charge_id = row.id
-          console.log('this.refundParam.payMode',this.refundParam.payMode.substr(0,this.refundParam.payMode.indexOf("-")))
-          console.log('this.refundParam.payMode',this.refundParam.payMode)
-          console.log('this.refundParam.payMode',this.refundParam.payMode.substr(this.refundParam.payMode.indexOf("-")+1,this.refundParam.payMode.length))
+          // this.refundParam.payReasonValue = this.previewEnterBill.payReasonValue
+          // this.refundParam.enterAccountCode = this.previewEnterBill.enterAccountCode //转换
+          // this.refundParam.payMode = row.related_pay_id.pay_mode_id.model_name + '-' + row.related_pay_id.pay_mode_id.id
+          // this.refundParam.payReasonValue = row.related_pay_id.code_pay_for_id.name + '-' + row.related_pay_id.code_pay_for_id.id
+          // this.refundParam.enterAccountCode = row.code_income_type_id.name + '-' + row.code_income_type_id.id
+          // this.refundParam.charge_id = row.id
+          // console.log('this.refundParam.payMode',this.refundParam.payMode.substr(0,this.refundParam.payMode.indexOf("-")))
+          // console.log('this.refundParam.payMode',this.refundParam.payMode)
+          // console.log('this.refundParam.payMode',this.refundParam.payMode.substr(this.refundParam.payMode.indexOf("-")+1,this.refundParam.payMode.length))
           // if(row.related_pay_id.pay_amount <= row.account_id.balance){
           //   this.maxRefundMoney = row.related_pay_id.pay_amount
           // }else{
           //   this.maxRefundMoney = row.account_id.balance
           // }
-        this.maxRefundMoney = row.related_pay_id.pay_amount - row.related_pay_id.real_pay //退款金额 要计算相减
-        this.refundMoneyValue = this.maxRefundMoney //赋值默认
+        this.maxRefundMoney = row.can_arrange //最大可退款金额
+        this.refundMoneyValue = row.can_arrange //赋值默认
         }
       },
       //针对支付明细进行退款(包括第三方)
@@ -2617,51 +2619,7 @@ export default {
             // if(!this.validatePayData()){
             //   return false
             // }
-            console.log('判断通过!')
-            //不是现金支付方式==>第三方支付
-            if(row.related_pay_id.original_pay_id){
-              //当为维信退款时
-              if(row.related_pay_id.pay_mode_id.code === 'wx_pay' || row.related_pay_id.pay_mode_id.code === 'weixin'){
-                console.log('微信支付开始')
-                that.$axios({
-                url: that.api.api_9022_9519+ '/v1/' + 'finance/extend_pay/get_order_number',
-                method: "post",
-                data:{
-                  amount:that.refundMoneyValue,
-                },
-              }).then(res=>{
-                  if (res.data.message === "success"){
-                    console.log(res.data._id,'随机单号<=====');
-                    that.order_form = res.data._id;
-                    that.refundByWxWay(row) //第一步开始
-                  }
-                })
-                .catch(error=>{
-                  console.log(error);
-                });
-              }else if(row.related_pay_id.pay_mode_id.code === 'ali_pay' || row.related_pay_id.pay_mode_id.code === "alipay"){
-                console.log('支付宝支付开始')
-                that.$axios({
-                url: that.api.api_9022_9519+ '/v1/' + 'finance/extend_pay/get_order_number',
-                method: "post",
-                data:{
-                  amount:that.refundMoneyValue,
-                },
-              }).then(res=>{
-                  if (res.data.message === "success"){
-                    console.log(res.data._id,'支付宝随机单号<=====');
-                    that.order_form = res.data._id;
-                    that.refundByAliWay(row) //第一步开始
-                  }
-                })
-                .catch(error=>{
-                  console.log(error);
-                });
-              }
-            }else{
-              console.log('现金方式')
-              that.refund_pointByAccont('现金')
-            }
+            that.refund_pointByAccont(row)
           }else{
             that.$message.warning('退款金额为必填项!')
           }
@@ -2727,25 +2685,24 @@ export default {
         }).catch(error=>{
         })
       },
-      //封装==>针对账务上的现金与非现金的退款====>字符串组装有风险
+      //封装==>针对账务上的现金与非现金的退款====>
       refund_pointByAccont(param){
+        let that = this
         // this.previewEnterBill.payMode.substr(this.previewEnterBill.payMode.indexOf("-")+1,this.previewEnterBill.payMode.length)
         console.log('param=====param',param)
+        console.log('this.previewEnterBill.payReasonValue',this.previewEnterBill.payReasonValue)
+        console.log('other',this.previewEnterBill.enterAccountCode)
         let scopeParam = {
-          pay_amount: this.refundMoneyValue,
-          cashier_id: null,
-          original_pay_id: param != '现金' ? param.related_pay_id.original_pay_id : null,
-          charge_id: this.refundParam.charge_id,
-          // account_id: this.preBillLinkParam.account_id,//主账户id
-          // code_income_type_id: this.refundParam.enterAccountCode.substr(this.refundParam.enterAccountCode.indexOf("-")+1,this.refundParam.enterAccountCode.length),   //入账类型代码id
-          // pay_mode_id: this.refundParam.payMode.substr(this.refundParam.payMode.indexOf("-")+1,this.refundParam.payMode.length),
-          // code_pay_for_id: this.refundParam.payReasonValue.substr(this.refundParam.payReasonValue.indexOf("-")+1,this.refundParam.payReasonValue.length),
-          // gen_time: moment(new Date()).format('YYYY-MM-DD HH:mm:ss'),    // 业务发生的实际时间
+          pay_amount: Number(this.refundMoneyValue),
+          desc: this.previewEnterBill.remark,
+          account: param.account,
+          cashier: this.previewEnterBill.cashValue,
+          incoming_account_reason: this.previewEnterBill.payReasonValue,
+          incoming_account_code: this.previewEnterBill.enterAccountCode,
+          charge_detail: param.id,//消费单id
         }
         console.log('scope==tuikuan',scopeParam)
-        scopeParam.charges = JSON.stringify(scopeParam.charges)
-        let that = this
-        let url= that.api.api_9022_9519+ '/v1/' + `finance/pay_detail/refund_pms`
+        let url= that.api.api_newPrice_9114+ '/v1/' + `accounts/refund/`
         that.$axios.post(url,scopeParam).then(res=>{
           if(res.data.message==='success'){
             that.queryData()//根据账户查询消费明细
@@ -2920,10 +2877,10 @@ export default {
           // }
           // console.log('this.transferData_left',this.transferData_left)
           if(res.data.message === "success") {
-            that.$message({
-              message: '调用接口成功',
-              type: 'success'
-            });
+            // that.$message({
+            //   message: '调用接口成功',
+            //   type: 'success'
+            // });
           } else {
             that.$message({
               message: '调用接口失败',
@@ -3160,7 +3117,7 @@ export default {
         // let url_1= that.api.api_9022_9519+ '/v1/' + `finance/pay_detail/pay_money_pms`
         // let url_2 = that.api.api_9022_9519+ '/v1/' + `finance/pay_detail/pay_money_by_author_pms`//预授权付款,即预授权转预收
         // let url = this.previewEnterBill.pre_author_id != '' && this.jie_authorization_flag == true ? url_2 : url_1
-        let url = 'http://192.168.4.168:8000' + '/v1/' + 'accounts/pay/'
+        let url = that.api.api_newPrice_9114 + '/v1/' + 'accounts/pay/'
         // let url= `http://192.168.5.96:9519/v1/finance/pay_detail/pay_by_charges`
         // let scopeParam_1 = {
         //   account_id: that.preBillLinkParam.account_id, //主账id
@@ -3186,8 +3143,8 @@ export default {
         let scopeParam = {
           pay_amount: -Number(that.previewEnterBill.money),//传负值
           account: that.preBillLinkParam.account_id, //主账id
-          desc: '',
-          cashier_id:	'',
+          desc: that.previewEnterBill.remark,
+          cashier_id:	that.previewEnterBill.cashValue,
           incoming_account_reason: that.previewEnterBill.payReasonValue,
           incoming_account_code: that.previewEnterBill.enterAccountCode,
         }
@@ -3492,7 +3449,7 @@ export default {
           }
           let that = this
           // let url = that.api.api_9022_9519+ '/v1/' + `finance/charge_detail/add_charges_pms`
-          let url = 'http://192.168.4.168:8000' + '/v1/' + `accounts/add_charge_detail/`
+          let url = that.api.api_newPrice_9114 + '/v1/' + `accounts/add_charge_detail/`
           console.log('++++',scopeParam)
           that.$axios.post(url,scopeParam).then(res=>{
             console.log('res.data.mess',res.data.message)
@@ -3629,7 +3586,7 @@ export default {
           console.log('查探this.transferAccountId',this.transferAccountId)
           let that = this
           // let url= that.api.api_9022_9519+ '/v1/' + `finance/transfer_accounts_detail/batch_add`
-          let url= 'http://192.168.4.168:8000'+ '/v1/' + `accounts/add_transfer_detail/`
+          let url= that.api.api_newPrice_9114+ '/v1/' + `accounts/add_transfer_detail/`
           let scopeParam = {
             desc: null,//描述
             submit_reason_id: null,//转账原因
@@ -3741,15 +3698,15 @@ export default {
           // let url= that.api.api_9022_9519+ '/v1/' + `finance/charge_detail/get_by_account_id_pms`
           if(startTime && endTime){
             if(subject_param){
-              url= 'http://192.168.4.168:8000'+ '/v1/' + `accounts/get_charge_detail_list/?page_size=${that.pagination.pageSize}&page=${that.pagination.pageNumber}&subject__in=${subject_param}&biz_date__gte=${startTime}&biz_date__lt=${endTime}&ordering=-create_datetime`
+              url= that.api.api_newPrice_9114+ '/v1/' + `accounts/get_charge_detail_list/?page_size=${that.pagination.pageSize}&page=${that.pagination.pageNumber}&subject__in=${subject_param}&biz_date__gte=${startTime}&biz_date__lt=${endTime}&ordering=-create_datetime`
             }else{
-              url= 'http://192.168.4.168:8000'+ '/v1/' + `accounts/get_charge_detail_list/?page_size=${that.pagination.pageSize}&page=${that.pagination.pageNumber}&biz_date__gte=${startTime}&biz_date__lt=${endTime}&ordering=-create_datetime`
+              url= that.api.api_newPrice_9114+ '/v1/' + `accounts/get_charge_detail_list/?page_size=${that.pagination.pageSize}&page=${that.pagination.pageNumber}&biz_date__gte=${startTime}&biz_date__lt=${endTime}&ordering=-create_datetime`
             }
           }else{
             if(subject_param){
-              url= 'http://192.168.4.168:8000'+ '/v1/' + `accounts/get_charge_detail_list/?page_size=${that.pagination.pageSize}&page=${that.pagination.pageNumber}&subject__in=${subject_param}&ordering=-create_datetime`
+              url= that.api.api_newPrice_9114+ '/v1/' + `accounts/get_charge_detail_list/?page_size=${that.pagination.pageSize}&page=${that.pagination.pageNumber}&subject__in=${subject_param}&ordering=-create_datetime`
             }else{
-              url= 'http://192.168.4.168:8000'+ '/v1/' + `accounts/get_charge_detail_list/?page_size=${that.pagination.pageSize}&page=${that.pagination.pageNumber}&ordering=-create_datetime`
+              url= that.api.api_newPrice_9114+ '/v1/' + `accounts/get_charge_detail_list/?page_size=${that.pagination.pageSize}&page=${that.pagination.pageNumber}&ordering=-create_datetime`
             }
           }
           console.log('this.checkList进入',this.checkList)
@@ -3887,7 +3844,7 @@ export default {
       getArOption(){
         let that = this
         // let url=  that.api.api_9022_9519 + '/v1/' + `finance/ar_account/info_list`
-        let url=  'http://192.168.4.168:8000' + '/v1/' + `accounts/get_ar_account_list/`
+        let url=  that.api.api_newPrice_9114 + '/v1/' + `accounts/get_ar_account_list/`
         that.$axios({
           method : 'get',
           url : url,
@@ -4194,25 +4151,22 @@ export default {
             console.log('error')
         })
       },
-      //平账=======>结账=======>不对此时不用 ===>退房 此时选c
-      pingAccount(param){
+      //新版本 ====>退房
+      pingAccount(){
         this.consume_checkRoom_price = 0
-        param ? param : ''//param有值证明查房产生了消费 没有消费也继续进行
-        console.log('consume_detail',param)
-        console.log('this.endPayListParam11',this.endPayListParam, this.endPayListParam.balance)
         // if(this.endPayListParam.close_flag != null && this.endPayListParam.close_flag != ''){
           //必须要强制平账
           let forceValue = 0
-          if(param){
-            this.consume_data = eval('('+param+')')
-            console.log('this.consume_data',this.consume_data)
-            this.consume_dialogVisible = true//查房产生的消费dialog
-            for(var item of this.consume_data){
-              this.consume_checkRoom_price = this.consume_checkRoom_price + item.num*item.price
-            }
-          }else{
-            this.$message.warning('没有消费或者查房完成了,直接开始退房!')
-            if(this.endPayListParam.balance != 0){
+          // if(param){
+          //   this.consume_data = eval('('+param+')')
+          //   console.log('this.consume_data',this.consume_data)
+          //   this.consume_dialogVisible = true//查房产生的消费dialog
+          //   for(var item of this.consume_data){
+          //     this.consume_checkRoom_price = this.consume_checkRoom_price + item.num*item.price
+          //   }
+          // }else{
+          //   this.$message.warning('没有消费或者查房完成了,直接开始退房!')
+            if(this.moneydesc.balance != 0){
               forceValue = 1
               this.dialogVisible = true
               console.log('进入进入弹出',this.dialogVisible)
@@ -4221,9 +4175,9 @@ export default {
               forceValue = 0
               this.refundMoney(forceValue)
             }
-          }
-          console.log('this.endPayListParam.balance',this.endPayListParam.balance)
-          console.log('forceValue',forceValue)
+          // }
+          // console.log('this.endPayListParam.balance',this.endPayListParam.balance)
+          // console.log('forceValue',forceValue)
         // }else{
         //   this.$message.warning('请先结账，才能退房!')
         // }
@@ -4277,17 +4231,14 @@ export default {
       refundMoney(param){
         console.log('parammmm',param)
         let that = this
-        let url = that.api.api_9022_9519+ '/v1/' + `finance/account_close_operation/add`
+        // let url = that.api.api_9022_9519+ '/v1/' + `finance/account_close_operation/add`
+        let url = 'http://192.168.2.165:9005'+ '/v2/' + `checkin/check_out/`
         let scopeParam = {
-          account_id: this.preBillLinkParam.account_id, //传入平账(结账)前的账号
-          cashier: null,//平帐点id
-          close_flag: 'c', //平帐类型(以何种方式平帐的?): a=冲帐 t=转帐 c=结帐
-          remark: '',//备注
-          force: param,//1或0 1为强制平账
+          order_no: this.preBillLinkParam.order_no, //传入平账(结账)前的账号
         }
         console.log('scopeParam',scopeParam)
         that.$axios.post(url,scopeParam).then(res=>{
-          if(res.data.message==='success'){
+          if(res.data.message==='退房成功！'){
             this.linkHouseFornVisible = false //退房关闭页面 res.data.message 为已有平帐记录则表示退房
             // this.$router.go(0)
             this.flushByLink()//刷新数据
@@ -4298,14 +4249,14 @@ export default {
           }).catch(error=>{
         })
       },
-    //结账==>退款(当退款时只能选现金<=====此时)
+    //结账==>退款(当退款时只能选现金<=====此时) 不废弃 退款
       jie_addChargeDetail(){
         if(this.previewEnterBill.payReasonValue && this.previewEnterBill.money && this.previewEnterBill.cashValue && this.previewEnterBill.enterAccountCode){
           let scopeParam = {
+            pay_amount: this.previewEnterBill.money,   // 已支付的部分,一般是0,
             account_id: this.preBillLinkParam.account_id,//主账户id
             pay_mode_id: this.previewEnterBill.payMode,
             code_pay_for_id: this.previewEnterBill.payReasonValue,
-            pay_amount: this.previewEnterBill.money,   // 已支付的部分,一般是0,
             original_pay_id: null,
             cashier_id: this.previewEnterBill.cashValue,
             code_income_type_id: this.previewEnterBill.enterAccountCode,   //入账类型代码id
@@ -4356,25 +4307,27 @@ export default {
       //加收房费(半天全天等)
       confirmFee(param){
         // this.getPayReason()
+        // this.getIncomingAccount()
+        // this.getPayReason()
         this.enterBill.billInfo =this.preBillLinkParam.master_guest.length > 0 ? this.preBillLinkParam.room_number + '-' + this.preBillLinkParam.master_guest[0].name : this.preBillLinkParam.room_number
         if(param==='全天'){
           this.fee_check_flag = true
           this.enterBillDialog = true
           this.previewEnterBill.payReasonValue = 5//5
-          this.enterBill.enterAccountCode = 10//10
-           this.enterBill.money= this.preBillLinkParam.fix_rate
+          this.enterBill.enterAccountCode = 16//10
+           this.enterBill.money= this.current_rate_price
         }else if(param==='半天'){
           this.fee_check_flag = true
           this.enterBillDialog = true
           this.previewEnterBill.payReasonValue = 5//5
-          this.enterBill.enterAccountCode = 13//13
-           this.enterBill.money= (this.preBillLinkParam.fix_rate/2).toFixed(0)
+          this.enterBill.enterAccountCode = 18//13
+           this.enterBill.money= (this.current_rate_price/2).toFixed(0)
         }else if(param==='手工'){
           this.fee_check_flag = true
           this.enterBillDialog = true
           this.previewEnterBill.payReasonValue = 5//5
           this.enterBill.money= ''
-          this.enterBill.enterAccountCode = 14//14
+          this.enterBill.enterAccountCode = 19//14
         }else{
           this.room_fee_dialog = false
         }
@@ -4393,6 +4346,7 @@ export default {
       },
       /**进入结账dialog ==param */
       handleJieAccount(){
+        this.moneydesc.balance <= 0 ? this.preview_enter_flag = 0 : this.preview_enter_flag = 1
         console.log('离房时间',this.preBillLinkParam)
         console.log('time',moment().format('YYYY-MM-DD HH:mm:ss'))
         let now_date = moment().format('YYYY-MM-DD HH:mm:ss')
@@ -4403,6 +4357,7 @@ export default {
           this.room_fee_dialog = true
           this.getPayReason()//再查一遍默认选择值
           this.getIncomingAccount()//再查一遍默认选择值
+          this.previewEnterBill.payReasonValue = 5 //默认付款方式
         }
         this.flushPreviewEnterBill()
         this.jieAccountTitle = '结账'
@@ -4414,6 +4369,7 @@ export default {
           this.get_list_by_hotel()//请求一遍
           this.previewEnterBill.payMode = 34 //线上环境需同步
         }
+        // preview_enter_flag = 0
         console.log('this.previewEnterBill.payMode////',this.previewEnterBill.payMode)
         // this.previewEnterBill.money = this.moneydesc.total_consumption
         // this.jieParam.jie_payValue = Math.abs(this.moneydesc.balance)
@@ -4642,7 +4598,7 @@ export default {
             // }
             // id = 1
             // let url= that.api.api_9022_9519+ '/v1/' + `finance/account/get_info_pms/` + id
-            let url= 'http://192.168.4.168:8000'+ '/v1/' + `accounts/get_account_base_info/` + id + '/'
+            let url= that.api.api_newPrice_9114+ '/v1/' + `accounts/get_account_base_info/` + id + '/'
             that.$axios({
               method : 'get',
               url : url,
@@ -5040,6 +4996,8 @@ export default {
         },
         //封装查看微信二维码或者扫码枪扫描支付是否成功
         check_paid(url,payment_id) {
+          console.log('url',url)
+          console.log('payment_id',payment_id)
           let that = this;
           clearInterval(that.timer_r);
           clearInterval(that.timer_src);
@@ -5266,7 +5224,7 @@ export default {
             return
           }
           // let url =  that.api.api_9022_9519+ '/v1/' +  'finance/incoming_account_code/info_list'
-          let url =  'http://192.168.4.168:8000' + '/v1/' +  'system/settings/get_code_pay_for_list/?parent_id=' + parent_id + '&page_size=300'
+          let url =  that.api.api_newPrice_9114 + '/v1/' +  'system/settings/get_code_pay_for_list/?parent_id=' + parent_id + '&page_size=300'
           that.$axios.get(url).then(res=>{
               console.log('res.data',res.data.data.results)
               that.incomingAccoutList = res.data.data.results
@@ -5293,7 +5251,7 @@ export default {
         getCashRegister(){
           let that = this
           // let url= that.api.api_9022_9519+ '/v1/' + `finance/cash_register/info_list`
-          let url =  'http://192.168.4.168:8000' + '/v1/' +  'accounts/get_cash_register_list/'
+          let url =  that.api.api_newPrice_9114 + '/v1/' +  'accounts/get_cash_register_list/'
 
           that.$axios({
             method : 'get',
@@ -5325,9 +5283,10 @@ export default {
           // let url= that.api.api_9022_9519+ '/v1/' + `finance/code_pay_for/info_list?page_size=999`
           let url
           if(this.preview_enter_flag === 0){
-            url= 'http://192.168.4.168:8000'+ '/v1/' + `system/settings/get_code_pay_for_list/?code_type=2&page_size=300&parent_id=`
+            //钱
+            url= that.api.api_newPrice_9114+ '/v1/' + `system/settings/get_code_pay_for_list/?code_type=2&page_size=300&parent_id=`
           }else{
-            url= 'http://192.168.4.168:8000'+ '/v1/' + `system/settings/get_code_pay_for_list/?code_type=1&page_size=300&parent_id=`
+            url= that.api.api_newPrice_9114+ '/v1/' + `system/settings/get_code_pay_for_list/?code_type=1&page_size=300&parent_id=`
           }
           that.$axios({
             method : 'get',
