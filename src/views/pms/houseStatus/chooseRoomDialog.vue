@@ -1658,12 +1658,14 @@ export default {
             },
           }).then(res=>{
               if (res.data.message=="success"){
-                console.log(res.data.data);
-                that.img_src= "data:image/png;base64,"+res.data.data.qr_img_b64;
-                console.log(that.img_src);
-                that.dialog_img=true;
-                that.img_wz=true//判断二维码展示flag
-               that.check_paid();//查询二维码支付是否成功
+                if(res.data.data.qr_img_b64){
+                  that.img_src = "data:image/png;base64," + res.data.data.qr_img_b64;
+                  that.dialog_img = true;
+                  that.img_wz = true;
+                  that.check_paid(that.call_back_url,payment_id);//查询二维码支付是否成功
+                }else {
+                  that.check_paid(that.call_back_url,payment_id);//查询二维码支付是否成功
+                }
               }
               else{
                 that.error_message(res.data.message)

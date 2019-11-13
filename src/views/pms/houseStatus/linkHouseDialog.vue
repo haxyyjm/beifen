@@ -48,7 +48,7 @@
               <div>
                 <el-row class="buttonStyle">
                   <el-button  type="info" :disabled="banDisable()" @click="handleChangeRoom(preBillLinkParam)" round  size="mini">换房升降</el-button>
-                  <el-button  type="info" :disabled="banDisable()" @click="changeNo()" round  size="mini">换房号</el-button>
+                  <!-- <el-button  type="info" :disabled="banDisable()" @click="changeNo()" round  size="mini">换房号</el-button> -->
                   <!-- <el-button type="info" @click="houseTypeDialog = true" round  size="small">换房型</el-button> -->
                   <!-- <el-button type="info" :disabled="banDisable()" @click="editPriceDialog = true" round  size="mini">修改价格</el-button> -->
                   <!-- <el-button type="info" round  size="small">转全天房</el-button> -->
@@ -366,8 +366,8 @@
           </div>
           <el-row style="padding-left: 12px" class="roomClass_third">
             是否免费换房: 
-            <el-radio style="padding-left: 12px" v-model="roomParam.isFee" label="1">是</el-radio>
-            <el-radio v-model="roomParam.isFee" label="2">否</el-radio>
+            <el-radio @change="witchRoom" style="padding-left: 12px" v-model="roomParam.isFee" label="1">是</el-radio>
+            <el-radio @change="witchRoom" v-model="roomParam.isFee" label="2">否</el-radio>
           </el-row>
           <el-row style="padding-left: 12px">
             <span style="padding-left: 15px">原房价:</span> 
@@ -375,7 +375,7 @@
           </el-row>
           <el-row style="padding-left: 12px">
           <span style="padding-left: 30px">折扣:</span> 
-          <el-input @blur="computeData" @input="roomParam.discount = roomParam.discount.replace(/[^\-?\d.]/g,'')" placeholder="示例:100或者-100" size="mini" class="roomClass_third width" v-model="roomParam.discount"></el-input>
+          <el-input :disabled="isDiscount" @blur="computeData" @input="roomParam.discount = roomParam.discount.replace(/[^\-?\d.]/g,'')" placeholder="示例:100或者-100" size="mini" class="roomClass_third width" v-model="roomParam.discount"></el-input>
           </el-row>
           <el-row style="padding-left: 12px">
             <span @input="roomParam.newPrice = roomParam.newPrice.replace(/[^\d.]/g,'')" style="padding-left: 15px">现房价:</span> <el-input size="mini" class="roomClass_third width" v-model="roomParam.newPrice"></el-input>
@@ -582,13 +582,13 @@
             </el-form-item>
             <el-form-item label="入账代码:">
               <el-select clearable @change="showExpand"  @focus="getIncomingAccount()"  v-model="previewEnterBill.enterAccountCode" size="mini" style="width: 14vw; margin-top: 10px;"  placeholder="请选择">
-                    <el-option
-                      v-for="item in incomingAccoutList"
-                      :key="item.id"
-                      :label="item.desc"
-                      :value="item.id">
-                    </el-option>
-                  </el-select>
+                <el-option
+                  v-for="item in incomingAccoutList"
+                  :key="item.id"
+                  :label="item.desc"
+                  :value="item.id">
+                </el-option>
+              </el-select>
             </el-form-item>
             <el-form-item>
                <span style="margin-right: 24px">备注:</span>
@@ -721,7 +721,7 @@
             <!-- <el-form-item label="欠款离店:">
               <el-switch active-value="1" inactive-value="0" active-text="是" inactive-text="否"  v-model="isDebt"></el-switch>
             </el-form-item> -->
-            <el-form-item label="收银点:">
+            <!-- <el-form-item label="收银点:">
                 <el-select style="margin-left: 15px" size="mini"  clearable   @focus="getCashRegister" v-model="previewEnterBill.cashValue"  placeholder="请选择">
                   <el-option
                     v-for="item in cashRegisterList"
@@ -730,7 +730,7 @@
                     :value="item.id">
                   </el-option>
                 </el-select>
-            </el-form-item>
+            </el-form-item> -->
             <!-- <el-form-item label="付款方式:">
               <el-select size="mini" clearable  @change="get_fields_by_payId" @focus="get_list_by_hotel" v-model="previewEnterBill.payMode"   placeholder="请选择">
                 <el-option
@@ -755,12 +755,12 @@
                 </el-option>
               </el-select>
             </el-form-item>
-            <el-form-item v-if="(previewEnterBill.payMode == 1 || previewEnterBill.payMode == 38)&& moneydesc.balance >= 0">
+            <!-- <el-form-item v-if="(previewEnterBill.payMode == 1 || previewEnterBill.payMode == 38)&& moneydesc.balance >= 0">
               扫码方式:
               <el-radio v-model="scan_code" label="0">扫码枪扫描</el-radio>
               <el-radio v-model="scan_code" label="1">客户扫码</el-radio>
-            </el-form-item>
-            <el-form-item label="付款方式:">
+            </el-form-item> -->
+            <!-- <el-form-item label="付款方式:">
                 <el-select size="mini" @change="previewEnterBill.enterAccountCode=''" clearable  @focus="getPayReason()" placeholder="付款原因"  v-model="previewEnterBill.payReasonValue">
                   <el-option
                     v-for="item in this.payInfoList"
@@ -769,8 +769,8 @@
                     :value="item.id">
                   </el-option>
                 </el-select>
-            </el-form-item>
-            <el-form-item  label="入账代码:">
+            </el-form-item> -->
+            <!-- <el-form-item  label="入账代码:">
               <el-select size="mini" clearable  @focus="getIncomingAccount()" v-model="previewEnterBill.enterAccountCode"  placeholder="请选择">
                 <el-option
                   v-for="item in incomingAccoutList"
@@ -779,9 +779,9 @@
                   :value="item.id">
                 </el-option>
               </el-select>
-            </el-form-item>
+            </el-form-item> -->
             <!--附加信息==>需要判断储值卡,银行卡,积分兑换-->
-            <div style="margin-top: 30px; margin-bottom: 20px">
+            <!-- <div style="margin-top: 30px; margin-bottom: 20px">
               <span style="color: #4488E9;margin-top: 10px;margin-left: -20vw">附加信息</span>
               <ul v-for="(item,index) of extraInformation" :key="index">
                 <li v-if="item.is_show != 0">
@@ -789,11 +789,7 @@
                   <el-input size="mini" v-model="item.acquiescence" style="width: 20vw; margin-top: 10px;margin-left:10px"></el-input>
                 </li>
               </ul>
-              <!-- <li>
-                <span style="color: #4488E9;margin-top: 10px;margin-left: -20vw">附加信息</span>
-              </li>
-                -->
-            </div>
+            </div> -->
             <!-- <el-form-item label="封账:">
               <el-switch active-text="是" inactive-text="否"  v-model="switchValue"></el-switch>
             </el-form-item> -->
@@ -805,9 +801,10 @@
         <el-row style="height: 40px"></el-row>
         <div slot="footer" class="dialog-footer">
           <!-- <el-button v-if="(previewEnterBill.payMode == 1 || previewEnterBill.payMode == 38) && moneydesc.balance <= 0" type="primary" @click="article_number();pay_amount_money_code = ''">结算</el-button> -->
-          <el-button v-if="moneydesc.balance <= 0" @click="handlePayCharge()"  type="primary">结账(收钱)</el-button>
-          <el-button type="primary" v-if="moneydesc.balance > 0" @click="jie_addChargeDetail">结账(退款)</el-button>
-                <!-- <el-button type="primary" v-if="(previewEnterBill.payMode != 1 && previewEnterBill.payMode != 38) &&moneydesc.balance > 0" @click="jie_addChargeDetail">结账(退款)</el-button>
+          <!-- <el-button v-if="moneydesc.balance <= 0" @click="handlePayCharge()"  type="primary">结账(收钱)</el-button>
+          <el-button type="primary" v-if="moneydesc.balance > 0" @click="jie_addChargeDetail">结账(退款)</el-button> -->
+          <el-button type="primary" @click="jie_addChargeDetail">结账</el-button>
+          <!-- <el-button type="primary" v-if="(previewEnterBill.payMode != 1 && previewEnterBill.payMode != 38) &&moneydesc.balance > 0" @click="jie_addChargeDetail">结账(退款)</el-button>
           <el-button type="primary" v-if="(previewEnterBill.payMode == 1 || previewEnterBill.payMode == 38) && moneydesc.balance > 0" @click="refundByWxWay">退款</el-button> -->
           <!-- <el-button v-else type="primary" @click="handlePayCharge()">付款</el-button> -->
         </div>
@@ -1448,6 +1445,7 @@ export default {
       //   return data;
       // };
         return {
+          isDiscount: false,
           linkUrl: '',
           roomOnlyTypeList: [],
           rowParam: {},//行内对象
@@ -1457,7 +1455,7 @@ export default {
             newType: '',
             oldNumber: '',
             newNumber: '',
-            isFee: '1',
+            isFee: '2',
             oldPrice: '',
             discount: '',
             newPrice: '',
@@ -2021,8 +2019,9 @@ export default {
           this.preview_enterBillDialog = true;
           this.handlePreviewEnterBill() //处理数据====>根据条件监听当中弹出入预收dialog
         }else if(this.parentInfoParam.openChildDialog === '换房'){
-          this.switchNumberDialog = true;
-          this.changeNo()
+          this.handleChangeRoom(this.parentInfoParam)
+          // this.switchNumberDialog = true;
+          // this.changeNo()
         }
         try {
           this.tabValue = this.parentInfoParam.room_number //tab房间号
@@ -2090,6 +2089,18 @@ export default {
       }
     },
     methods: {
+      //是否免费 换房切换
+      witchRoom(){
+        if(this.roomParam.isFee == '1'){
+          this.roomParam.newPrice = this.roomParam.oldPrice
+          this.isDiscount  = true
+        }else{
+          // this.roomParam.oldPrice = ''
+          this.roomParam.newPrice = ''
+          this.isDiscount  = false
+        }
+        console.log('roomParam.isFee',this.roomParam.isFee) 
+      },
       flushChangeData(){
         this.roomParam.newType = ''
         this.roomParam.oldType = '',
@@ -2105,15 +2116,15 @@ export default {
         this.roomParam.newPrice = Number(this.roomParam.oldPrice) + Number(this.roomParam.discount)
       },
       /**
-       * @desc 确定进行换房
+       * @desc 确定进行换房==升降级 新版本
        */
       confirmChangeRoom(){
         let that = this
-        if (that.roomParam.oldNumber && that.roomParam.newNumber && that.roomParam.oldType && that.roomParam.newType && that.roomParam.oldPrice && that.roomParam.discount){
+        if (that.roomParam.oldNumber && that.roomParam.newNumber && that.roomParam.oldType && that.roomParam.newType && that.roomParam.oldPrice){
           console.log('kaishi',this.rowParam)
           console.log('roomParam',this.roomParam)
-          // let url = 'http://192.168.2.224:9005' + '/v2/' + `depend_ex/exchange_houses/`
-          let url = that.api.api_newBill_9204 + '/v2/' + `depend_ex/exchange_houses/`
+          let url = 'http://192.168.2.165:9005' + '/v2/' + `depend_ex/exchange_houses/`
+          // let url = that.api.api_newBill_9204 + '/v2/' + `depend_ex/exchange_houses/`
           let scopeParam ={
             order_no:  that.rowParam.order_no,
             old_room: that.roomParam.oldNumber, //原房间
@@ -2131,8 +2142,8 @@ export default {
             if(res.data.message === 'success'){
               that.$message.success(res.data.data.result.message)
               that.changeRoomVisible = false
-              //  this.linkHouseFornVisible = false;
-              //     this.flushByLink()//刷新数据
+              this.linkHouseFornVisible = false;
+              this.flushByLink()//刷新数据
             }else{
               that.$message.warning('换房失败!')
             }
@@ -2149,7 +2160,9 @@ export default {
       handleChangeRoom(row){
         console.log('row',row)
         this.getLiveRoom(row.room_type_name)
+        this.roomParam.isFee = '2' //切换===>重置
         this.changeRoomVisible = true
+        this.isDiscount  = false //切换===>重置
         console.log('row',row)
         this.roomParam.oldNumber = row.room_number
         this.roomParam.oldType = row.room_type
@@ -2169,13 +2182,18 @@ export default {
          *@current_rate_price 从多个数据里获取当日价  
          */
         getRateCode_price_self(){
-          console.log('this.preBillLinkParam',this.preBillLinkParam.room_price)
-          let  temp = this.preBillLinkParam.room_price.filter(item=>item.price_date == moment().format('YYYY-MM-DD'))
-          console.log('temp',temp)
-          if(temp){
-            this.current_rate_price = temp[0].room_price
-          }else{
-            this.current_rate_price = 0
+          console.log('this.preBillLinkParam.room_price',this.preBillLinkParam.room_price)
+          console.log('11',moment().format('YYYY-MM-DD'))
+          try {
+            let  temp = this.preBillLinkParam.room_price.filter(item=>item.price_date == moment().format('YYYY-MM-DD'))
+            console.log('temp',temp)
+            if(temp){
+              this.current_rate_price = temp[0].room_price
+            }else{
+              this.current_rate_price = 0
+            }
+          } catch (error) {
+            console.log('入住超过期限查不到房价' + error)            
           }
         },
         /**
@@ -2187,7 +2205,7 @@ export default {
           console.log('jinru--------------------')
           // this.preBillLinkParam.room_type_name
           let that = this
-          let url = that.api.api_price_9101 + '/v1/' +  `room/rate_code/get_rate_code/`
+          let url = that.api.api_newPrice_9114 + '/v1/' +  `room/rate_code/get_rate_code/`
           // let temp = []
           // temp.push(param.room_type)
           let scopeParam ={
@@ -2291,6 +2309,8 @@ export default {
         let expandInfo =  this.incomingAccoutList.filter(item=>item.id==this.previewEnterBill.enterAccountCode)
         console.log('expandInfo',expandInfo)
         this.linkUrl = expandInfo[0].link_url
+        this.trading_unit = expandInfo[0].trading_unit
+        that.call_back_url = expandInfo[0].call_back_url
         console.log('this.linkUrl',this.linkUrl)
         if(expandInfo[0].link_data){
           //字符串数组变化为数组，用json的parse的方法进行转换,这个变量接收额外信息
@@ -3119,27 +3139,6 @@ export default {
         // let url = this.previewEnterBill.pre_author_id != '' && this.jie_authorization_flag == true ? url_2 : url_1
         let url = that.api.api_newPrice_9114 + '/v1/' + 'accounts/pay/'
         // let url= `http://192.168.5.96:9519/v1/finance/pay_detail/pay_by_charges`
-        // let scopeParam_1 = {
-        //   account_id: that.preBillLinkParam.account_id, //主账id
-        //   pay_mode_id: that.previewEnterBill.payMode,
-        //   code_pay_for_id: that.previewEnterBill.payReasonValue === '' ? 1 : that.previewEnterBill.payReasonValue, //因为是必填选项
-        //   pay_amount: that.previewEnterBill.money,
-        //   code_income_type_id: that.previewEnterBill.enterAccountCode,   //入账类型代码id
-        //   // biz_date: moment(new Date()).format('YYYY-MM-DD'),
-        //   original_pay_id: that.order_form == '' ? '': that.order_form, //	微信/淘宝/第三方支付订单的id,现金支付没有此参数
-        //   // ar_account_id: '',//	ar账户id, ar支付必须.
-        //   cashier_id:	9,
-        //   original_pay_dict: that.extraParam.length>0 ? JSON.stringify(that.extraParam) : null
-        // }
-        // let scopeParam_2={
-        //   code_pay_for_id: that.previewEnterBill.payReasonValue === '' ? 1 : that.previewEnterBill.payReasonValue, //因为是必填选项
-        //   code_income_type_id: that.previewEnterBill.enterAccountCode,   //入账类型代码id
-        //   pay_amount: that.previewEnterBill.money,
-        //   pay_mode_id: that.previewEnterBill.payMode,
-        //   pre_author_id: that.previewEnterBill.pre_author_id,
-        //   cashier_id:	null,
-        // }
-        // let scopeParam = this.previewEnterBill.pre_author_id != '' && this.jie_authorization_flag == true ? scopeParam_2 : scopeParam_1
         let scopeParam = {
           pay_amount: -Number(that.previewEnterBill.money),//传负值
           account: that.preBillLinkParam.account_id, //主账id
@@ -3163,19 +3162,22 @@ export default {
           if(res.data.message != 'success'){
             that.$message.warning('调用后台接口失败')
           }else{
-            console.log('....',this.incomingAccoutList)
-            console.log('this.linkUrl',this.linkUrl)
-            let get_refund_obj = res.data.data.data
+            that.get_refund_obj = res.data.data.data
             let payment_id = res.data.data.data.id
             if(this.linkUrl){
+              console.log('jirnu111')
+              console.log('payment_id',payment_id)
               //1.请求这个url得到相应数据例如二维码
-              this.getInfoByLinkUrl(that.linkUrl,that.extraInformation ,get_refund_obj,payment_id,that.extraInformation_no)
+              console.log('this.linkUrl',this.linkUrl)
+              console.log(that.linkUrl,that.extraInformation,payment_id,that.extraInformation_no)
+              that.getInfoByLinkUrl(that.linkUrl,that.extraInformation,payment_id,that.extraInformation_no) //类似kindle_dxg
+              // this.kindle_dxg()
             }else{
               that.$message.success('操作成功!')
               that.preview_enterBillDialog = false
               that.jieAccountDialog=false
-              that.queryData()
             }
+            that.queryData()
             // 下面暂时注释
             // that.$message.success('操作成功!')
             // that.preview_enterBillDialog = false
@@ -3183,10 +3185,11 @@ export default {
             // that.queryData()
           }
           }).catch(error=>{
+            console.log(error)
         })
       },
-      getInfoByLinkUrl(url,description,get_refund_obj,payment_id,link_data){
-        console.log('iiiiiiiii',url,description,get_refund_obj,payment_id,link_data)
+      getInfoByLinkUrl(url,description,payment_id,link_data){
+        console.log('iiiiiiiii',url,description,payment_id,link_data)
         let that = this;
         let params = {};
         let obj={},
@@ -3197,9 +3200,9 @@ export default {
         }
         for(let i  of link_data){
           if(i.parallelism === "pay_amount"){
-            params_obj[i.fields_name] = -Number(get_refund_obj[i.parallelism])*100;
+            params_obj[i.fields_name] = -Number(that.get_refund_obj[i.parallelism])*that.trading_unit;
           }else {
-            params_obj[i.fields_name] =get_refund_obj[i.parallelism];
+            params_obj[i.fields_name] = that.get_refund_obj[i.parallelism];
           }
         }
         console.log('params_obj',params_obj)
@@ -3227,7 +3230,7 @@ export default {
               that.check_paid(that.call_back_url,payment_id);//查询二维码支付是否成功
             }
           }else{
-            this.$message.error('调用接口失败!')
+            this.$message.error(error)
           }
         })
       },
@@ -3406,12 +3409,14 @@ export default {
             },
           }).then(res=>{
               if (res.data.message=="success"){
-                console.log(res.data.data);
-                that.img_src= "data:image/png;base64,"+res.data.data.qr_img_b64;
-                console.log(that.img_src);
-                that.dialog_img=true;
-                that.img_wz=true//判断二维码展示flag
-               that.check_paid();//查询二维码支付是否成功
+                if(res.data.data.qr_img_b64){
+                  that.img_src = "data:image/png;base64," + res.data.data.qr_img_b64;
+                  that.dialog_img = true;
+                  that.img_wz = true;
+                  that.check_paid(that.call_back_url,payment_id);//查询二维码支付是否成功
+                }else {
+                  that.check_paid(that.call_back_url,payment_id);//查询二维码支付是否成功
+                }
               }
               else{
                 that.error_message(res.data.message)
@@ -3920,7 +3925,7 @@ export default {
       //制卡操作
       activateCard(){
         let that = this
-        let url = that.api.api_price_9101 + '/v1/' + `room/room_lock/activate_card/`
+        let url = that.api.api_newPrice_9114 + '/v1/' + `room/room_lock/activate_card/`
         let scopeParam ={
           operate_type: 2,//1, "读卡"), (2, "写卡"), (4, "销卡"),
           start_time: this.preBillLinkParam.arr_time,
@@ -4227,18 +4232,31 @@ export default {
           message: '取消退房'
         });
       },
-      //正式开始退款====>金额==>退房的时候
+      //正式开始退款====>金额==>退房的时候 ====>新版本
       refundMoney(param){
         console.log('parammmm',param)
+        console.log('...',this.preBillLinkParam.master_guest)
+        let policeArray = []
+        this.preBillLinkParam.master_guest.forEach(item=>{
+          policeArray.push({
+            card_type: '身份证',
+            card_number: '411323199309163430'
+          })
+        })
+        console.log('policeArray',policeArray)
+        this.refundPolice(policeArray)
+        return
         let that = this
-        // let url = that.api.api_9022_9519+ '/v1/' + `finance/account_close_operation/add`
-        let url = 'http://192.168.2.165:9005'+ '/v2/' + `checkin/check_out/`
+        // let url = 'http://192.168.2.165:9005'+ '/v2/' + `checkin/check_out/`
+        let url= that.api.api_newBill_9204 + '/v2/' + `checkin/check_out/`
         let scopeParam = {
           order_no: this.preBillLinkParam.order_no, //传入平账(结账)前的账号
         }
         console.log('scopeParam',scopeParam)
         that.$axios.post(url,scopeParam).then(res=>{
           if(res.data.message==='退房成功！'){
+            //退房===>公安销毁
+            // this.refundPolice()
             this.linkHouseFornVisible = false //退房关闭页面 res.data.message 为已有平帐记录则表示退房
             // this.$router.go(0)
             this.flushByLink()//刷新数据
@@ -4249,22 +4267,41 @@ export default {
           }).catch(error=>{
         })
       },
-    //结账==>退款(当退款时只能选现金<=====此时) 不废弃 退款
-      jie_addChargeDetail(){
-        if(this.previewEnterBill.payReasonValue && this.previewEnterBill.money && this.previewEnterBill.cashValue && this.previewEnterBill.enterAccountCode){
-          let scopeParam = {
-            pay_amount: this.previewEnterBill.money,   // 已支付的部分,一般是0,
-            account_id: this.preBillLinkParam.account_id,//主账户id
-            pay_mode_id: this.previewEnterBill.payMode,
-            code_pay_for_id: this.previewEnterBill.payReasonValue,
-            original_pay_id: null,
-            cashier_id: this.previewEnterBill.cashValue,
-            code_income_type_id: this.previewEnterBill.enterAccountCode,   //入账类型代码id
-            // gen_time: moment(new Date()).format('YYYY-MM-DD HH:mm:ss'),    // 业务发生的实际时间
+      //公安退房销毁 === >需要循环调用退房 不需要
+      refundPolice(param){
+        let that = this
+        let url = 'http://organ.crowncrystalhotel.com/v1/organization/ht/public_security/pms_submit_array_check_out/'
+        let scopeParam = {
+          guest_array: param
+        }
+        console.log('scopeParam',scopeParam)
+        that.$axios({
+          method: "POST",
+          url: url,
+          data: scopeParam,
+          headers: {
+              'authorization': 'auth_c2eb4aaad3984dff9a8fb6f243d56e3e'
           }
-          scopeParam.charges = JSON.stringify(scopeParam.charges)
+        }).then(res=>{
+          console.log('res',res)
+          if(res.data.msg == 'OK'){
+            that.$message.warning('公安退房成功!')
+          }else{
+            that.$message.warning(res.data.msg)
+          }
+        }).catch(()=>{
+            that.$message.warning('接口错误!')
+        })
+      },
+    //结账==>直接就结账了
+      jie_addChargeDetail(){
+        // if(this.previewEnterBill.payReasonValue && this.previewEnterBill.cashValue && this.previewEnterBill.enterAccountCode){
+          let scopeParam = {
+            account: this.preBillLinkParam.account_id,//主账户id
+            remark: this.previewEnterBill.remark,
+          }
           let that = this
-          let url= that.api.api_9022_9519+ '/v1/' + `finance/pay_detail/refund_pms`
+          let url= that.api.api_newPrice_9114+ '/v1/' + `accounts/add_close_detail/`
           that.$axios.post(url,scopeParam).then(res=>{
             if(res.data.message==='success'){
               that.queryData()//根据账户查询消费明细
@@ -4275,9 +4312,10 @@ export default {
             }
           }).catch(error=>{
           })
-        }else{
-          this.$message.warning('请选择或者输入必要数据!')
-        }
+        // }
+        // else{
+        //   this.$message.warning('请选择或者输入必要数据!')
+        // }
       },
       //结账==>付款==>废弃
       jie_payCharge(){
@@ -4442,7 +4480,7 @@ export default {
           chang_leave_time: moment(this.after_leave_time_2).format('YYYY-MM-DD 14:00:00'),
           total_continue_day: null,//暂时
           total_day: null,
-          remark: null,
+          remark: this.remark_continue,
         }
         that.$axios.post(url,scopeParam).then(res=>{
           if(res.data.message === 'success'){
@@ -4721,7 +4759,7 @@ export default {
             let that = this
             // let url = that.UrLHeader_2 + 'room/get_roomnumber_list_tree/'
             // let url = that.UrLHeader + 'room/get_roomnumber_list/'
-            let url = that.api.api_price_9101 + '/v1/' + 'room/rate_code/get_breakfast_list/'
+            let url = that.api.api_newPrice_9114 + '/v1/' + 'room/rate_code/get_breakfast_list/'
             // let url = `http://47.98.113.173:9101/v1/room/rate_code/get_breakfast_list/`
             that.$axios({
             method : 'get',
@@ -4996,7 +5034,7 @@ export default {
         },
         //封装查看微信二维码或者扫码枪扫描支付是否成功
         check_paid(url,payment_id) {
-          console.log('url',url)
+          console.log('url////////////////////',url)
           console.log('payment_id',payment_id)
           let that = this;
           clearInterval(that.timer_r);
@@ -5062,15 +5100,32 @@ export default {
               console.log(error);
             });
         },
+        //封装微信二维码后的定时器
+        timing_wx(url,payment_id) {
+          let that = this;
+          // that.timer=0;
+          that.timer_src = setInterval(function ()   //开启循环：
+          {
+            that.timer++;
+            console.log(that.timer++);
+            that.check_paid(url,payment_id);
+            if (that.timer >= 60) {
+              clearInterval(that.timer_src);
+              console.log(that.timer);
+              return;
+              //判断res
+            }
+          }, 2000);
+        },
         //封装扫描二维码后触发的定时器
-        timing(){
+        timing(url,payment_id){
           let that = this;
           // that.timer=0;
           that.timer_src=setInterval(function()   //开启循环：
           {
             that.timer++;
             console.log(that.timer++);
-            that.check_paid();
+            that.check_paid(url,payment_id);
             if(that.timer >=60){
               clearInterval(that.timer_src);
               console.log(that.timer);
@@ -5078,7 +5133,7 @@ export default {
               //判断res
 
             }
-          },1000);
+          },2000);
         },
         /** 成功页面或者失败页面的确定按钮*/
         succeed_failed(){
@@ -5127,7 +5182,7 @@ export default {
         //获取最终房间号
         getLiveRoom(param){
           let that = this
-          let url= that.api.api_price_9101 + '/v1/' + `room/room_status/can_live_room_list/`
+          let url= that.api.api_newPrice_9114 + '/v1/' + `room/room_status/can_live_room_list/`
           console.log('房间类型',this.preBillLinkParam)
           let scopeParam = {
             room_type: param,
@@ -5154,7 +5209,7 @@ export default {
         getCanLiveRoom(){
           let that = this
           // that.getRoomType()
-          // let url= that.api.api_price_9101 + '/v1/' + `room/room_status/can_live_room_list/`
+          // let url= that.api.api_newPrice_9114 + '/v1/' + `room/room_status/can_live_room_list/`
           // console.log('房间类型',this.preBillLinkParam)
           // let scopeParam = {
           //   // room_type: param,
@@ -5311,7 +5366,7 @@ export default {
         */
         getOnlyRoomType(){
           let that = this
-          let url =  that.api.api_price_9101 + '/v1/' + 'room/room_status/get_room_type_occupy_list/'
+          let url =  that.api.api_newPrice_9114 + '/v1/' + 'room/room_status/get_room_type_occupy_list/'
           let start 
           let end
           if(this.rowParam.arr_time && this.rowParam.leave_time){
@@ -5337,7 +5392,7 @@ export default {
         //获取房型数据
         getRoomType(){
           let that = this
-          let url = that.api.api_price_9101+ '/v1/' + `room/room_status/get_room_type_list/`
+          let url = that.api.api_newPrice_9114+ '/v1/' + `room/room_status/get_room_type_list/`
           that.$axios.get(url).then(res=>{
             if(res.data.message == 'success'){
               that.roomTypeList = res.data.data.results

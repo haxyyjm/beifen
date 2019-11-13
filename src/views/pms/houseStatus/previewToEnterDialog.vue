@@ -1283,6 +1283,7 @@ export default {
       //开始分情况处理1.有预定且有入住人的信息(包括多条的时候)
       //2.无预定，直接刷身份证的时候
       handlePoliceParam(){
+        this.policeInfoParam.liveStatus = 0
         console.log('card身份',this.cardInfoParam)
         console.log('policeInfoParam',this.policeInfoParam)
         console.log('this.preBillParam.reserve_guest<=====',this.preBillParam.reserve_guest)
@@ -1522,8 +1523,8 @@ export default {
       cardImport(){
         let that = this
         // that.cardInfoDialog = true //读卡器失败就不打开dialog
-        // let url = `http://127.0.0.1:32727/?startTime=2019-04-18%2009:12:49&endTime=2019-4-19%2012:00:00&type=5&IDC_Factory=HuaShiDianZi_IDC_Card&IDC_ComPort=1001&roomNo=undefined&lockNo=undefined&guestNum=undefined&Lock_EnableLock=True&Lock_Factory=LockSDK_Card&Lock_ComPort=USB&Lock_ReaderType=RF50&Lock_SysCode=&Lock_HotelCode=1703936&Lock_CancelCard=True&Lock_WriteCardNum=10&Lock_ElevatorlsTrue=True&Lock_BeforeHour=0&Lock_AfterHour=0&jsonp=angular.callbacks._0`
-        let url = `http://127.0.0.1:32727/?startTime=2019-04-18%2009:12:49&endTime=2019-4-19%2012:00:00&type=5&IDC_Factory=JingLunDianZi_IDC&IDC_ComPort=1001&roomNo=undefined&lockNo=undefined&guestNum=undefined&Lock_EnableLock=True&Lock_Factory=LockSDK_Card&Lock_ComPort=USB&Lock_ReaderType=RF50&Lock_SysCode=&Lock_HotelCode=1703936&Lock_CancelCard=True&Lock_WriteCardNum=10&Lock_ElevatorlsTrue=True&Lock_BeforeHour=0&Lock_AfterHour=0&jsonp=angular.callbacks._0`
+        let url = `http://127.0.0.1:32727/?startTime=2019-04-18%2009:12:49&endTime=2019-4-19%2012:00:00&type=5&IDC_Factory=HuaShiDianZi_IDC_Card&IDC_ComPort=1001&roomNo=undefined&lockNo=undefined&guestNum=undefined&Lock_EnableLock=True&Lock_Factory=LockSDK_Card&Lock_ComPort=USB&Lock_ReaderType=RF50&Lock_SysCode=&Lock_HotelCode=1703936&Lock_CancelCard=True&Lock_WriteCardNum=10&Lock_ElevatorlsTrue=True&Lock_BeforeHour=0&Lock_AfterHour=0&jsonp=angular.callbacks._0`
+        // let url = `http://127.0.0.1:32727/?startTime=2019-04-18%2009:12:49&endTime=2019-4-19%2012:00:00&type=5&IDC_Factory=JingLunDianZi_IDC&IDC_ComPort=1001&roomNo=undefined&lockNo=undefined&guestNum=undefined&Lock_EnableLock=True&Lock_Factory=LockSDK_Card&Lock_ComPort=USB&Lock_ReaderType=RF50&Lock_SysCode=&Lock_HotelCode=1703936&Lock_CancelCard=True&Lock_WriteCardNum=10&Lock_ElevatorlsTrue=True&Lock_BeforeHour=0&Lock_AfterHour=0&jsonp=angular.callbacks._0`
         url = url.replace('angular.callbacks._0','userHandler') //替换
         // let url = `http://127.0.0.1:32727/?startTime=2019-04-18%2009:12:49&endTime=2019-4-19%2012:00:00&type=5&IDC_Factory=HuaShiDianZi_IDC_Card&IDC_ComPort=1001&roomNo=undefined&lockNo=undefined&guestNum=undefined&Lock_EnableLock=True&Lock_Factory=LockSDK_Card&Lock_ComPort=USB&Lock_ReaderType=RF50&Lock_SysCode=&Lock_HotelCode=1703936&Lock_CancelCard=True&Lock_WriteCardNum=10&Lock_ElevatorlsTrue=True&Lock_BeforeHour=0&Lock_AfterHour=0`
         that.$http.jsonp(url,{
@@ -2593,7 +2594,7 @@ export default {
           console.log('this.rateValueList----2',this.rateValueList)
           console.log('item====数据',item)
           let that = this
-          let url = that.api.api_price_9101 + '/v1/' +  `room/rate_code/get_rate_code/`
+          let url = that.api.api_newPrice_9114 + '/v1/' +  `room/rate_code/get_rate_code/`
           let scopeParam ={
             rate_code: this.preBillParam.reserve_base[0].rate_code,
             begin_date:  moment(new Date(item.reserve_base[0].arr_time)).format('YYYY-MM-DD'),
@@ -2692,7 +2693,7 @@ export default {
           room_no: that.room_no_value
         }
         let params = util.deleteNullParam(scopeParams)//删除对象里属性值为空的属性
-        let url = that.api.api_price_9101 + '/v1/' + `room/room_status/get_room_map_list/?page_size=1000`
+        let url = that.api.api_newPrice_9114 + '/v1/' + `room/room_status/get_room_map_list/?page_size=1000`
         that.$axios({
           method : 'get',
             url : url,
@@ -3007,7 +3008,7 @@ export default {
         getRoomInfo(){
           // this.getRoomType() //准备:循环得到匹配的房型中文名
           let that = this
-          let url =  that.api.api_price_9101 + '/v1/' + 'room/room_status/get_room_type_occupy_list/'
+          let url =  that.api.api_newPrice_9114 + '/v1/' + 'room/room_status/get_room_type_occupy_list/'
           that.$axios({
           method : 'get',
               url : url,
@@ -3072,7 +3073,7 @@ export default {
         //获取code对应房型数据
         getRoomType(){
           let that = this
-          let url = that.api.api_price_9101+ '/v1/' + `room/room_status/get_room_type_list/`
+          let url = that.api.api_newPrice_9114+ '/v1/' + `room/room_status/get_room_type_list/`
           // let url = this.billUrl + 'room/get_roomtype_list/'
           that.$axios.get(url).then(res=>{
               if(res.data.message == 'success'){
@@ -3088,7 +3089,7 @@ export default {
           let start = moment(this.preBillParam.reserve_base[0].leave_time[0]).format('YYYY-MM-DD HH:mm:ss')
           let end = moment(this.preBillParam.reserve_base[0].leave_time[1]).format('YYYY-MM-DD 14:00:00')
           let that = this
-          let url= that.api.api_price_9101 + '/v1/' + `room/room_status/can_live_room_list/`
+          let url= that.api.api_newPrice_9114 + '/v1/' + `room/room_status/can_live_room_list/`
           let scopeParam = {
             room_type: param,
             start_time: start,
@@ -3118,7 +3119,7 @@ export default {
           let start = moment(this.preBillParam.reserve_base[0].leave_time[0]).format('YYYY-MM-DD')
           let end = moment(this.preBillParam.reserve_base[0].leave_time[1]).format('YYYY-MM-DD')
           let that = this
-          let url =  that.api.api_price_9101 + '/v1/' + 'room/room_status/get_room_type_occupy_list/'
+          let url =  that.api.api_newPrice_9114 + '/v1/' + 'room/room_status/get_room_type_occupy_list/'
           that.$axios({
             url : url,
             method : 'get',
@@ -3172,7 +3173,7 @@ export default {
         //得到房间占用
         getRoomOccupy(){
           let that = this
-          let url = that.api.api_price_9101 + '/v1/' + 'room/room_status/get_room_occupy_list/'
+          let url = that.api.api_newPrice_9114 + '/v1/' + 'room/room_status/get_room_occupy_list/'
           that.$axios.get(url).then(res=>{
               if(res.data.message == 'success'){
                   that.roomOccupyList = res.data.data.results
@@ -3395,7 +3396,7 @@ export default {
             room_no: that.room_no_value
           }
           let params = util.deleteNullParam(scopeParams)//删除对象里属性值为空的属性
-          let url = that.api.api_price_9101 + '/v1/' + `room/room_status/get_room_map_list/?page_size=1000`
+          let url = that.api.api_newPrice_9114 + '/v1/' + `room/room_status/get_room_map_list/?page_size=1000`
           that.$axios({
             method : 'get',
               url : url,
@@ -3590,7 +3591,7 @@ export default {
         getBreakfastList(){ 
           let that = this
           // let url = that.UrLHeader_2 + 'room/get_roomnumber_list_tree/'
-          let url = that.api.api_price_9101 + '/v1/' + 'room/rate_code/get_breakfast_list/'
+          let url = that.api.api_newPrice_9114 + '/v1/' + 'room/rate_code/get_breakfast_list/'
           // let url = `http://47.98.113.173:9101/v1/rate_code/get_breakfast_list/`
           that.$axios({
           method : 'get',
@@ -3739,7 +3740,7 @@ export default {
         getRateCode_list(){
           let that = this
           that.rateCode_list = []
-          let url = that.api.api_price_9101+ '/v1/' + `room/rate_code/get_rate_code_list/`
+          let url = that.api.api_newPrice_9114+ '/v1/' + `room/rate_code/get_rate_code_list/`
           that.$axios.get(url,{
             params: {
               market: that.preBillParam.reserve_base[0].code_market,

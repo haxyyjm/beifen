@@ -2275,7 +2275,7 @@ export default {
         //获取code对应房型数据
         getRoomType(){
           let that = this
-          let url = that.api.api_price_9101+ '/v1/' + `room/room_status/get_room_type_list/`
+          let url = that.api.api_newPrice_9114+ '/v1/' + `room/room_status/get_room_type_list/`
           that.$axios.get(url).then(res=>{
               if(res.data.message == 'success'){
                 console.log('res.data.data.results321312',res.data.data.results)

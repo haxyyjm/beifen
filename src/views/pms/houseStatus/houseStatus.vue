@@ -1351,7 +1351,7 @@
           page : 1,
           page_size : 300,
         }
-        // let url = that.api.api_price_9101 + '/v1/' + `room/room_status/get_room_map_list?page_size=1000`
+        // let url = that.api.api_newPrice_9114 + '/v1/' + `room/room_status/get_room_map_list?page_size=1000`
         let url =  that.api.api_newPrice_9114 + '/v1/' +  'room/room_status/get_room_map_list/page_size=1000'
         that.$axios({
            method : 'get',
@@ -1482,7 +1482,7 @@
           room_no: that.room_no_value
         }
         let params = util.deleteNullParam(scopeParams)//删除对象里属性值为空的属性
-        // let url = that.api.api_price_9101 + '/v1/' + `room/room_status/get_room_map_list?page_size=1000`
+        // let url = that.api.api_newPrice_9114 + '/v1/' + `room/room_status/get_room_map_list?page_size=1000`
         let url =  that.api.api_newPrice_9114 + '/v1/' +  'room/room_status/get_room_map_list/?page_size=1000'
         that.$axios({
            method : 'get',
@@ -1633,7 +1633,7 @@
           let start = moment(new Date()).format('YYYY-MM-DD HH:mm:ss')
           let end = moment(new Date()).format('YYYY-MM-DD 23:59:59')
           let room_no = param.room_no
-          let url =  that.api.api_price_9101 + '/v1/' + 'room/room_status/get_room_occupy_list/'
+          let url =  that.api.api_newPrice_9114 + '/v1/' + 'room/room_status/get_room_occupy_list/'
           that.$axios({
             url : url,
             method : 'get',
@@ -2023,7 +2023,7 @@
       //制卡
       activateCard(param){
         let that = this
-        let url = that.api.api_price_9101 + '/v1/' + `room/room_lock/activate_card/`
+        let url = that.api.api_newPrice_9114 + '/v1/' + `room/room_lock/activate_card/`
         let scopeParam ={
           operate_type: 2,//1, "读卡"), (2, "写卡"), (4, "销卡"),
           start_time: this.enterInfoBillParam.arr_time,
@@ -2195,7 +2195,7 @@
               this.repairAndParam.room_occupy_after_code = 'NNZ'
               this.repairAndParam.room_no = param.room_no
               let that = this
-              let url= that.api.api_price_9101 + '/v1/' + `room/room_status/manual_change_room_status/`
+              let url= that.api.api_newPrice_9114 + '/v1/' + `room/room_status/manual_change_room_status/`
               let scopeParam = that.repairAndParam
               console.log('scopeParam',scopeParam)
               that.$axios.post(url,scopeParam).then(res=>{
@@ -2303,7 +2303,7 @@
            }
            // console.log(new Date(new Date(that.repairAndParam.end_time).setHours(23,59,59)),'that.repairAndParam')
            let that = this
-           let url= that.api.api_price_9101 + '/v1/' + `room/room_status/manual_change_room_status/`
+           let url= that.api.api_newPrice_9114 + '/v1/' + `room/room_status/manual_change_room_status/`
            let scopeParam = that.repairAndParam
            that.$axios.post(url,{
               room_no: array[i].room_no,
@@ -2336,7 +2336,7 @@
         if(array.length>0){
           for(let i in array){
             let that = this
-            let url = that.api.api_price_9101 + '/v1/' + 'room/room_status/manual_change_room_status/'
+            let url = that.api.api_newPrice_9114 + '/v1/' + 'room/room_status/manual_change_room_status/'
             that.$axios.post(url,{
               room_no: array[i].room_no,
               start_time: moment(this.repairAndParam.start_time).format('YYYY-MM-DD HH:mm:ss'),
@@ -2370,7 +2370,7 @@
         this.repairAndParam.start_time = moment(this.repairAndParam.start_time).format('YYYY-MM-DD HH:mm:ss')
         this.repairAndParam.end_time = moment(this.repairAndParam.end_time).format('YYYY-MM-DD HH:mm:ss')
         let that = this
-        let url = that.api.api_price_9101 + '/v1/' + 'room/room_status/manual_change_room_status/'
+        let url = that.api.api_newPrice_9114 + '/v1/' + 'room/room_status/manual_change_room_status/'
         let scopeParam = that.repairAndParam
         that.$axios.post(url,scopeParam).then(res=>{
           this.$message.success('置脏成功')
@@ -2407,7 +2407,7 @@
         this.repairAndParam.room_occupy_after_code = 'NNZ'
         this.repairAndParam.room_no = param.room_no
         let that = this
-        let url= that.api.api_price_9101 + '/v1/' + `room/room_status/manual_change_room_status/`
+        let url= that.api.api_newPrice_9114 + '/v1/' + `room/room_status/manual_change_room_status/`
         let scopeParam = that.repairAndParam
         console.log('scopeParam',scopeParam)
         that.$axios.post(url,scopeParam).then(res=>{
@@ -2446,7 +2446,7 @@
         }
         // console.log(new Date(new Date(that.repairAndParam.end_time).setHours(23,59,59)),'that.repairAndParam')
         let that = this
-        let url= that.api.api_price_9101 + '/v1/' + `room/room_status/manual_change_room_status/`
+        let url= that.api.api_newPrice_9114 + '/v1/' + `room/room_status/manual_change_room_status/`
         let scopeParam = that.repairAndParam
         that.$axios.post(url,scopeParam).then(res=>{
           that.$message.success('操作成功')
@@ -2472,7 +2472,7 @@
       getRepairOccupy(){
         let that = this
         let parent_code = 'room_lock_reason'
-        let url = that.api.api_price_9101 + '/v1/' + 'room/room_status/get_code_room_occupy_list/'
+        let url = that.api.api_newPrice_9114 + '/v1/' + 'room/room_status/get_code_room_occupy_list/'
         // let url= `http://192.168.4.99:8002/v1/room/room_status/get_code_room_occupy_list/`
         that.$axios({
           method : 'get',
@@ -2501,7 +2501,7 @@
       //获取楼栋列表option
       getBuilding(){
         let that = this
-        let url = that.api.api_price_9101+ '/v1/' + 'room/room_status/get_room_building_list/'
+        let url = that.api.api_newPrice_9114+ '/v1/' + 'room/room_status/get_room_building_list/'
         that.$axios.get(url).then(res=>{
             if(res.data.message == 'success'){
                 that.buildingList = res.data.data.results
@@ -2514,7 +2514,7 @@
       //获取楼层数据
       getFloor(){
         let that = this
-        let url = that.api.api_price_9101+ '/v1/' + 'room/room_status/get_room_floor_list/'
+        let url = that.api.api_newPrice_9114+ '/v1/' + 'room/room_status/get_room_floor_list/'
         that.$axios.get(url).then(res=>{
             if(res.data.message == 'success'){
                 that.floorList = res.data.data.results
@@ -2527,7 +2527,7 @@
       //获取房型数据
       getRoomType(){
         let that = this
-        let url = that.api.api_price_9101+ '/v1/' + `room/room_status/get_room_type_list/`
+        let url = that.api.api_newPrice_9114+ '/v1/' + `room/room_status/get_room_type_list/`
         that.$axios.get(url).then(res=>{
             if(res.data.message == 'success'){
                 that.roomTypeList = res.data.data.results

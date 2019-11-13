@@ -1013,7 +1013,7 @@ export default {
             return
           }
           let that = this
-          let url = that.api.api_price_9101+ '/v1/' + `room/rate_code/get_rate_code_list/`
+          let url = that.api.api_newPrice_9114+ '/v1/' + `room/rate_code/get_rate_code_list/`
           that.$axios.get(url,{
             params: {
               market: that.preBillParam.reserve_base.code_market,
@@ -1843,7 +1843,7 @@ export default {
           let start = moment(this.preBillParam.reserve_base.leave_time[0]).format('YYYY-MM-DD')
           let end = moment(this.preBillParam.reserve_base.leave_time[1]).format('YYYY-MM-DD')
           let that = this
-          let url =  that.api.api_price_9101 + '/v1/' + 'room/room_status/get_room_type_occupy_list/'
+          let url =  that.api.api_newPrice_9114 + '/v1/' + 'room/room_status/get_room_type_occupy_list/'
           that.$axios({
             url : url,
             method : 'get',
@@ -1876,7 +1876,7 @@ export default {
           let start = moment(new Date()).format('YYYY-MM-DD HH:mm:ss')
           let end = moment(this.preBillParam.reserve_base.leave_time[1]).format('YYYY-MM-DD HH:mm:ss')
           let that = this
-          let url= that.api.api_price_9101 + '/v1/' + `room/room_status/can_live_room_list/`
+          let url= that.api.api_newPrice_9114 + '/v1/' + `room/room_status/can_live_room_list/`
           let scopeParam = {
             room_type: param,
             start_time: start,
@@ -1901,7 +1901,7 @@ export default {
         //获取code对应房型数据
         getRoomType(){
           let that = this
-          let url = that.api.api_price_9101+ '/v1/' + `room/room_status/get_room_type_list/`
+          let url = that.api.api_newPrice_9114+ '/v1/' + `room/room_status/get_room_type_list/`
           that.$axios.get(url).then(res=>{
               if(res.data.message == 'success'){
                   that.roomTypeList = res.data.data.results
@@ -1927,7 +1927,7 @@ export default {
         //得到房间占用
         getRoomOccupy(){
           let that = this
-          let url = that.api.api_price_9101 + '/v1/' + 'room/room_status/get_room_occupy_list/'
+          let url = that.api.api_newPrice_9114 + '/v1/' + 'room/room_status/get_room_occupy_list/'
           that.$axios.get(url).then(res=>{
               if(res.data.message == 'success'){
                   that.roomOccupyList = res.data.data.results
@@ -2148,7 +2148,7 @@ export default {
             room_no: that.room_no_value
           }
           let params = util.deleteNullParam(scopeParams)//删除对象里属性值为空的属性
-          let url = that.api.api_price_9101 + '/v1/' + `room/room_status/get_room_map_list?page_size=1000`
+          let url = that.api.api_newPrice_9114 + '/v1/' + `room/room_status/get_room_map_list?page_size=1000`
           that.$axios({
             method : 'get',
               url : url,
@@ -2353,7 +2353,7 @@ export default {
         getBreakfastList(){
           let that = this
           // let url = that.UrLHeader_2 + 'room/get_roomnumber_list_tree/'
-          let url = that.api.api_price_9101 + '/v1/' + 'room/rate_code/get_breakfast_list/'
+          let url = that.api.api_newPrice_9114 + '/v1/' + 'room/rate_code/get_breakfast_list/'
           // let url = `http://47.98.113.173:9101/v1/room/rate_code/get_breakfast_list/`
           that.$axios({
           method : 'get',
@@ -2486,7 +2486,7 @@ export default {
         },
         getRateCodeMore(item){
           let that = this
-          let url = that.api.api_price_9101 + '/v1/' +  `room/rate_code/get_rate_code/`
+          let url = that.api.api_newPrice_9114 + '/v1/' +  `room/rate_code/get_rate_code/`
           let scopeParam ={
             rate_code: this.rateCodeValue,
             begin_date:  moment(new Date()).format('YYYY-MM-DD'),
@@ -2516,7 +2516,7 @@ export default {
         //根据房型得到对应房价码
         getRateCode(item,param){
           let that = this
-          let url = that.api.api_price_9101 + '/v1/' +  `room/rate_code/get_rate_code/`
+          let url = that.api.api_newPrice_9114 + '/v1/' +  `room/rate_code/get_rate_code/`
           // let temp = []
           // temp.push(param.room_type)
           // this.preBillParam.reserve_base.rsv_type

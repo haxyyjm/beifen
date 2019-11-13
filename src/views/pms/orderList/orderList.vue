@@ -404,10 +404,8 @@
         <el-table-column prop="master_status_lable" label="单状态">
           <template slot-scope="scope">
             <span v-if="scope.row.master_status_lable === 0">在住</span>
-            <span v-else-if="scope.row.master_status_lable === 1">正常离店</span>
-            <span v-else-if="scope.row.master_status_lable === 2">欠费离店</span>
-            <span v-else-if="scope.row.master_status_lable === 3">部分离店</span>
-            <span v-else-if="scope.row.master_status_lable === -1">异常单</span>
+            <span v-else-if="scope.row.master_status_lable === 4">处理中</span>
+            <span v-else-if="scope.row.master_status_lable === 5">已取消</span>
             <!-- <span v-else>NULL</span> -->
           </template>
         </el-table-column>
@@ -859,8 +857,8 @@
         if (that.roomParam.oldNumber && that.roomParam.newNumber && that.roomParam.oldType && that.roomParam.newType && that.roomParam.oldPrice){
           console.log('kaishi',this.rowParam)
           console.log('roomParam',this.roomParam)
-          // let url = 'http://192.168.2.224:9005' + '/v2/' + `depend_ex/exchange_houses/`
-          let url = that.api.api_newBill_9204 + '/v2/' + `depend_ex/exchange_houses/`
+          let url = 'http://192.168.2.165:9005' + '/v2/' + `depend_ex/exchange_houses/`
+          // let url = that.api.api_newBill_9204 + '/v2/' + `depend_ex/exchange_houses/`
           let scopeParam ={
             order_no:  that.rowParam.order_no,
             old_room: that.roomParam.oldNumber, //原房间
@@ -912,7 +910,7 @@
       getRateCode_price(param){
         // this.preBillLinkParam.room_type_name
         let that = this
-        let url = that.api.api_price_9101 + '/v1/' +  `room/rate_code/get_rate_code/`
+        let url = that.api.api_newPrice_9114 + '/v1/' +  `room/rate_code/get_rate_code/`
         // let temp = []
         // temp.push(param.room_type)
         let scopeParam ={
@@ -939,7 +937,7 @@
           start = moment(this.rowParam.arr_time).format('YYYY-MM-DD')
           end = moment(this.rowParam.leave_time).format('YYYY-MM-DD')
         }
-        let url= that.api.api_price_9101 + '/v1/' + `room/room_status/can_live_room_list/`
+        let url= that.api.api_newPrice_9114 + '/v1/' + `room/room_status/can_live_room_list/`
         let scopeParam = {
           room_type: this.roomParam.newType,
           start_time: start,
@@ -954,7 +952,7 @@
       //获取房型
       getRoomType(){
         let that = this
-        let url =  that.api.api_price_9101 + '/v1/' + 'room/room_status/get_room_type_occupy_list/'
+        let url =  that.api.api_newPrice_9114 + '/v1/' + 'room/room_status/get_room_type_occupy_list/'
         let start 
         let end
         if(this.rowParam.arr_time && this.rowParam.leave_time){
@@ -1250,7 +1248,7 @@
        */
       get_room_type_list(){
         let that = this
-        let url = that.api.api_price_9101+ '/v1/' + `room/room_status/get_room_type_list/`
+        let url = that.api.api_newPrice_9114+ '/v1/' + `room/room_status/get_room_type_list/`
         that.$axios.get(url).then(res=>{
             if(res.data.message == 'success'){
                 that.item_room_types = res.data.data.results

@@ -49,7 +49,7 @@
                 <el-table-column type="index" width="90"  label="序号"></el-table-column>
                 <el-table-column label="姓名">
                   <template slot-scope="scope">
-                    <span v-for="(item,index) of scope.row.master_guest" :key="index">
+                    <span v-for="(item,index) of scope.row.master_guest_list" :key="index">
                       {{item.name}}、
                     </span>
                   </template>
@@ -64,17 +64,9 @@
               <!--缺失市场码来源码的数据-->
               <el-table size="mini" height="550px" v-show="srcLack" :data="srcData" :header-cell-style="{background:'#CCCCCCFF', color: '#333333'}" style="width: 100%">
                 <el-table-column type="index" width="90"  label="序号"></el-table-column>
-                <el-table-column label="姓名">
-                  <template slot-scope="scope">
-                    <span v-for="(item,index) of scope.row.master_guest" :key="index">
-                      {{item.name}}、
-                    </span>
-                  </template>
-                </el-table-column>
                 <el-table-column prop="room_number" label="房间"></el-table-column>
                 <el-table-column prop="room_type" label="房型"></el-table-column>
                 <el-table-column prop="order_no" label="单号"></el-table-column>
-                <el-table-column prop="telephone_master" label="电话"></el-table-column>
                 <el-table-column prop="arr_time" label="到达时间"></el-table-column>
                 <el-table-column prop="leave_time" label="离开时间"></el-table-column>
               </el-table>
@@ -82,7 +74,7 @@
                 <el-table-column type="index" width="90"  label="序号"></el-table-column>
                 <el-table-column label="姓名">
                   <template slot-scope="scope">
-                    <span v-for="(item,index) of scope.row.master_guest" :key="index">
+                    <span v-for="(item,index) of scope.row.master_guest_list" :key="index">
                       {{item.name}}、
                     </span>
                   </template>
@@ -162,7 +154,7 @@
                 <el-table-column type="index" width="90"  label="序号"></el-table-column>
                 <el-table-column label="姓名">
                     <template slot-scope="scope">
-                      <span v-for="(item,index) of scope.row.master_guest" :key="index">
+                      <span v-for="(item,index) of scope.row.master_guest_list" :key="index">
                         {{item.name}}、
                       </span>
                     </template>
@@ -187,7 +179,7 @@
                 <el-table-column type="index" width="90"  label="序号"></el-table-column>
                 <el-table-column label="姓名">
                     <template slot-scope="scope">
-                      <span v-for="(item,index) of scope.row.master_guest" :key="index">
+                      <span v-for="(item,index) of scope.row.master_guest_list" :key="index">
                         {{item.name}}、
                       </span>
                     </template>
@@ -246,12 +238,12 @@
               <span>{{moneydesc.total_consumption}}</span>
             </el-form-item>
             <el-form-item label="余额:">
-              <span>{{-moneydesc.balance}}</span>
+              <span>{{moneydesc.balance}}</span>
             </el-form-item>
-            <el-form-item v-if="moneydesc.balance < 0" label="总退款金额:">
+            <el-form-item v-if="moneydesc.balance > 0" label="总退款金额:">
               <span>{{Math.abs(moneydesc.balance)}}</span>
             </el-form-item>
-            <el-form-item v-if="moneydesc.balance > 0" label="应收金额:">
+            <el-form-item v-if="moneydesc.balance < 0" label="应收金额:">
               <span>{{Math.abs(moneydesc.balance)}}</span>
             </el-form-item>
             <!-- <el-form-item label="欠款离店:">
@@ -268,61 +260,32 @@
                 </el-select>
             </el-form-item>
             <el-form-item label="付款方式:">
-              <!--付款方式-->
-              <el-select size="mini" clearable  @change="get_fields_by_payId" @focus="get_list_by_hotel" v-model="previewEnterBill.payMode"   placeholder="请选择">
-                <el-option
-                  v-for="item in payModelist_other"
-                  :key="item.id"
-                  :label="item.model_name"
-                  :value="item.id">
-                </el-option>
-              </el-select>
-              <span style="margin-left: 10px">金额:</span> <el-input  size="mini" placeholder="请输入金额" v-model="previewEnterBill.money" style="width: 12vw"></el-input>
-              <!-- <span style="color: rgb(252, 103, 132)">(不能大于所选预授权金额!)</span> -->
-            </el-form-item>
-            <el-form-item v-if="(previewEnterBill.payMode == 1 || previewEnterBill.payMode == 38)&& moneydesc.balance >= 0">
-              扫码方式:
-              <el-radio v-model="scan_code" label="0">扫码枪扫描</el-radio>
-              <el-radio v-model="scan_code" label="1">客户扫码</el-radio>
-            </el-form-item>
-            <el-form-item label="付款原因:">
-                <el-select size="mini" @change="previewEnterBill.enterAccountCode=''" clearable  @focus="getPayReason()" placeholder="付款原因"  v-model="previewEnterBill.payReasonValue">
+                <el-select  clearable @change="previewEnterBill.enterAccountCode=''" size="mini"  @focus="getPayReason()" placeholder="付款原因"  v-model="previewEnterBill.payReasonValue">
                   <el-option
                     v-for="item in this.payInfoList"
-                    :key="item.code"
-                    :label="item.name"
+                    :key="item.id"
+                    :label="item.desc"
                     :value="item.id">
                   </el-option>
                 </el-select>
             </el-form-item>
-            <el-form-item v-if="moneydesc.balance < 0" label="入账代码(退款):">
-              <el-select size="mini" clearable @change="controlReason"  @focus="getIncomingAccount('refund')" v-model="previewEnterBill.enterAccountCode"  placeholder="请选择">
+            <el-form-item label="入账代码:">
+              <el-select clearable @change="showExpand"  @focus="getIncomingAccount()"  v-model="previewEnterBill.enterAccountCode" size="mini"  placeholder="请选择">
                 <el-option
                   v-for="item in incomingAccoutList"
                   :key="item.id"
-                  :label="item.name"
+                  :label="item.desc"
                   :value="item.id">
                 </el-option>
               </el-select>
             </el-form-item>
-            <el-form-item v-else>
-                 入账代码:
-                  <el-select size="mini" clearable @change="controlReason"  @focus="getIncomingAccount('pay')"  v-model="previewEnterBill.enterAccountCode"   placeholder="请选择">
-                    <el-option
-                      v-for="item in incomingAccoutList"
-                      :key="item.id"
-                      :label="item.name"
-                      :value="item.id">
-                    </el-option>
-                  </el-select>
-            </el-form-item>
             <!--附加信息==>需要判断储值卡,银行卡,积分兑换-->
             <div style="margin-top: 30px; margin-bottom: 20px">
-              <span v-if="extraInformation.length>0" style="color: #4488E9;">附加信息</span>
+              <span  style="color: #4488E9;">附加信息</span>
               <ul v-for="(item,index) of extraInformation" :key="index">
-                <li v-if="item.field_type != 'datetime'">
-                  <span style="margin-left: 28px">{{item.field_name_cn}}:</span>
-                  <el-input size="mini" v-model="item.field_name_value" style="width: 20vw; margin-top: 10px"></el-input>
+                <li v-if="item.is_show != 0">
+                  <span style="display: inline-block;width: 66px">{{item.fields_describe}}:</span>
+                  <el-input size="mini" v-model="item.acquiescence" style="width: 20vw; margin-top: 10px;"></el-input>
                 </li>
               </ul>
             </div>
@@ -335,10 +298,11 @@
           </el-form>
         </div>
         <div slot="footer" class="dialog-footer">
-          <el-button v-if="(previewEnterBill.payMode == 1 || previewEnterBill.payMode == 38) && moneydesc.balance > 0" type="primary" @click="article_number();pay_amount_money_code = ''">结算</el-button>
-          <el-button v-if="(previewEnterBill.payMode != 1 && previewEnterBill.payMode != 38) && moneydesc.balance > 0" @click="handlePayCharge();"  type="primary">结账</el-button>
-          <el-button type="primary" v-if="moneydesc.balance < 0" @click="jie_addChargeDetail">结账(退款)</el-button>
-          <el-button type="primary" v-if="moneydesc.balance == 0" @click="pingMoney">平账</el-button>
+          <!-- <el-button type="primary" v-if="moneydesc.balance >= 0" @click="jie_addChargeDetail('refund')">结账(退款)</el-button>
+          <el-button type="primary" v-if="moneydesc.balance < 0" @click="jie_addChargeDetail()">结账(收钱)</el-button> -->
+          <!-- <el-button type="primary" @click="jie_addChargeDetail()">结账(收钱)</el-button> -->
+          <el-button type="primary" @click="handlePayCharge()">结账(收钱)</el-button>
+          <!-- <el-button type="primary" v-if="moneydesc.balance == 0" @click="pingMoney">平账</el-button> -->
         </div>
       </el-dialog>
       <!-- 扫码枪扫描 -->
@@ -420,6 +384,9 @@ import _ from 'lodash'
   export default {
     data: function(){
       return {
+        trading_unit: '',
+        linkUrl: '',
+        call_back_url: '',
         extraParam:[],
         scan_code: '0',
         prePayDialog: false, //聚合支付
@@ -686,6 +653,7 @@ import _ from 'lodash'
       },
       //刷新数据
       flushData(){
+        this.extraInformation = []
         this.previewEnterBill.payMode = ''
         this.previewEnterBill.payReasonValue = ''
         this.previewEnterBill.enterAccountCode = ''
@@ -693,8 +661,13 @@ import _ from 'lodash'
       },
       //当有未平账的信息时，点击每一行进行处理
       pingAccount_resolve(row){
+        let that = this
         this.accountParam.account_id = row.account_id
-        this.getEndpayInfoListByAccount(row.account_id)
+        // this.getEndpayInfoListByAccount(row.account_id)
+        that.moneydesc.pay_amount = row.account.pay_amount
+        that.moneydesc.total_consumption = row.account.total_consumption
+        that.moneydesc.balance = row.account.balance
+        this.previewEnterBill.money = Math.abs(row.account.balance) //退款或预收金额
         this.accountResolve_dialog = true
         // this.previewEnterBill.money = Math.abs(this.moneydesc.balance) //退款或预收金额
         this.$confirm('是否清账或挂临时帐?','提示',{
@@ -815,22 +788,20 @@ import _ from 'lodash'
           }).catch(error=>{
         })
       },
-      //结账==>退款(当退款时只能选现金<=====此时)
-      jie_addChargeDetail(){
-        if(this.previewEnterBill.payMode && this.previewEnterBill.payReasonValue && this.previewEnterBill.enterAccountCode){
+      //结账==>退款(当退款时只能选现金<=====此时)//先余额为0 在结账账 分两步
+      jie_addChargeDetail(param){
+        let that = this
+        let url 
+        if(param == 'refund'){
+          url= that.api.api_newPrice_9114+ '/v1/' + `accounts/add_close_detail/`
+        }else{
+          // let url= that.api.api_9022_9519+ '/v1/' + `finance/pay_detail/refund_pms`
+        }
+        if(this.previewEnterBill.payReasonValue && this.previewEnterBill.enterAccountCode){
           let scopeParam = {
-            account_id: this.accountParam.account_id,//主账户id
-            pay_mode_id: this.previewEnterBill.payMode,
-            code_pay_for_id: this.previewEnterBill.payReasonValue,
-            pay_amount: this.previewEnterBill.money,   // 已支付的部分,一般是0,
-            original_pay_id: null,
-            cashier_id: this.previewEnterBill.cashValue,
-            code_income_type_id: this.previewEnterBill.enterAccountCode,   //入账类型代码id
-            // gen_time: moment(new Date()).format('YYYY-MM-DD HH:mm:ss'),    // 业务发生的实际时间
+            account: this.accountParam.account_id,//主账户id
+            remark: this.previewEnterBill.remark,
           }
-          scopeParam.charges = JSON.stringify(scopeParam.charges)
-          let that = this
-          let url= that.api.api_9022_9519+ '/v1/' + `finance/pay_detail/refund_pms`
           that.$axios.post(url,scopeParam).then(res=>{
             if(res.data.message==='success'){
               that.$message.success('处理成功!')
@@ -853,7 +824,7 @@ import _ from 'lodash'
           }).catch(error=>{
           })
         }else{
-          this.$message.warning('请选择付款方式，付款原因或者入账代码!')
+          this.$message.warning('请选择付款方式或者入账代码!')
         }
       },
       //进行付款
@@ -865,32 +836,8 @@ import _ from 'lodash'
           return false
         }
         let that = this
-          //在判断是不是支付宝或者微信
-          if (that.previewEnterBill.payMode === 1 || that.previewEnterBill.payMode === 38) {
-            // that.article_number() //可能有异步产生 此处不要
-            //判断是不是选择扫码枪 在弹出的扫码页面里进行支付
-            console.log('that.scan_code',that.scan_code)
-            if (that.scan_code === "0") {
-              that.dialog_alipay = true;
-            }
-            //如果不是扫码枪
-            else {
-              that.dialog_alipay = false;
-              //判断是微信还是支付宝==>并列
-              if(that.previewEnterBill.payMode === 38){
-                // 首先请求微信或者支付宝的接口，获取动态的二维码
-                that.kindle_dxg();
-              }else{
-                that.alipay_dxg();//支付宝
-              }
-              // that.fu_money();//付钱的结算
-            }
-          }
-          //如果不是支付宝或者微信 ===>此时默认现金支付
-          else {
-            console.log('第一次paycharge')
-            that.payCharge()
-          }
+        console.log('第一次paycharge')
+        that.payCharge()
       },
       //处理附加信息
       handleExtraParam(){
@@ -927,20 +874,16 @@ import _ from 'lodash'
         console.log('...xinxi1',this.extraInformation)
         this.handleExtraParam()
         let that = this
-        let url= that.api.api_9022_9519+ '/v1/' + `finance/pay_detail/pay_money_pms`
+        let url = that.api.api_newPrice_9114 + '/v1/' + 'accounts/pay/'
+        // let url= that.api.api_9022_9519+ '/v1/' + `finance/pay_detail/pay_money_pms`
         // let url= `http://192.168.5.96:9519/v1/finance/pay_detail/pay_by_charges`
         let scopeParam = {
-          account_id: that.accountParam.account_id, //主账id//==========>标记:入住付款的时候得先得到主账id
-          // account_id: 76,//暂时测试
-          pay_mode_id: that.previewEnterBill.payMode,
-          code_pay_for_id: that.previewEnterBill.payReasonValue,
-          pay_amount: that.previewEnterBill.money,
-          code_income_type_id: that.previewEnterBill.enterAccountCode,   //入账类型代码id
-          // biz_date: moment(new Date()).format('YYYY-MM-DD'),
-          original_pay_id: that.order_form == '' ? '': that.order_form, //	微信/淘宝/第三方支付订单的id,现金支付没有此参数
-          original_pay_dict: that.extraParam.length>0 ? JSON.stringify(that.extraParam) : null,
-          // ar_account_id: '',//	ar账户id, ar支付必须.
+          pay_amount: -Number(that.previewEnterBill.money),//传负值
+          desc: that.previewEnterBill.remark,
+          account: that.accountParam.account_id, //主账id
           cashier_id:	that.previewEnterBill.cashValue,
+          incoming_account_reason: that.previewEnterBill.payReasonValue,
+          incoming_account_code: that.previewEnterBill.enterAccountCode,
         }
         console.log('scopeParam',scopeParam)
         that.$axios.post(url,scopeParam).then(res=>{
@@ -948,23 +891,79 @@ import _ from 'lodash'
           if(res.data.message != 'success'){
             that.$message.warning('调用后台接口失败')
           }else{
-            that.$message.success('操作成功!')
-            that.accountResolve_dialog = false
-            let row = {
-              index: 0,
-              nightItem: '退房未平帐的主帐信息',
-              number: 0,
-              src: '',
-            }
-            this.getNight_noPing(row)//刷新右边tabel
-            if(this.nightData[0].number > 0){
-              this.nightData[0].number = this.nightData[0].number -1//刷新左边数据
+            that.get_refund_obj = res.data.data.data
+            let payment_id = res.data.data.data.id
+            if(this.linkUrl){
+              //1.请求这个url得到相应数据例如二维码
+              console.log(that.linkUrl,that.extraInformation,payment_id,that.extraInformation_no)
+              that.getInfoByLinkUrl(that.linkUrl,that.extraInformation,payment_id,that.extraInformation_no) //类似kindle_dxg
+              // this.kindle_dxg()
             }else{
-              this.nightData[0].number = 0//刷新左边对应数据
+              that.$message.success('操作成功!')
+              that.accountResolve_dialog = false
+              let row = {
+                index: 0,
+                nightItem: '退房未平帐的主帐信息',
+                number: 0,
+                src: '',
+              }
+              this.getNight_noPing(row)//刷新右边tabel
+              if(this.nightData[0].number > 0){
+                this.nightData[0].number = this.nightData[0].number -1//刷新左边数据
+              }else{
+                this.nightData[0].number = 0//刷新左边对应数据
+              }
+              // this.$router.go(0)
             }
-            // this.$router.go(0)
           }
           }).catch(error=>{
+        })
+      },
+      getInfoByLinkUrl(url,description,payment_id,link_data){
+        console.log('iiiiiiiii',url,description,payment_id,link_data)
+        let that = this;
+        let params = {};
+        let obj={},
+        params_obj={};
+        //实现取值拼接json给后台的值
+        for(let item of description){
+          params[item.fields_name] = item.acquiescence
+        }
+        for(let i  of link_data){
+          if(i.parallelism === "pay_amount"){
+            params_obj[i.fields_name] = -Number(that.get_refund_obj[i.parallelism])*that.trading_unit;
+          }else {
+            params_obj[i.fields_name] = that.get_refund_obj[i.parallelism];
+          }
+        }
+        console.log('params_obj',params_obj)
+        console.log('params',params)
+        let merge_obj = Object.assign(obj,params,params_obj);
+        console.log('merge_obj',merge_obj)
+        console.log('.......',this.linkUrl)
+        console.log('进入得到二维码')
+        console.log('url',url)
+        that.$axios({
+          url: url,
+          method: "post",
+          data: merge_obj,
+        }).then(res=>{
+          if(res.data.message == 'success'){
+            if(res.data.data.qr_img_b64){
+              that.img_src = "data:image/png;base64," + res.data.data.qr_img_b64;
+              console.log(that.img_src);
+              that.dialog_img = true;
+              that.img_wz = true;
+              if(that.img_src){
+                that.check_paid(that.call_back_url,payment_id);//查询二维码支付是否成功
+              }
+            }else {
+              that.check_paid(that.call_back_url,payment_id);//查询二维码支付是否成功
+            }
+          }else{
+            console.log(error)
+            // this.$message.error(error)
+          }
         })
       },
         /**封装获取商品订单号====>付款第一步*/
@@ -1000,38 +999,6 @@ import _ from 'lodash'
         console.log('关掉')
         clearInterval(this.timer_src)
         clearInterval(this.timer_r)
-      },
-      //进行付款
-      handlePayCharge(){
-        if(!this.validatePayData()){
-          return false
-        }
-        let that = this
-          //在判断是不是支付宝或者微信
-          if (that.previewEnterBill.payMode === 1 || that.previewEnterBill.payMode === 38) {
-            // that.article_number() //可能有异步产生 此处不要
-            //判断是不是选择扫码枪 在弹出的扫码页面里进行支付
-            console.log('that.scan_code',that.scan_code)
-            if (that.scan_code === "0") {
-              that.dialog_alipay = true;
-            }
-            //如果不是扫码枪
-            else {
-              that.dialog_alipay = false;
-              //判断是微信还是支付宝==>并列
-              if(that.previewEnterBill.payMode === 38){
-                // 首先请求微信或者支付宝的接口，获取动态的二维码
-                that.kindle_dxg();//获取维信的二维码
-              }else{
-                that.alipay_dxg();//支付宝
-              }
-              // that.fu_money();//付钱的结算
-            }
-          }
-          //如果不是支付宝或者微信 ===>此时默认现金支付
-          else {
-            that.payCharge()
-          }
       },
       /**首先请求支付宝二维码接口*/
       alipay_dxg(){
@@ -1278,12 +1245,14 @@ import _ from 'lodash'
             },
           }).then(res=>{
               if (res.data.message=="success"){
-                console.log(res.data.data);
-                that.img_src= "data:image/png;base64,"+res.data.data.qr_img_b64;
-                console.log(that.img_src);
-                that.dialog_img=true;
-                that.img_wz=true//判断二维码展示flag
-               that.check_paid();//查询二维码支付是否成功
+                if(res.data.data.qr_img_b64){
+                  that.img_src = "data:image/png;base64," + res.data.data.qr_img_b64;
+                  that.dialog_img = true;
+                  that.img_wz = true;
+                  that.check_paid(that.call_back_url,payment_id);//查询二维码支付是否成功
+                }else {
+                  that.check_paid(that.call_back_url,payment_id);//查询二维码支付是否成功
+                }
               }
               else{
                 that.error_message(res.data.message)
@@ -1294,52 +1263,99 @@ import _ from 'lodash'
         });
       },
       //封装查看微信二维码或者扫码枪扫描支付是否成功
-        check_paid(){
+        check_paid(url,payment_id){
+          console.log('url////////////////////',url)
+          console.log('payment_id',payment_id)
           let that = this;
+          clearInterval(that.timer_r);
           clearInterval(that.timer_src);
           that.$axios({
-            url: that.api.api_9530_9503+ '/v1/' + "payment/weixin/check_paid",
-            method: "post",
-            data:{
-              out_trade_no:that.order_form
-            },
-          }).then(res=>{
-              if(res.data.data.paid === "yes"){
-                that.dialog_img=false;
-                that.dialog_succeed=true;//成功或者失败的页面
-                that.ihatetheqrcode=true;
+            // url: "http://47.98.113.173:9503/v1/payment/weixin/check_paid",
+            url:url+payment_id+"/",
+            method: "get",
+          })
+            .then(res => {
+              console.log(res);
+              if (res.data.data.pay_status === 0) {
+                console.log(res);
+                that.dialog_img = false;
+                that.dialog_succeed = true;//成功或者失败的页面
+                that.ihatetheqrcode = true;
+                clearInterval(that.timer_r);
                 clearInterval(that.timer_src);
-              }else{
-                if(that.timer>=60){
-                  clearInterval(that.timer_src);
-                  if (res.data.data === "yes"){
-                    that.dialog_img=false;
-                    that.dialog_succeed=true;//成功或者失败的页面
-                    that.ihatetheqrcode=true;
-                  }else {
-                    that.dialog_img=false;
-                    that.dialog_succeed=true;//成功或者失败的页面
-                    that.ihatetheqrcode=false;
-                  }
-                  return;
-                }
-                that.timing();
+                that.timer=0;
+                that. pay_ament_particulars(that.major_account_id);//刷新付款
               }
+              else {
+                if (that.img_src) {
+                  that.timing_wx(url,payment_id);
+                  if (that.timer >= 60) {
+                    clearInterval(that.timer_r);
+                    clearInterval(that.timer_src);
+                    that.timer=0;
+                    if (res.data.data.pay_status === 0) {
+                      that.dialog_img = false;
+                      that.dialog_succeed = true;//成功或者失败的页面
+                      that.ihatetheqrcode = true;
+                      that. pay_ament_particulars(that.major_account_id);//刷新付款
+                    } else {
+                      that.dialog_img = false;
+                      that.dialog_succeed = true;//成功或者失败的页面
+                      that.ihatetheqrcode = false;
+                    }
+                    return;
+                  }
+                } else {
+                  that.timing(url,payment_id);
+                  if (that.timer >= 6) {
+                    clearInterval(that.timer_r);
+                    clearInterval(that.timer_src);
+                    that.timer=0;
+                    if (res.data.data.pay_status === 0) {
+                      that.dialog_img = false;
+                      that.dialog_succeed = true;//成功或者失败的页面
+                      that.ihatetheqrcode = true;
+                    } else {
+                      that.dialog_img = false;
+                      that.dialog_succeed = true;//成功或者失败的页面
+                      that.ihatetheqrcode = false;
+                    }
+                    return;
 
+                  }
+                }
+              }
             })
-            .catch(error=>{
+            .catch(error => {
               console.log(error);
             });
         },
+        //封装微信二维码后的定时器
+        timing_wx(url,payment_id) {
+          let that = this;
+          // that.timer=0;
+          that.timer_src = setInterval(function ()   //开启循环：
+          {
+            that.timer++;
+            console.log(that.timer++);
+            that.check_paid(url,payment_id);
+            if (that.timer >= 60) {
+              clearInterval(that.timer_src);
+              console.log(that.timer);
+              return;
+              //判断res
+            }
+          }, 2000);
+        },
         //封装扫描二维码后触发的定时器
-        timing(){
+        timing(url,payment_id){
           let that = this;
           // that.timer=0;
           that.timer_src=setInterval(function()   //开启循环：
           {
             that.timer++;
             console.log(that.timer++);
-            that.check_paid();
+            that.check_paid(url,payment_id);
             if(that.timer >=60){
               clearInterval(that.timer_src);
               console.log(that.timer);
@@ -1347,7 +1363,7 @@ import _ from 'lodash'
               //判断res
 
             }
-          },1000);
+          },2000);
         },
          /** 成功页面或者失败页面的确定按钮*/
         succeed_failed(){
@@ -1391,7 +1407,7 @@ import _ from 'lodash'
        validatePayData(){
           return(
             util.validateBlank(this.previewEnterBill.enterAccountCode,'入账代码是必填项',this)&&
-            util.validateBlank(this.previewEnterBill.payMode,'支付方式是必填项',this)
+            util.validateBlank(this.previewEnterBill.payReasonValue,'付款方式是必填项',this)
             // util.validateBlank(this.previewEnterBill.payReasonValue,'付(退)款原因是必填项',this)
             // util.validateBlank(this.previewEnterBill.money,'请输入正确身份证格式',this)
           )
@@ -1604,12 +1620,12 @@ import _ from 'lodash'
             break;
            case '缺失市场码来源码主单':
             this.getNight_noSrc(row)
-            this.hourLeave = true
+            this.hourLeave = false
             this.noAddress = false
             this.noPay = false
             this.errorCheck = false
             this.noArrive = false
-            this.srcLack = false
+            this.srcLack = true
             this.noPing = false
             this.qingAccount = false
             this.cancleOrder = false
@@ -1642,7 +1658,7 @@ import _ from 'lodash'
                 message:'还未到夜审时间,不能入账!'
               });
               return 
-            }else if(this.is_night == false){
+            }else if(this.is_night == true){
               // this.$router.push('/login')//跳转到登陆界面
               // this.$message.warning('夜审时间未到或者已经夜审了，不能进行批量入账操作!')
               this.$message({
@@ -1681,17 +1697,18 @@ import _ from 'lodash'
             break;
         }
       },
-      //批量入账操作
+      //批量入账操作 =====新版本
       enterAccount(){
         let that = this
-        let url = that.api.api_9022_9519 + '/v1/' + 'report/night_audit/batch_add_rent'
+        // let url = that.api.api_9022_9519 + '/v1/' + 'report/night_audit/batch_add_rent'
+        let url = that.api.api_newPrice_9114 + '/v1/' + 'report/night_audit/add_YSFF/'
         that.$axios.post(url).then(res=>{
           console.log('res入账',res.data)
           if(res.data.message === 'success'){
             that.$message.warning('夜审入账成功')
-            this.$router.push('/login')//跳转到登陆界面
+            // this.$router.push('/login')//跳转到登陆界面
             console.log('.......')
-            that.addNight_record()//添加一条夜审记录
+            // that.addNight_record()//添加一条夜审记录
           }
         })
 
@@ -1709,16 +1726,15 @@ import _ from 'lodash'
       },
       //检查是否已经夜审
       check_isNight(){
-        this.is_night = true//防止干扰
+        this.is_night = false//防止干扰
         console.log('jinrurururuur')
         let that = this
-        let url = that.api.api_9022_9519 + '/v1/' + 'report/night_audit/check'
-        console.log('urllll',url)
-        that.$axios.post(url).then(res=>{
+        let url = that.api.api_newPrice_9114 + '/v1/' + 'report/night_audit/night_check/'
+        that.$axios.get(url).then(res=>{
+          console.log('resss',res.data.data.data)
           if(res.data.message == 'success'){
-            this.is_night = true
+            this.is_night = res.data.data.data
           }else{
-            this.is_night = false
             this.$message.warning(res.data.message)
           }
           console.log('res检查',res.data)
@@ -1756,7 +1772,7 @@ import _ from 'lodash'
       getNight_noPing(row){
         // row.number= 1
         let that = this
-        let url = that.api.api_newPrice_9114+ '/v1/' + `report/check_out_but_no_closed/`
+        let url = that.api.api_newPrice_9114+ '/v1/' + `report/night_audit/check_out_but_no_closed/`
         that.$axios.get(url).then(res=>{
           try {
             row.number = res.data.data.data.length
@@ -1775,7 +1791,7 @@ import _ from 'lodash'
       //异常检查
       getNight_errorCheck(){
         let that = this;
-        let url = that.api.api_newPrice_9114+ '/v1/' + `report/get_abnormal_master_base/`
+        let url = that.api.api_newPrice_9114+ '/v1/' + `report/night_audit/get_abnormal_master_base/`
         that.$axios({
           method: 'get',
           url: url,
@@ -1798,7 +1814,7 @@ import _ from 'lodash'
       // 应离未离钟点房列表
       getNight_hourLeave(row){
         let that = this;
-        let url = that.api.api_bill_9202 + '/v1/checkin/get_leave_hour_night_list/?page_size=300';
+        let url = that.api.api_newPrice_9114 + '/v1/checkin/night_audit/get_leave_hour_night_list/';
         that.$axios({
           method: 'post',
           url: url,
@@ -1821,8 +1837,8 @@ import _ from 'lodash'
       //应离未离宾客列表
       getNight_qingAccount(row){
         let that = this;
-        // let url = that.api.api_bill_9202 + '/v1/checkin/get_leave_night_list/?page_size=300';
-        let url = that.api.api_newPrice_9114+ '/v1/' + `report/should_leave_without_leave/`
+        // let url = that.api.api_newPrice_9114 + '/v1/checkin/get_leave_night_list/?page_size=300';
+        let url = that.api.api_newPrice_9114+ '/v1/' + `report/night_audit/should_leave_without_leave/`
         that.$axios({
           method: 'get',
           url: url,
@@ -1842,20 +1858,22 @@ import _ from 'lodash'
           console.error(err);
         })
       },
+      //缺少市场码来源码登记单
       getNight_noSrc(row){
         let that = this
-        let url = that.api.api_bill_9202 + '/v1/checkin/get_no_src_market_night_list/?page_size=300';
+        let url = that.api.api_newPrice_9114 + '/v1/report/night_audit/without_market_code_src_code/';
         that.$axios({
-          method: 'post',
+          method: 'get',
           url: url,
         }).then((res) => {
           try {
-            row.number = res.data.data.results.length
+            row.number = res.data.data.data.length
             row.src = row.number == 0 ? '通过' : '异常'
             if(row.src === '异常'){
               this.$message.warning('存在异常数据!')
             }
-            that.srcData = res.data.data.results
+            that.srcData = res.data.data.data
+            console.log('....',that.srcData)
             // localStorage.setItem('qingAccount',row.number)
           } catch (error) {
             console.log('error')
@@ -1867,8 +1885,8 @@ import _ from 'lodash'
       //应到未到客人列表
       getNight_noArrive(row){
         let that = this
-        // let url = that.api.api_bill_9202 + '/v1/booking/get_not_arrive_night_list/?page_size=300';
-        let url = that.api.api_newPrice_9114+ '/v1/' + `report/should_check_in_without_check_in/`
+        // let url = that.api.api_newPrice_9114 + '/v1/booking/get_not_arrive_night_list/?page_size=300';
+        let url = that.api.api_newPrice_9114+ '/v1/' + `report/night_audit/should_check_in_without_check_in/`
         that.$axios({
           method: 'get',
           url: url,
@@ -1891,7 +1909,7 @@ import _ from 'lodash'
       //取消预订列表
       getNight_cancleOrder(row){
         let that = this
-        let url = that.api.api_bill_9202+ '/v1/' + `booking/get_cancel_reserve_night_list/?page_size=300`
+        let url = that.api.api_newPrice_9114+ '/v1/' + `booking/get_cancel_reserve_night_list/?page_size=300`
         that.$axios.post(url).then(res=>{
           row.number = res.data.data.results.length
           row.src = row.number == 0 ? '通过' : '异常'
@@ -1944,7 +1962,7 @@ import _ from 'lodash'
       //即将到期维修和锁定房
       getNight_repairLock(row){
         let that = this
-        let url = that.api.api_price_9101+ '/v1/' + `report/get_OO_room_list/`
+        let url = that.api.api_newPrice_9114+ '/v1/' + `report/get_OO_room_list/`
         that.$axios.get(url).then(res=>{
           console.log('res.data.data==repair',res.data.data.results)
           row.number = res.data.data.results.length
@@ -1964,19 +1982,43 @@ import _ from 'lodash'
           return
         }
       },
+      //确定入账代码值 判断是否展示额外信息及内容
+      showExpand(){
+        let that = this
+        console.log('previewEnterBill.enterAccountCode',this.previewEnterBill.enterAccountCode)
+        console.log('showExpand',)
+        let expandInfo =  this.incomingAccoutList.filter(item=>item.id==this.previewEnterBill.enterAccountCode)
+        console.log('expandInfo',expandInfo)
+        this.linkUrl = expandInfo[0].link_url
+        this.trading_unit = expandInfo[0].trading_unit
+        that.call_back_url = expandInfo[0].call_back_url
+        console.log('this.linkUrl',this.linkUrl)
+        if(expandInfo[0].link_data){
+          //字符串数组变化为数组，用json的parse的方法进行转换,这个变量接收额外信息
+          that.extraInformation = JSON.parse(expandInfo[0].link_data)
+          let extraInformation_All = _.cloneDeep(that.extraInformation) 
+          that.extraInformation = extraInformation_All.filter(item=>item.is_show == '1')
+          that.extraInformation_no = extraInformation_All.filter(item=>item.is_show == '0')
+          console.log('that.extraInformation额外信息',that.extraInformation)
+        }else{
+          that.extraInformation = []
+        }
+      },
       //入账代码
       getIncomingAccount(){
         let that = this
-        let url =  that.api.api_9022_9519+ '/v1/' +  'finance/incoming_account_code/info_list'
-        let scopeParam = {
-          code_pay_for: that.previewEnterBill.payReasonValue,
-          in_or_out: null,
-          only_system: null,//	0或者1 一般不传传递此参数
-          page_size: 300
+        that.incomingAccoutList = [] //防止数据污染
+        let parent_id = that.previewEnterBill.payReasonValue
+        console.log('id',that.previewEnterBill.payReasonValue)
+        if(!parent_id){
+          this.$message.warning('请先选择付款方式!')
+          return
         }
-        that.$axios.post(url,scopeParam).then(res=>{
-            console.log('res.data',res.data.data.list)
-            that.incomingAccoutList = res.data.data.list
+        // let url =  that.api.api_9022_9519+ '/v1/' +  'finance/incoming_account_code/info_list'
+        let url =  that.api.api_newPrice_9114 + '/v1/' +  'system/settings/get_code_pay_for_list/?parent_id=' + parent_id + '&page_size=300'
+        that.$axios.get(url).then(res=>{
+            console.log('res.data',res.data.data.results)
+            that.incomingAccoutList = res.data.data.results
           }).catch(error=>{
         })
       },
@@ -1985,12 +2027,14 @@ import _ from 'lodash'
       */
       getCashRegister(){
         let that = this
-        let url= that.api.api_9022_9519+ '/v1/' + `finance/cash_register/info_list`
+        // let url= that.api.api_9022_9519+ '/v1/' + `finance/cash_register/info_list`
+        let url =  that.api.api_newPrice_9114 + '/v1/' +  'accounts/get_cash_register_list/'
+
         that.$axios({
           method : 'get',
           url : url,
         }).then(res=>{
-          that.cashRegisterList = res.data.data.list
+          that.cashRegisterList = res.data.data.results
         }).catch(error=>{
         })
       },
@@ -1999,12 +2043,13 @@ import _ from 'lodash'
        */
       getPayReason(){
         let that = this
-        let url= that.api.api_9022_9519+ '/v1/' + `finance/code_pay_for/info_list?page_size=999`
+        // let url= that.api.api_9022_9519+ '/v1/' + `finance/code_pay_for/info_list?page_size=999`
+        let url = that.api.api_newPrice_9114+ '/v1/' + `system/settings/get_code_pay_for_list/?code_type=2&page_size=300&parent_id=`
         that.$axios({
           method : 'get',
           url : url,
         }).then(res=>{
-          that.payInfoList = res.data.data.list
+          that.payInfoList = res.data.data.results
         }).catch(error=>{
         })
       },

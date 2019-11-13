@@ -275,8 +275,8 @@
             <el-row style="margin-top: 120px">
                 <img style="cursor: pointer; display: inline-block; margin-bottom: -19px" @click="cardImport" src="../../../assets/images/pms/houseStatus/cardImport.png">
                 <!-- <el-button style="height: 50px; width: 150px; margin-left: 12px" type="info">物品</el-button> -->
-                <!-- <el-button style="height: 50px; width: 100px" type="info" @click="remarkDialog = true; resolveRemarkList()">备注</el-button>
-                <el-button style="height: 50px; width: 100px" type="info" @click="preview_billDialog = false">预约发票</el-button> -->
+                <!-- <el-button style="height: 50px; width: 100px" type="info" @click="remarkDialog = true; resolveRemarkList()">备注</!-->
+                <!-- <el-button style="height: 50px; width: 100px" type="info" @click="preview_billDialog = false">预约发票</el-button> -->
                 <!-- <el-button style="height: 50px; width: 100px" type="info" @click="consumeDialog = true">消费</el-button> -->
                 <!-- <el-button style="height: 50px; width: 100px" type="info" @click="settingDialog = false">服务设置</el-button> -->
                 <!-- <el-button style="height: 50px; width: 100px" type="info" @click="pictureImportDialog = true;">图像拍摄</el-button> -->
@@ -734,7 +734,7 @@
             <el-input v-model="remarkContent_value" style="margin-top: 20px" placeholder="请输入备注信息" type="textarea" :rows="10"></el-input>
           </div>
           <div slot="footer" class="dialog-footer">
-            <el-button type="info"   @click="addRemark();remarkDialog=false">保存</el-button>
+            <el-button type="info"   @click="addRemark();">保存</el-button>
           </div>
         </el-dialog>
     </div>
@@ -1050,6 +1050,7 @@ export default {
                 last_account_id: null,
                 last_pay_id: null,
                 account_num: null,
+                remark_id_list: '',
                 pay_num: 0,
                 master_id: null,
                 sub_lable: null,
@@ -1417,7 +1418,7 @@ export default {
           return
         }
         let that = this
-        let url = that.api.api_price_9101+ '/v1/' + `room/rate_code/get_rate_code_list/`
+        let url = that.api.api_newPrice_9114+ '/v1/' + `room/rate_code/get_rate_code_list/`
         let scopeParam
         if(this.preBillParam.master_base[0].master_lable != 1){
           scopeParam = {
@@ -1456,6 +1457,7 @@ export default {
         this.authorizationDialog = true;
       },
       handlePolice(){
+        this.policeInfoParam.liveStatus = 0
         console.log('card身份',this.cardInfoParam)
         console.log('policeInfoParam',this.policeInfoParam)
         console.log('this.preBillParam.master_guest<=====',this.preBillParam.master_guest)
@@ -1804,12 +1806,14 @@ export default {
             },
           }).then(res=>{
               if (res.data.message=="success"){
-                console.log(res.data.data);
-                that.img_src= "data:image/png;base64,"+res.data.data.qr_img_b64;
-                console.log(that.img_src);
-                that.dialog_img=true;
-                that.img_wz=true//判断二维码展示flag
-               that.check_paid();//查询二维码支付是否成功
+                if(res.data.data.qr_img_b64){
+                  that.img_src = "data:image/png;base64," + res.data.data.qr_img_b64;
+                  that.dialog_img = true;
+                  that.img_wz = true;
+                  that.check_paid(that.call_back_url,payment_id);//查询二维码支付是否成功
+                }else {
+                  that.check_paid(that.call_back_url,payment_id);//查询二维码支付是否成功
+                }
               }
               else{
                 that.error_message(res.data.message)
@@ -1995,7 +1999,17 @@ export default {
       },
       //刷新入住公安
       flushPolice(){
-        this.policeInfoParam.room_no = ''//刷新
+        this.policeInfoParam.liveStatus = 0
+        // this.policeInfoParam.room_no = ''//刷新
+        // this.policeInfoParam.name = ''//刷新
+        // this.policeInfoParam.sex = ''//刷新
+        // this.policeInfoParam.cardType = ''//刷新
+        // this.policeInfoParam.cardNo = ''//刷新
+        // this.policeInfoParam.nation = ''//刷新
+        // this.policeInfoParam.address = ''//刷新
+        // this.policeInfoParam.birthday = ''//刷新
+        // this.policeInfoParam.telephone = ''//刷新
+        // this.policeInfoParam.remark = ''//刷新
       },
       handleCompare(){
         try {
@@ -2056,14 +2070,14 @@ export default {
         // that.transferData()//转换处理数据
         // let url_enter= that.api.api_9022_9519+ '/v1/' + `outside/api/submit_check_in_master`
         // let url_same = that.api.api_9022_9519+ '/v1/' + `outside/api/submit_check_in_add` //提交同住人url
-        let url_enter = 'http://organ.crowncrystalhotel.com/v1/organization/ht/public_security/submit_check_in_master/'
-        let url_same = 'http://organ.crowncrystalhotel.com/v1/organization/ht/public_security/submit_check_in_add/'
+        let url_enter = 'http://organ.crowncrystalhotel.com/v1/organization/ht/public_security/pms_submit_check_in_master/'
+        let url_same = 'http://organ.crowncrystalhotel.com/v1/organization/ht/public_security/pms_submit_check_in_add/'
         //入住人
         if(this.policeInfoParam.liveStatus === 0){
           let scopeParam_enter = {
-            hotel_id: hotel_id,
+            // hotel_id: hotel_id,
             // register_type: 14,//登记类型
-            device_code: 'ByA29WcYF94SoWTjo533RLeV3JBi9KcIsLdYTdzjnk4=',
+            // device_code: 'ByA29WcYF94SoWTjo533RLeV3JBi9KcIsLdYTdzjnk4=',
             card_type: this.policeInfoParam.cardType,//证件类型 一般为身份证
             similarity_degree: this.percent === '0' ? this.percent + '%'  : this.percent,
             room_number:  this.policeInfoParam.room_no,
@@ -2089,25 +2103,27 @@ export default {
           console.log('this.cardTypethis.cardType',this.cardType)
           //同住人对象
             let scopeParam_same = {
+              // hotel_id: hotel_id,
+              // device_code: 'ByA29WcYF94SoWTjo533RLeV3JBi9KcIsLdYTdzjnk4=',
+              original_card_type: this.cardType ? this.cardType : '身份证',//入住人证件类型
+              original_card_number: this.card_number,//入住人证件号码//相反操作
               similarity_degree: this.percent === '0' ? this.percent + '%'  : this.percent,
               room_number:  this.policeInfoParam.room_no,
-              // room_number:  '1001',
-              // card_number: '342427199509182519',//证件号码
-              // original_card_number: '411323199309163430',//入住人证件号码
-              original_card_number: this.card_number,//入住人证件号码//相反操作
-              card_number: this.policeInfoParam.cardNo,//同住人证件号码//相反操作
-              // card_type:  '身份证',//证件类型
-              // original_card_type: '身份证',//入住人证件类型
-              original_card_type: this.cardType ? this.cardType : '身份证',//入住人证件类型
-              card_type:  this.policeInfoParam.cardType,//同住人证件类型
               user_name: this.policeInfoParam.name,
               sex: this.policeInfoParam.sex + '性',
               birthday: this.policeInfoParam.birthday,
               permanent_address: this.policeInfoParam.address,
-              register_type: 14,//登记类型
               nation: this.policeInfoParam.nation + '族',
               photo: this.imageUrl,//现场拍摄照片
-              profile_photo: this.card_imgUrl//身份证照片
+              profile_photo: this.card_imgUrl,//身份证照片
+              card_number: this.policeInfoParam.cardNo,//同住人证件号码//相反操作
+              card_type:  this.policeInfoParam.cardType,//同住人证件类型
+              // room_number:  '1001',
+              // card_number: '342427199509182519',//证件号码
+              // original_card_number: '411323199309163430',//入住人证件号码
+              // card_type:  '身份证',//证件类型
+              // original_card_type: '身份证',//入住人证件类型
+              // register_type: 14,//登记类型
             }
             if(scopeParam_same.card_number && scopeParam_same.room_number){
               url = url_same
@@ -2118,7 +2134,14 @@ export default {
         }
         console.log('url',url)
         console.log('scopeParamscopeParam',scopeParam)
-        that.$axios.post(url,scopeParam).then(res=>{
+        that.$axios({
+          method: "POST",
+          url: url,
+          data: scopeParam,
+          headers: {
+              'authorization': 'auth_156cd3fefe2a40f5bd0308b897bdb768'
+          }
+    }).then(res=>{
           console.log('res',res)
           if(res.data.msg == 'OK'){
             that.$message.warning('登记成功')
@@ -2814,6 +2837,7 @@ export default {
                 last_account_id: null,
                 last_pay_id: null,
                 account_num: null,
+                remark_id_list: '',
                 pay_num: 0,
                 master_id: null,
                 sub_lable: null,
@@ -2939,7 +2963,7 @@ export default {
           let start = moment(this.preBillParam.master_base[0].leave_time[0]).format('YYYY-MM-DD HH:mm:ss')
           let end = moment(this.preBillParam.master_base[0].leave_time[1]).format('YYYY-MM-DD HH:mm:ss')
           let that = this
-          let url= that.api.api_price_9101 + '/v1/' + `room/room_status/can_live_room_list/`
+          let url= that.api.api_newPrice_9114 + '/v1/' + `room/room_status/can_live_room_list/`
           let scopeParam = {
             room_type: param.room_type_value,
             start_time: start,
@@ -2971,7 +2995,7 @@ export default {
           let start = moment(this.preBillParam.master_base[0].leave_time[0]).format('YYYY-MM-DD HH:mm:ss')
           let end = moment(this.preBillParam.master_base[0].leave_time[1]).format('YYYY-MM-DD HH:mm:ss')
           let that = this
-          let url= that.api.api_price_9101 + '/v1/' + `room/room_status/can_live_room_list/`
+          let url= that.api.api_newPrice_9114 + '/v1/' + `room/room_status/can_live_room_list/`
           let scopeParam = {
             room_type: param.room_type_value,
             start_time: start,
@@ -3404,9 +3428,8 @@ export default {
          */
         truePostEnter(scopeParam){
           let that = this
-          // let url= that.api.api_bill_9202 + '/v1/' + `checkin/nobooking_checkin/`
-          let url= 'http://192.168.2.165:9005' + '/v2/' + `checkin/nobooking_checkin/`
-          // let url= that.api.api_newBill_9204 + '/v2/' + `checkin/nobooking_checkin/`
+          // let url= 'http://192.168.2.165:9005' + '/v2/' + `checkin/nobooking_checkin/`.
+          let url= that.api.api_newBill_9204 + '/v2/' + `checkin/nobooking_checkin/`
           console.log('scopeParam===true==传入param',scopeParam)
           setTimeout(() => {
             that.$axios.post(url,scopeParam).then(res=>{
@@ -3474,7 +3497,7 @@ export default {
           console.log('this.rateValueList----2',this.rateValueList)
           console.log('item====数据',item)
           let that = this
-          let url = that.api.api_price_9101 + '/v1/' +  `room/rate_code/get_rate_code/`
+          let url = that.api.api_newPrice_9114 + '/v1/' +  `room/rate_code/get_rate_code/`
           let scopeParam ={
             rate_code: this.rateCodeValue,
             begin_date:  moment(new Date(item.master_base[0].arr_time)).format('YYYY-MM-DD'),
@@ -3672,7 +3695,7 @@ export default {
           //暂时加判断，当为钟点房的时候时间需要推一天
           let end = this.preBillParam.master_base[0].master_lable != 1 ? moment(this.preBillParam.master_base[0].leave_time[1]).format('YYYY-MM-DD'): moment(new Date()).add(+1,'days').format('YYYY-MM-DD')
           let that = this
-          let url =  that.api.api_price_9101 + '/v1/' + 'room/room_status/get_room_type_occupy_list/'
+          let url =  that.api.api_newPrice_9114 + '/v1/' + 'room/room_status/get_room_type_occupy_list/'
           that.$axios({
             url : url,
             method : 'get',
@@ -3710,7 +3733,7 @@ export default {
         //获取code对应房型数据
         getRoomType(){
           let that = this
-          let url = that.api.api_price_9101+ '/v1/' + `room/room_status/get_room_type_list/`
+          let url = that.api.api_newPrice_9114+ '/v1/' + `room/room_status/get_room_type_list/`
           that.$axios.get(url).then(res=>{
               if(res.data.message == 'success'){
                   that.roomTypeList = res.data.data.results
@@ -3830,7 +3853,7 @@ export default {
         getRateCode_hourPrice(item,param){
           console.log('jinrrr',item,param)
           let that = this
-          let url = that.api.api_price_9101+ '/v1/' + `room/rate_code/get_hours_rate_code/`
+          let url = that.api.api_newPrice_9114+ '/v1/' + `room/rate_code/get_hours_rate_code/`
          if(this.preBillParam.master_base[0].master_lable == 1){
             this.rateCodeList_hour = this.rateCode_list
           }
@@ -3872,7 +3895,7 @@ export default {
         //获取所有的钟点房房价码列表
         getRateCode_hour(){
           let that = this
-          let url = that.api.api_price_9101+ '/v1/' + `room/rate_code/get_rate_code_list/?category=T`
+          let url = that.api.api_newPrice_9114+ '/v1/' + `room/rate_code/get_rate_code_list/?category=T`
           that.$axios.get(url).then(res=>{
             console.log('res.data.data.results',res.data.data.results,res.data.data)
               if(res.data.message == 'success'){
@@ -3888,7 +3911,7 @@ export default {
           let start = moment(this.preBillParam.master_base[0].leave_time[0]).format('YYYY-MM-DD HH:mm:ss')
           let end = moment(this.preBillParam.master_base[0].leave_time[1]).format('YYYY-MM-DD HH:mm:ss')
           let that = this
-          let url= that.api.api_price_9101 + '/v1/' + `room/room_status/can_live_room_list/`
+          let url= that.api.api_newPrice_9114 + '/v1/' + `room/room_status/can_live_room_list/`
           let scopeParam = {
             room_type: param,
             start_time: start,
@@ -3928,7 +3951,7 @@ export default {
         //得到房间占用
         getRoomOccupy(){
           let that = this
-          let url = that.api.api_price_9101 + '/v1/' + 'room/room_status/get_room_occupy_list/'
+          let url = that.api.api_newPrice_9114 + '/v1/' + 'room/room_status/get_room_occupy_list/'
           that.$axios.get(url).then(res=>{
               if(res.data.message == 'success'){
                   that.roomOccupyList = res.data.data.results
@@ -4267,6 +4290,7 @@ export default {
             last_account_id: null,
             last_pay_id: null,
             account_num: null,
+            remark_id_list: '',
             pay_num: 0,
             master_id: null,
             sub_lable: null,
@@ -4465,12 +4489,12 @@ export default {
           let index = _.findIndex(this.breakfastAllList,function(o) { return o.id == row.id}) //扎到索引
           this.preBillParam.breakfastInfoList.splice(index,1)//删除指定索引
         },
-        //处理备注数据 第一次进去传个空[]进去
+        //处理备注数据 第一次进去传个空[]进去 没啥用
         resolveRemarkList(){
-          if(this.preBillParam.remarkList.length === 1 && this.preBillParam.remarkList[0].remarkContent === ''){
-          this.preBillParam.remarkList = []
-          console.log('this.preBillParam.remarkList',this.preBillParam.remarkList)
-          }
+          // if(this.preBillParam.remarkList.length === 1 && this.preBillParam.remarkList[0].remarkContent === ''){
+          // this.preBillParam.remarkList = []
+          // console.log('this.preBillParam.remarkList',this.preBillParam.remarkList)
+          // }
         },
         //入住单编辑详情备注
         handleRemarkInfo(row){
@@ -4485,6 +4509,7 @@ export default {
         },
         //入住单=》新增备注
         addRemark(){
+          // this.remarkDialog=false
           console.log('hhrema',this.preBillParam.master_base)
           console.log('beizhu',this.remark_roomNo,this.remarkContent_value)
         },
@@ -4546,7 +4571,7 @@ export default {
           console.log('this.rateValueList----2',this.rateValueList)
           console.log('item',item)
           let that = this
-          let url = that.api.api_price_9101 + '/v1/' +  `room/rate_code/get_rate_code/`
+          let url = that.api.api_newPrice_9114 + '/v1/' +  `room/rate_code/get_rate_code/`
           let scopeParam ={
             rate_code: this.rateCodeValue,
             begin_date:  moment(new Date()).format('YYYY-MM-DD'),
@@ -4584,7 +4609,7 @@ export default {
         getRateCode_BreakFast(){
           this.getEnter_RommNumber()//得到选中的房间数
           let that = this
-          let url = that.api.api_price_9101 + '/v1/' +  `room/rate_code/get_rate_code/`
+          let url = that.api.api_newPrice_9114 + '/v1/' +  `room/rate_code/get_rate_code/`
           let scopeParam ={
             rate_code: this.rateCodeValue,
             begin_date:  moment(new Date()).format('YYYY-MM-DD'),
@@ -4618,7 +4643,7 @@ export default {
         getRateCode_price(item,param){
           console.log('item,param==普通的',item,param)
           let that = this
-          let url = that.api.api_price_9101 + '/v1/' +  `room/rate_code/get_rate_code/`
+          let url = that.api.api_newPrice_9114 + '/v1/' +  `room/rate_code/get_rate_code/`
           // let temp = []
           // temp.push(param.room_type)
           let scopeParam ={
@@ -4781,7 +4806,7 @@ export default {
             room_no: that.room_no_value
           }
           let params = util.deleteNullParam(scopeParams)//删除对象里属性值为空的属性
-          let url = that.api.api_price_9101 + '/v1/' + `room/room_status/get_room_map_list?page_size=1000`
+          let url = that.api.api_newPrice_9114 + '/v1/' + `room/room_status/get_room_map_list?page_size=1000`
           that.$axios({
             method : 'get',
               url : url,
@@ -4810,7 +4835,7 @@ export default {
             room_no: that.room_no_value
           }
           let params = util.deleteNullParam(scopeParams)//删除对象里属性值为空的属性
-          let url = that.api.api_price_9101 + '/v1/' + `room/room_status/get_room_map_list?page_size=1000`
+          let url = that.api.api_newPrice_9114 + '/v1/' + `room/room_status/get_room_map_list?page_size=1000`
           that.$axios({
             method : 'get',
               url : url,

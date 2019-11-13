@@ -1,7 +1,7 @@
 
 <template>
     <div>
-        <el-dialog class="houseTypeClass" width="50%"   title="上传公安" @close="$emit('update:show', false);" :show="show" :visible.sync="policeComponentDialog" :modal="false">
+        <el-dialog class="houseTypeClass" width="50%"   title="上传公安" @close="$emit('update:show', false);policeParamInfo.liveStatus = 0" :show="show" :visible.sync="policeComponentDialog" :modal="false">
           <div style="height: 400px; display: flex; justify-content: space-between;">
             <div>
               <el-form  label-width="80px" :inline="true" :model="policeParamInfo">
@@ -118,7 +118,7 @@
                 this.policeComponentDialog = this.show;
             },
             policeParam(){
-              console.log('policeParamInfo',this.policeParamInfo)
+              console.log('policeParamInfo=======子组件',this.policeParamInfo)
               this.policeParamInfo = _.cloneDeep(this.policeParam)
               this.policeParamInfo.liveStatus = 0
               console.log('this.policeParam===',this.policeParam)
@@ -256,16 +256,20 @@
                     console.log('if(policeParam.liveStatus)',this.policeParam.liveStatus)
                     this.policeParamInfo.birthday.length > 9 ? this.policeParamInfo.birthday : this.policeParamInfo.birthday = this.policeParamInfo.birthday.slice(0,4) + '-' + this.policeParamInfo.birthday.slice(4,6) + '-' + this.policeParamInfo.birthday.slice(6,8)
                     let that = this
+                    let urerInfo = JSON.parse(localStorage.getItem('userInfo'))
+                    let hotel_id = urerInfo['hotel_id']
                     let scopeParam
                     let url
                     // that.transferData()//转换处理数据
-                    let url_enter= that.api.api_9022_9519+ '/v1/' + `outside/api/submit_check_in_master`
-                    let url_same = that.api.api_9022_9519+ '/v1/' + `outside/api/submit_check_in_add` //提交同住人url
+                    let url_enter = 'http://organ.crowncrystalhotel.com/v1/organization/ht/public_security/pms_submit_check_in_master/'
+                    let url_same = 'http://organ.crowncrystalhotel.com/v1/organization/ht/public_security/pms_submit_check_in_add/'
                     //入住人
                     if(this.policeParamInfo.liveStatus === 0){
                         let scopeParam_enter = {
+                            // hotel_id: hotel_id,
+                            // device_code: 'ByA29WcYF94SoWTjo533RLeV3JBi9KcIsLdYTdzjnk4=',
                             card_type: this.policeParamInfo.cardType,//证件类型
-                            register_type: 14,//登记类型
+                            // register_type: 14,//登记类型
                             similarity_degree: this.percent === '0' ? this.percent + '%'  : this.percent,
                             room_number:  this.policeParamInfo.room_no,
                             // room_number:  '1001',
@@ -290,6 +294,8 @@
                         console.log('this.cardTypethis.cardType',this.cardType)
                         //同住人对象
                         let scopeParam_same = {
+                            // hotel_id: hotel_id,
+                            // device_code: 'ByA29WcYF94SoWTjo533RLeV3JBi9KcIsLdYTdzjnk4=',
                             similarity_degree: this.percent === '0' ? this.percent + '%'  : this.percent,
                             room_number:  this.policeParam.room_no,
                             // room_number:  '1001',
@@ -305,7 +311,7 @@
                             sex: this.policeParamInfo.sex + '性',
                             birthday: this.policeParamInfo.birthday,
                             permanent_address: this.policeParamInfo.address,
-                            register_type: 14,//登记类型
+                            // register_type: 14,//登记类型
                             nation: this.policeParamInfo.nation + '族',
                             photo: this.imageUrl,//现场拍摄照片
                             profile_photo: this.policeParamInfo.card_imgUrl//身份证照片
@@ -322,13 +328,13 @@
                     that.sendToParent()
                     that.$axios.post(url,scopeParam).then(res=>{
                     console.log('res',res)
-                    if(res.data.msg == 'OK'){
-                        that.$message.warning('登记成功')
-                        that.policeDialog_2 = false;//关闭dialog
-                        that.policeComponentDialog = false
-                    }else{
-                        that.$message.warning(res.data.msg)
-                    }
+                        if(res.data.msg == 'OK'){
+                            that.$message.warning('登记成功')
+                            that.policeDialog_2 = false;//关闭dialog
+                            that.policeComponentDialog = false
+                        }else{
+                            that.$message.warning(res.data.msg)
+                        }
                     }).catch(()=>{
                         that.$message.warning('接口错误!')
                     })
