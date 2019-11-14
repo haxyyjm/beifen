@@ -263,7 +263,8 @@
                     <el-input  v-model.trim="item.telephone "  placeholder="联系方式"  style="width: 9.8vw"></el-input>
                 </div>
                 <div style="display: inline-block">
-                    <el-input  v-model.trim="item.street_add "  placeholder="请输入联系地址"  style="width: 40vw; margin-left: 5vw; margin-top: 10px"></el-input>
+                    <el-input  v-model.trim="item.street_add "  placeholder="请输入联系地址"  style="width: 40vw; margin-left: 64px; margin-top: 10px"></el-input>
+                    <el-button type="danger" @click="handleNewPolice(item,index)">上传公安</el-button>
                     <el-button type="danger" @click="handlePicture(item,index)">上传照片</el-button>
                 </div>
                 <!-- 入住房间入住人多选 +-->
@@ -274,6 +275,7 @@
             </el-row>
             <el-row style="margin-top: 120px">
                 <img style="cursor: pointer; display: inline-block; margin-bottom: -19px" @click="cardImport" src="../../../assets/images/pms/houseStatus/cardImport.png">
+                <el-button style="height: 50px; width: 100px" type="primary" @click="remarkDialog = true; resolveRemarkList()">备注</el-button>
                 <!-- <el-button style="height: 50px; width: 150px; margin-left: 12px" type="info">物品</el-button> -->
                 <!-- <el-button style="height: 50px; width: 100px" type="info" @click="remarkDialog = true; resolveRemarkList()">备注</!-->
                 <!-- <el-button style="height: 50px; width: 100px" type="info" @click="preview_billDialog = false">预约发票</el-button> -->
@@ -294,7 +296,7 @@
                     <!-- </el-popover> -->
                 <!-- <el-button style="height: 50px; width: 100px" type="primary" @click="handleAuthorization()">预授权</el-button> -->
                 <!-- <el-button style="height: 50px; width: 100px" type="primary"  @click="handlePicture()">上传照片</el-button> -->
-                <el-button style="height: 50px; width: 100px" type="primary"  @click="handlePolice()">上传公安</el-button>
+                <!-- <el-button style="height: 50px; width: 100px" type="primary"  @click="handlePolice()">上传公安</el-button> -->
                 <el-button style="height: 50px; width: 100px" type="primary" @click="handleBreakfastList()">早餐</el-button>
                 <el-button :loading="isLoading" style="height: 50px; width: 100px;" type="success" @click="confirmEnter()">确认入住</el-button>
                 <!-- <el-button style="height: 50px; width: 100px;" type="success" @click="confirmEnter()">确认入住</el-button> -->
@@ -725,7 +727,7 @@
         <!-- 新建/编辑入住单备注=》新建编辑备注 -->
         <el-dialog class="houseTypeClass" width="30%" title="新增备注" :visible.sync="remarkDialog" :modal="true">
           <div style="height: 300px">
-            <el-select  @focus="getEnter_RommNumber" v-model="remark_roomNo" placeholder="房间号">
+            <el-select  @focus="getEnter_RommNumber" @change="getRemarkByRoom" v-model="remark_roomNo" placeholder="房间号">
               <el-option  v-for="item in liveoptions_Value" :key="item.roomNo" :label="item.roomNo" :value="item.roomNo">
                 <span style="float: left">{{ item.roomNo }}</span>
                 <!-- <span style="float: right; color: #8492a6; font-size: 13px">已住:{{ itemm.liveCount }}</span> -->
@@ -734,7 +736,7 @@
             <el-input v-model="remarkContent_value" style="margin-top: 20px" placeholder="请输入备注信息" type="textarea" :rows="10"></el-input>
           </div>
           <div slot="footer" class="dialog-footer">
-            <el-button type="info"   @click="addRemark();">保存</el-button>
+            <el-button type="primary"   @click="addRemark();">保存</el-button>
           </div>
         </el-dialog>
     </div>
@@ -753,6 +755,7 @@ import pictureDialog from './pictureDialog'
 export default {
     data(){
         return {
+          remarkNewList: [],
           face_set: '',//获取face-set
           isLoading: false,
           rate_other_list: [],//最终组装的数据 
@@ -1253,6 +1256,8 @@ export default {
         this.getRoomType() //准备:循环得到匹配的房型中文名
       },
       parentParam(){
+        this.remark_roomNo = ''
+        this.remarkContent_value = ''
         console.log('this.parentParam',this.parentParam)
         //这个循环是为了避免数据被污染===>入住人这一行重置数据
         for(var item of this.preBillParam.master_guest){
@@ -1455,6 +1460,28 @@ export default {
         let mainAccountId = this.mainAccount_id
         localStorage.setItem('mainAccountId',mainAccountId) //通过缓存弄暂时
         this.authorizationDialog = true;
+      },
+      //新版上传公安
+      handleNewPolice(item,index){
+        this.policeInfoParam.liveStatus = 0
+        console.log('item',item)
+        //开始
+        this.policeInfoParam.room_no = item.room_number
+        this.policeInfoParam.nation = item.nation
+        this.policeInfoParam.name = item.name
+        this.policeInfoParam.sex = item.sex === '0' ? '男' : '女'
+        this.policeInfoParam.cardNo = item.id_no //读卡获取到身份证信息了
+        this.policeInfoParam.address = item.street_add
+        this.policeInfoParam.telephone = item.telephone
+        this.policeInfoParam.birthday = item.birthday
+        this.policeInfoParam.time = item.arr_time + '至' + item.leave_time
+        this.policeInfoParam.cardType = '身份证' 
+        //结束
+        this.policeDialog = true;
+        // this.policeDialog_2 = true
+        this.$nextTick(_=>{
+          media.getMedia('150','150','video_2')
+        })
       },
       handlePolice(){
         this.policeInfoParam.liveStatus = 0
@@ -2138,9 +2165,9 @@ export default {
           method: "POST",
           url: url,
           data: scopeParam,
-          headers: {
-              'authorization': 'auth_156cd3fefe2a40f5bd0308b897bdb768'
-          }
+          // headers: {
+          //     'authorization': 'auth_156cd3fefe2a40f5bd0308b897bdb768'
+          // }
     }).then(res=>{
           console.log('res',res)
           if(res.data.msg == 'OK'){
@@ -2320,6 +2347,8 @@ export default {
           this.preBillParam.master_guest[0].id_code = this.cardInfoParam.cardType
           this.preBillParam.master_guest[0].id_no = this.cardInfoParam.cardNo
           this.preBillParam.master_guest[0].street_add = this.cardInfoParam.address
+          this.preBillParam.master_guest[0].nation = this.cardInfoParam.nation
+          this.preBillParam.master_guest[0].birthday = this.cardInfoParam.birthday
         //当数组长度大于1的时候，要进行2步，自动加行自动填充数据
         }else if(this.preBillParam.master_guest.length>=1){
           // let array = _.cloneDeep(this.preBillParam.master_guest)
@@ -2328,6 +2357,8 @@ export default {
           //   }else{}
           // }
           let enterValue = {
+            birthday: this.cardInfoParam.birthday,
+            nation: this.cardInfoParam.nation,
             room_floor: 0,
             name: this.cardInfoParam.name, //姓名
             sex: this.cardInfoParam.sex,//性别
@@ -2354,7 +2385,6 @@ export default {
             race: null,
             religion: null,
             career: '122',
-            nation: null,
             visa_no: null,
             visa_grant: null,
             enter_port: null,
@@ -3430,7 +3460,9 @@ export default {
           let that = this
           // let url= 'http://192.168.2.165:9005' + '/v2/' + `checkin/nobooking_checkin/`.
           let url= that.api.api_newBill_9204 + '/v2/' + `checkin/nobooking_checkin/`
-          console.log('scopeParam===true==传入param',scopeParam)
+          scopeParam.remarkList = this.remarkNewList
+          console.log('scopeparam',scopeParam)
+          // return
           setTimeout(() => {
             that.$axios.post(url,scopeParam).then(res=>{
               // if(res.data.message === 'fail'){
@@ -4489,13 +4521,6 @@ export default {
           let index = _.findIndex(this.breakfastAllList,function(o) { return o.id == row.id}) //扎到索引
           this.preBillParam.breakfastInfoList.splice(index,1)//删除指定索引
         },
-        //处理备注数据 第一次进去传个空[]进去 没啥用
-        resolveRemarkList(){
-          // if(this.preBillParam.remarkList.length === 1 && this.preBillParam.remarkList[0].remarkContent === ''){
-          // this.preBillParam.remarkList = []
-          // console.log('this.preBillParam.remarkList',this.preBillParam.remarkList)
-          // }
-        },
         //入住单编辑详情备注
         handleRemarkInfo(row){
           this.addAndUpdate = false //标记
@@ -4507,11 +4532,53 @@ export default {
           let index = _.findIndex(this.preBillParam.remarkList,function(o) { return o.time == row.time}) //扎到索引
           this.preBillParam.remarkList.splice(index,1)//删除指定索引
         },
+        //处理备注数据 第一次进去传个空[]进去 没啥用
+        resolveRemarkList(){
+          console.log('已存入得数组',this.remarkNewList)
+          // if(this.preBillParam.remarkList.length === 1 && this.preBillParam.remarkList[0].remarkContent === ''){
+          // }
+          // this.remark_roomNo = ''
+          // this.remarkContent_value = ''
+          // let obj = {}
+          // let key = this.remark_roomNo
+		      // obj[key] =  this.remarkContent_value
+          // this.remarkNewList.push(obj)
+          // console.log('this.remarkNewList',this.remarkNewList)
+        },
+        //根据房间号获取实时的备注信息
+        getRemarkByRoom(param){
+          let array = this.remarkNewList.filter(item=>item.roomNo == param)
+          console.log('array',array)
+          if(array.length>0){
+            this.remarkContent_value = array[0].remark
+          }
+       },
         //入住单=》新增备注
+        /**
+         *@desc 增加备注,一顿过滤数组=>数组更新最新的
+         */
         addRemark(){
-          // this.remarkDialog=false
-          console.log('hhrema',this.preBillParam.master_base)
-          console.log('beizhu',this.remark_roomNo,this.remarkContent_value)
+          console.log('this.remarkNewList开始',this.remarkNewList)
+          for(var item of this.remarkNewList){
+            if(item.roomNo == this.remark_roomNo){
+              item.remark = this.remarkContent_value
+            }
+          }
+          this.remarkNewList.push({
+            roomNo: this.remark_roomNo,
+            remark: this.remarkContent_value
+          })
+          var result = [];
+          var obj = {};
+          for(var i =0; i<this.remarkNewList.length; i++){
+              if(!obj[this.remarkNewList[i].roomNo]){
+                    result.push(this.remarkNewList[i]);
+                obj[this.remarkNewList[i].roomNo] = true;
+            }
+          }
+          this.remarkNewList = result
+          this.remarkDialog = false
+          console.log('this.remarkNewList2222',this.remarkNewList)
         },
         //获取入住单房型右边弹出内容
         getHouseTypeNextValue(item,index, param){

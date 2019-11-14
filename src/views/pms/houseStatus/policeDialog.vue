@@ -118,10 +118,10 @@
                 this.policeComponentDialog = this.show;
             },
             policeParam(){
-              console.log('policeParamInfo=======子组件',this.policeParamInfo)
-              this.policeParamInfo = _.cloneDeep(this.policeParam)
-              this.policeParamInfo.liveStatus = 0
-              console.log('this.policeParam===',this.policeParam)
+                console.log('policeParamInfo=======子组件',this.policeParamInfo)
+                this.policeParamInfo = _.cloneDeep(this.policeParam)
+                this.policeParamInfo.liveStatus = 0
+                console.log('this.policeParam===',this.policeParam)
             },
         },
         computed:{

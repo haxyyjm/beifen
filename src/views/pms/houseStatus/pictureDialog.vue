@@ -4,7 +4,7 @@
         <el-dialog class="houseTypeClass" width="50%"   title="上传图片" @close="$emit('update:show', false);flushMedia()" :show="show" :visible.sync="pictureComponentDialog" :modal="false">
             <div style="height: 360px; display: flex; justify-content: space-between;">
                 <div style="border:1px solid; height: 301px;width:100%; text-align:center">
-                    <video id="video_2" style="float:left" width="300px" height="300px" autoplay="autoplay"></video>
+                    <video id="video_1" style="float:left" width="300px" height="300px" autoplay="autoplay"></video>
                     <canvas id="canvas" style="float:right"  width="300px" height="300px"></canvas>
                 </div>
           </div>
@@ -83,7 +83,7 @@
             //获取摄像头
             getMedia(){
                 this.clearPhoto() //清除掉图片
-                media.getMedia('300','300','video_2')
+                media.getMedia('300','300','video_1')
             },
             //拍照上传
             takePhoto(param){
@@ -93,7 +93,7 @@
                 console.log('localStorage...2222',this.pictureParamIndex)
                 let that = this
                 //获得Canvas对象
-                let video = document.getElementById("video_2");
+                let video = document.getElementById("video_1");
                 let canvas = document.getElementById("canvas");
                 let ctx = canvas.getContext('2d');
                 ctx.drawImage(video, 0, 0, 300, 300);

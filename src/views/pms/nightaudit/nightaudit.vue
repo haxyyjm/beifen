@@ -2,6 +2,7 @@
   <!--夜审-->
   <div class="warp-night">
     <el-container>
+      <link-house-dialog :show.sync= linkHouseFornVisible :parentInfoParam='linInfoParam'></link-house-dialog>
       <el-aside  width="500px" :style="{ height: availHeight }" style="background-color: #FFFFFF,"  class="left">
         <el-table size="mini" :row-class-name="tableRowClassName" @row-click="checkNightAuditAll" :data="nightData" :header-cell-style="{background:'#68819E', color: '#FFFFFF'}" style="width: 100%;margin-top: 10px">
           <el-table-column prop="nightItem" width="260" label="夜审项目"></el-table-column>
@@ -35,7 +36,7 @@
           </el-row>
           <!--夜审tabel开始-->
           <div>
-              <el-table size="mini" @row-click="pingAccount_resolve" height="550px" v-show="noPing" :data="noPingData" :header-cell-style="{background:'#CCCCCCFF', color: '#333333'}" style="width: 100%">
+              <el-table size="mini"  @row-dblclick="rowClick" height="550px" v-show="noPing" :data="noPingData" :header-cell-style="{background:'#CCCCCCFF', color: '#333333'}" style="width: 100%">
                 <el-table-column type="index" width="90"  label="序号"></el-table-column>
                 <el-table-column prop="room_number" label="房间号"></el-table-column>
                 <el-table-column prop="room_type" label="房型"></el-table-column>
@@ -377,6 +378,7 @@
   </div>
 </template>
 <script>
+import linkHouseDialog from '../houseStatus/linkHouseDialog'
 import moment from 'moment'
 import util from '../../../common/util.js'
 import QRCode from 'qrcodejs2'
@@ -384,6 +386,8 @@ import _ from 'lodash'
   export default {
     data: function(){
       return {
+        linInfoParam: {},
+        linkHouseFornVisible: false,//联房
         trading_unit: '',
         linkUrl: '',
         call_back_url: '',
@@ -583,7 +587,8 @@ import _ from 'lodash'
       };
     },
     components: {
-      QRCode
+      QRCode,
+      'link-house-dialog': linkHouseDialog 
     },
     // 注册一个局部的自定义指令 v-focus
     directives: {
@@ -645,6 +650,37 @@ import _ from 'lodash'
       this.availHeight = (screen.availHeight -10)  +'px';
     },
     methods: {
+      rowClick(row){
+        this.getEnterInfoByRoom(row.room_number)
+      },
+        //===>联房列表打开
+      getEnterInfoByRoom(param){
+        let scopeParams = {
+          room_number: param
+        }
+        let that = this
+        // let url = `http://192.168.2.224:9005/v2/checkin/all_master_info/`
+        // let url = that.api.api_bill_9202 + `/v2/checkin/all_master_info/`
+        let url = that.api.api_newBill_9204 + `/v2/checkin/all_master_info/`
+        that.$axios({
+           method : 'get',
+            url : url,
+            params: scopeParams
+        }).then(res=>{
+          if(res.data.message === 'success'){
+            that.linInfoParam = res.data.data.results[0]
+            if(that.linInfoParam != undefined){
+                that.linkHouseFornVisible = true //联房列表打开
+            }else{
+              that.$message.warning('获取后台数据失败!')
+            }
+          }else{
+            that.$message.error('获取入住单详情失败!')
+          }
+        }).catch(error=>{
+          console.log(error)
+        })
+      },
       dateFormat_arr: function (row) {
         return moment(row.start_time).format("YYYY-MM-DD HH:mm:ss")
       },

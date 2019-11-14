@@ -259,7 +259,8 @@
                     <el-input  v-model.trim="item.telephone "  placeholder="联系方式"  style="width: 9.8vw"></el-input>
                 </div>
                 <div style="display: inline-block">
-                  <el-input  v-model.trim="item.street_add "  placeholder="请输入联系地址"  style="width: 40vw; margin-left: 5vw; margin-top: 10px"></el-input>
+                  <el-input  v-model.trim="item.street_add "  placeholder="请输入联系地址"  style="width: 40vw; margin-left: 64px; margin-top: 10px"></el-input>
+                    <el-button type="danger" @click="handleNewPolice(item,index)">上传公安</el-button>
                     <el-button type="danger" @click="handlePicture(item,index)">上传照片</el-button>
                 </div>
                 <!-- 预定房间入住人多选 +-->
@@ -285,7 +286,7 @@
             <el-row style="margin-top: 120px">
                 <img style="cursor: pointer; display: inline-block; margin-bottom: -19px" @click="cardImport" src="../../../assets/images/pms/houseStatus/cardImport.png">
                 <!-- <el-button style="height: 50px; width: 150px; margin-left: 12px" type="info">物品</el-button> -->
-                <!-- <el-button style="height: 50px; width: 100px" type="info" @click="remarkDialog = false; resolveRemarkList()">备注</el-button> -->
+                <el-button style="height: 50px; width: 100px" type="primary" @click="remarkDialog = true; resolveRemarkList()">备注</el-button>
                 <!-- <el-button style="height: 50px; width: 100px" type="info" @click="preview_billDialog = false">预约发票</el-button> -->
                 <!-- <el-button style="height: 50px; width: 100px" type="info" @click="consumeDialog = true">消费</el-button> -->
                 <!-- <el-button style="height: 50px; width: 100px" type="info" @click="settingDialog = false">服务设置</el-button> -->
@@ -295,7 +296,7 @@
                      <!-- 应收总额:<span style="margin-right: 10px">{{needPayCount}}</span> -->
                     <!-- 应收总额:<span style="margin-right: 10px">{{countMoney1}}</span>
                     <span style="margin-right: 10px">明细</span> -->
-                <el-button style="height: 50px; width: 100px" type="primary" @click="handlePolice()">上传公安</el-button>
+                <!-- <el-button style="height: 50px; width: 100px" type="primary" @click="handlePolice()">上传公安</el-button> -->
                 <el-button :loading="isLoading" style="height: 50px; width: 100px;" type="primary" @click="confirmPreToEnter()">确认入住</el-button>
                 <!-- <el-button  style="height: 50px; width: 100px;" type="primary" @click="confirmPreToEnter()">确认入住</el-button> -->
                 </div>
@@ -496,8 +497,23 @@
             <el-button type="info" @click="preview_billDialog=false">保存</el-button>
           </div>
         </el-dialog>
+        <!-- 新建/编辑入住单备注=》新建编辑备注 -->
+        <el-dialog class="houseTypeClass" width="30%" title="新增备注" :visible.sync="remarkDialog" :modal="true">
+          <div style="height: 300px">
+            <el-select  @focus="getEnter_RommNumber" @change="getRemarkByRoom" v-model="remark_roomNo" placeholder="房间号">
+              <el-option  v-for="item in liveoptions_Value" :key="item.roomNo" :label="item.roomNo" :value="item.roomNo">
+                <span style="float: left">{{ item.roomNo }}</span>
+                <!-- <span style="float: right; color: #8492a6; font-size: 13px">已住:{{ itemm.liveCount }}</span> -->
+              </el-option>
+            </el-select>
+            <el-input v-model="remarkContent_value" style="margin-top: 20px" placeholder="请输入备注信息" type="textarea" :rows="10"></el-input>
+          </div>
+          <div slot="footer" class="dialog-footer">
+            <el-button type="primary"   @click="addRemark();">保存</el-button>
+          </div>
+        </el-dialog>
         <!--新建预订单=>备注-->
-        <el-dialog class="houseTypeClass deletePadding_Class" title="备注" :visible.sync="remarkDialog" :modal="true">
+        <!-- <el-dialog class="houseTypeClass deletePadding_Class" title="备注" :visible.sync="remarkDialog" :modal="true">
           <div style="height: 400px">
             <el-table :data="preBillParam.remarkList" :header-cell-style="{background:'#BFCAD1', color: '#3e608a'}" style="width: 100%">
               <el-table-column prop="remarkContent" label="备注内容"></el-table-column>
@@ -519,7 +535,7 @@
             </div>
             <el-button type="info" plain  @click="remarkDialog=false">关闭</el-button>
           </div>
-        </el-dialog>
+        </el-dialog> -->
         <!-- 扫码枪扫描 -->
         <el-dialog class="houseTypeClass deletePadding_Class" title="聚合支付" :visible.sync="dialog_alipay" :modal="true">
           <div style="width: 100%; height: 400px">
@@ -611,6 +627,7 @@ import pictureDialog from './pictureDialog'
 export default {
     data(){
         return {
+          remarkNewList: [],
           face_set: '',//获取face-set
           isLoading: false,
           rate_other_list: [],//最终组装的数据 
@@ -1147,6 +1164,8 @@ export default {
         this.getRoomType() //准备:循环得到匹配的房型中文名
       },
       parentInfoParam(){
+        this.remark_roomNo = ''
+        this.remarkContent_value = ''
         //关键一步，登记有身份证号要清空<===================mark 在上一步已经清空
         this.getCardListInfo()//获取房子信息所有数据
         this.preBillParam = _.cloneDeep(this.parentInfoParam)
@@ -1261,6 +1280,24 @@ export default {
         console.log('msg传过来得信息',msg)
         this.preBillParam.reserve_guest = [].concat(msg.reserve_guest) //更新了入住人的信息==>主要是为了更新入住人的照片和证件照信息
       },
+      //新版上传公安
+      handleNewPolice(item,index){
+        //开始分情况处理1.有预定且有入住人的信息(包括多条的时候)2.无预定，直接刷身份证的时候
+        console.log('....item',item)
+        this.handlePoliceParam(item,index)
+        this.policeParam =  Object.assign({},this.policeInfoParam) //刷卡产生的对象赋值
+        console.log('this.policeParam middle',this.policeParam)
+        this.getEnter_RommNumber()//获取房间号下拉
+        console.log('getEnter_RommNumber',this.liveoptions_Value)
+        this.policeParam.card_imgUrl = this.card_imgUrl //公安照片
+        this.policeParam.liveoptions_Value = this.liveoptions_Value//入住房间
+        this.policeParam.reserve_guest = item //赋值入住人数组
+        this.policeParam.cardIndex = index
+        console.log('policeParam',this.policeParam)
+        console.log('this.policeInfoParam，end',this.policeInfoParam)
+        this.policeComponentDialog = true
+      },
+      //废弃
       handlePolice(){
         //开始分情况处理1.有预定且有入住人的信息(包括多条的时候)2.无预定，直接刷身份证的时候
         this.handlePoliceParam()
@@ -1282,20 +1319,20 @@ export default {
       },
       //开始分情况处理1.有预定且有入住人的信息(包括多条的时候)
       //2.无预定，直接刷身份证的时候
-      handlePoliceParam(){
+      handlePoliceParam(item){
         this.policeInfoParam.liveStatus = 0
-        console.log('card身份',this.cardInfoParam)
-        console.log('policeInfoParam',this.policeInfoParam)
-        console.log('this.preBillParam.reserve_guest<=====',this.preBillParam.reserve_guest)
         // this.policeInfoParam
-        this.policeInfoParam.name = this.cardInfoParam.name
-        this.policeInfoParam.sex = this.cardInfoParam.sex === '0' ? '男' : '女'
-        this.policeInfoParam.cardNo = this.cardInfoParam.cardNo //读卡获取到身份证信息了
-        this.policeInfoParam.address = this.cardInfoParam.address
-        this.policeInfoParam.birthday = this.cardInfoParam.birthday
-        this.policeInfoParam.nation = this.cardInfoParam.nation
+        this.policeInfoParam.room_no = item.room_number
+        this.policeInfoParam.nation = item.nation
+        this.policeInfoParam.name = item.name
+        this.policeInfoParam.sex = item.sex === '0' ? '男' : '女'
+        this.policeInfoParam.cardNo = item.id_no //读卡获取到身份证信息了
+        this.policeInfoParam.address = item.street_add
+        this.policeInfoParam.telephone = item.telephone
+        this.policeInfoParam.birthday = item.birthday
+        // this.policeInfoParam.time = item.arr_time + '至' + item.leave_time
         this.policeInfoParam.time = moment(this.preBillParam.reserve_base[0].leave_time[0]).format('YYYY-MM-DD HH:mm:ss') + '至'+ moment(this.preBillParam.reserve_base[0].leave_time[1]).format('YYYY-MM-DD HH:mm:ss')
-        this.policeInfoParam.cardType = this.cardInfoParam.cardType === '01' ? '身份证' : ''
+        this.policeInfoParam.cardType = item.id_code === '01' ? '身份证' : ''
         // this.policeParam = this.policeInfoParam
         //筛选得到匹配的对应值===废弃
         // let array = this.preBillParam.reserve_guest.filter(item=>item.id_no === this.policeInfoParam.cardNo)
@@ -1309,7 +1346,6 @@ export default {
         // this.$nextTick(_=>{
         //   media.getMedia('150','150','video_2')
         // })
-        console.log('this.preBillParam.预定客人',this.preBillParam.reserve_guest)
       },
       closeAndFlushData(){
         this.span_input_flag = false
@@ -1438,14 +1474,18 @@ export default {
           this.preBillParam.reserve_guest[0].id_code = this.cardInfoParam.cardType
           this.preBillParam.reserve_guest[0].id_no = this.cardInfoParam.cardNo
           this.preBillParam.reserve_guest[0].street_add = this.cardInfoParam.address
+          this.preBillParam.reserve_guest[0].nation = this.cardInfoParam.nation
+          this.preBillParam.reserve_guest[0].birthday = this.cardInfoParam.birthday
         //当数组长度大于1的时候，要进行2步，自动加行自动填充数据
         }else if(this.preBillParam.reserve_guest.length>=1){
           // let array = _.cloneDeep(this.preBillParam.reserve_guest)
           // for(var item of this.preBillParam.reserve_guest){
-          //   if(item.id_no === ''){
-          //   }else{}
+            //   if(item.id_no === ''){
+              //   }else{}
           // }
           let enterValue = {
+            birthday: this.cardInfoParam.birthday,
+            nation: this.cardInfoParam.nation,
             room_no: 0,
             pic_photo: null,
             face_id: null,
@@ -1473,7 +1513,6 @@ export default {
             race: '',
             religion: '',
             career: '',
-            nation: '',
             visa_no: '',
             visa_grant: '',
             enter_port: '',
@@ -2531,13 +2570,17 @@ export default {
          * @master_rtrate  这里存着每天对应的房价
          * @room_list 存房间即入住的是哪几个房间
          * @reserve_guest 入住人数组，一行
-         * @reseeve_base 
+         * @reseeve_base
+         * @remarkList 这里进行备注 
         */
       truePostEnter(scopeParam){
           let that = this
           // let url= that.api.api_bill_9202 + '/v1/' + `checkin/nobooking_checkin/`
           let url= that.api.api_newBill_9204 + '/v2/' + `checkin/batch_booking_check_in/`
           console.log('scopeParam===true==传入param',scopeParam)
+          scopeParam.remarkList = this.remarkNewList
+          console.log('scopeparam',scopeParam)
+          // return
           setTimeout(() => {
             that.$axios.post(url,scopeParam).then(res=>{
               if(res.data.message === 'success'){
@@ -3652,10 +3695,45 @@ export default {
         },
         //处理备注数据 第一次进去传个空[]进去
         resolveRemarkList(){
-          return false
-          if(this.preBillParam.remarkList.length === 1 && this.preBillParam.remarkList[0].remarkContent === ''){
-            this.preBillParam.remarkList = []
+          // this.remark_roomNo = ''
+          // this.remarkContent_value = ''
+          // return false
+          // if(this.preBillParam.remarkList.length === 1 && this.preBillParam.remarkList[0].remarkContent === ''){
+          //   this.preBillParam.remarkList = []
+          // }
+        },
+        //根据房间号获取实时的备注信息
+        getRemarkByRoom(param){
+          let array = this.remarkNewList.filter(item=>item.roomNo == param)
+          console.log('array',array)
+          if(array.length>0){
+            this.remarkContent_value = array[0].remark
           }
+       },
+        //预定转入住单=》新增备注
+        addRemark(){
+          for(var item of this.remarkNewList){
+            if(item.roomNo == this.remark_roomNo){
+              item.remark = this.remarkContent_value
+            }
+          }
+          this.remarkNewList.push({
+            roomNo: this.remark_roomNo,
+            remark: this.remarkContent_value
+          })
+          console.log('this.remarkNewList',this.remarkNewList)
+          var result = [];
+          var obj = {};
+          for(var i =0; i<this.remarkNewList.length; i++){
+              if(!obj[this.remarkNewList[i].roomNo]){
+                    result.push(this.remarkNewList[i]);
+                obj[this.remarkNewList[i].roomNo] = true;
+            }
+          }
+          this.remarkNewList = result
+          this.remarkDialog = false
+          console.log('this.remarkNewList2222',this.remarkNewList)
+          console.log('result', result)
         },
         //预订单编辑详情备注
         handleRemarkInfo(row){

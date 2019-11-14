@@ -317,16 +317,16 @@
       <!--最后一行样式-->
       <div slot="footer" class="dialog-footer">
         <div style="float: left">
-          <el-button :disabled="banDisable()" type="info" size="small" @click="linkRoomDialog = true; getLinkRoomData()" style="background-color: #FDB754;border-color: #FDB754">编辑联房</el-button>
+          <el-button :disabled="banDisable_2()" type="info" size="small" @click="linkRoomDialog = true; getLinkRoomData()" style="background-color: #FDB754;border-color: #FDB754">编辑联房</el-button>
           <!-- <el-button type="info" size="small" style="background-color: #CCCCCC; border-color: #CCCCCC; ">欠离</el-button> -->
           <!-- <el-button :disabled="banDisable()" type="danger" size="small" :loading="!refundHouse"  @click="selectPerson();">
             <span v-if="refundHouse == true">退房</span>
             <span v-else>查房</span>
           </el-button> -->
-          <el-button type="danger" @click="pingAccount()" size="small">退房</el-button>
+          <el-button type="danger" @click="pingAccount()" :disabled="banDisable_2()" size="small">退房</el-button>
         </div>
         <!-- <el-button type="info" size="small">日志[1]</el-button> -->
-        <el-button type="info" :disabled="banDisable()" @click="billDialog = true;billParam.invoice_type = 0" size="small">发票</el-button>
+        <el-button type="info" :disabled="banDisable()"  @click="billDialog = true;billParam.invoice_type = 0" size="small">发票</el-button>
         <!-- <el-button type="info" @click="consumptionDialog = false" size="small">消费</el-button> -->
         <!-- <el-button type="info" @click="borrowingDialog = false" size="small">借物</el-button> -->
         <el-button type="info" :disabled="banDisable()" @click="handleAuthorization()"  size="small">预授权</el-button>
@@ -470,7 +470,7 @@
                       <el-input size="mini" :disabled="index<disableLength"  v-model="item.telephone "  placeholder="联系方式"  style="width: 9.8vw"></el-input>
                   </div>
                   <div style="display: inline-block">
-                      <el-input size="mini" :disabled="index<disableLength"  v-model="item.street_add "  placeholder="请输入联系地址"  style="width: 40vw; margin-left: 15vw; margin-top: 10px"></el-input>
+                      <el-input size="mini" :disabled="index<disableLength"  v-model="item.street_add "  placeholder="请输入联系地址"  style="width: 40vw; margin-left: 64px; margin-top: 10px"></el-input>
                   </div>
                   <!-- 预定房间入住人多选 +-->
                   <!-- <img style="cursor: pointer; float: right; position: relative; top: 10px" src="../../../assets/images/pms/houseStatus/add.png"> -->
@@ -2123,8 +2123,8 @@ export default {
         if (that.roomParam.oldNumber && that.roomParam.newNumber && that.roomParam.oldType && that.roomParam.newType && that.roomParam.oldPrice){
           console.log('kaishi',this.rowParam)
           console.log('roomParam',this.roomParam)
-          let url = 'http://192.168.2.165:9005' + '/v2/' + `depend_ex/exchange_houses/`
-          // let url = that.api.api_newBill_9204 + '/v2/' + `depend_ex/exchange_houses/`
+          // let url = 'http://192.168.2.165:9005' + '/v2/' + `depend_ex/exchange_houses/`
+          let url = that.api.api_newBill_9204 + '/v2/' + `depend_ex/exchange_houses/`
           let scopeParam ={
             order_no:  that.rowParam.order_no,
             old_room: that.roomParam.oldNumber, //原房间
@@ -2150,7 +2150,7 @@ export default {
             }).catch(error=>{
           })
         }else{
-          this.$message.warning('有数据没填充!')
+          this.$message.warning('有数据没填充或者价格为0!')
         }
         console.log('this.multipleSelectionget',this.multipleSelection)
       },
@@ -2380,7 +2380,16 @@ export default {
       //联房的房间禁选状态
       banDisable(){
         if(this.preBillLinkParam.master_status_lable===1){
+          // return true   //正常离店
+          return false   //正常离店
+        }else{
+          return false  //在住
+        }
+      },
+      banDisable_2(){
+        if(this.preBillLinkParam.master_status_lable===1){
           return true   //正常离店
+          // return false   //正常离店
         }else{
           return false  //在住
         }
@@ -4240,12 +4249,12 @@ export default {
         this.preBillLinkParam.master_guest.forEach(item=>{
           policeArray.push({
             card_type: '身份证',
-            card_number: '411323199309163430'
+            card_number: '232724199504230729'
           })
         })
         console.log('policeArray',policeArray)
-        this.refundPolice(policeArray)
-        return
+        // this.refundPolice(policeArray)
+        // return
         let that = this
         // let url = 'http://192.168.2.165:9005'+ '/v2/' + `checkin/check_out/`
         let url= that.api.api_newBill_9204 + '/v2/' + `checkin/check_out/`
@@ -4256,7 +4265,7 @@ export default {
         that.$axios.post(url,scopeParam).then(res=>{
           if(res.data.message==='退房成功！'){
             //退房===>公安销毁
-            // this.refundPolice()
+            // this.refundPolice(policeArray) 暂时注销
             this.linkHouseFornVisible = false //退房关闭页面 res.data.message 为已有平帐记录则表示退房
             // this.$router.go(0)
             this.flushByLink()//刷新数据
@@ -4279,15 +4288,15 @@ export default {
           method: "POST",
           url: url,
           data: scopeParam,
-          headers: {
-              'authorization': 'auth_c2eb4aaad3984dff9a8fb6f243d56e3e'
-          }
+          // headers: {
+          //     'authorization': 'auth_d5e4b051a5ed49db93cefd548216331e'
+          // }
         }).then(res=>{
           console.log('res',res)
-          if(res.data.msg == 'OK'){
+          if(res.data.data.faild_guest.length == 0){
             that.$message.warning('公安退房成功!')
           }else{
-            that.$message.warning(res.data.msg)
+            that.$message.warning('公安退房存在问题!')
           }
         }).catch(()=>{
             that.$message.warning('接口错误!')
@@ -4469,16 +4478,38 @@ export default {
         }
       },
       /**
+       * 计算
+       */
+      countDay(){
+        let start = moment(this.preBillParam.reserve_base.leave_time[1]).format('YYYY-MM-DD HH:mm:ss')
+        let end = moment(this.after_leave_time_2).format('YYYY-MM-DD HH:mm:ss')
+        let day
+        console.log('jinru')
+        day = this.datedifference(start, end)
+        console.log('day',day)
+        // return this.datedifference(start, end)
+      },
+      /**
        * 续住或者提前离店
        */
       confirmContinueRoom(){
         let that = this
+        let total_continue_day
         let url= that.api.api_newBill_9204 + '/v2/' + `depend_ex/extend_check/`
         // let url= `http://192.168.2.224:9005/v1/depend_ex/extend_check/`
+        let start = moment(this.preBillLinkParam.leave_time).format('YYYY-MM-DD HH:mm:ss')
+        let end = moment(this.after_leave_time_2).format('YYYY-MM-DD 14:00:00')
+        console.log('..',start.slice(0,10))
+        //处理续住或提前离店时间=======>total_continue_day
+        if(start.slice(0,10) == end.slice(0,10)){
+          total_continue_day = 0
+        }else{
+          total_continue_day = this.datedifference(start, end)
+        }
         let scopeParam = {
           order_no: this.preBillLinkParam.order_no,
           chang_leave_time: moment(this.after_leave_time_2).format('YYYY-MM-DD 14:00:00'),
-          total_continue_day: null,//暂时
+          total_continue_day: total_continue_day,//暂时
           total_day: null,
           remark: this.remark_continue,
         }
@@ -5414,7 +5445,7 @@ export default {
         getMarketSrc(param){
           let that = this
           that.marketSrcList = []
-          let url =  that.api.api_code_9103+ '/v1/' + 'system/settings/get_code_base_list'
+          let url =  that.api.api_code_9103+ '/v1/' + 'system/settings/get_code_base_list/'
           let params = {}
           //src 代表市场码
           if(param == 'market'){

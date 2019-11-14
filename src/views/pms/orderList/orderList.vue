@@ -857,8 +857,8 @@
         if (that.roomParam.oldNumber && that.roomParam.newNumber && that.roomParam.oldType && that.roomParam.newType && that.roomParam.oldPrice){
           console.log('kaishi',this.rowParam)
           console.log('roomParam',this.roomParam)
-          let url = 'http://192.168.2.165:9005' + '/v2/' + `depend_ex/exchange_houses/`
-          // let url = that.api.api_newBill_9204 + '/v2/' + `depend_ex/exchange_houses/`
+          // let url = 'http://192.168.2.165:9005' + '/v2/' + `depend_ex/exchange_houses/`
+          let url = that.api.api_newBill_9204 + '/v2/' + `depend_ex/exchange_houses/`
           let scopeParam ={
             order_no:  that.rowParam.order_no,
             old_room: that.roomParam.oldNumber, //原房间
@@ -884,7 +884,7 @@
             }).catch(error=>{
           })
         }else{
-          this.$message.warning('有数据没填充!')
+          this.$message.warning('有数据没填充或者价格为0!')
         }
         console.log('this.multipleSelectionget',this.multipleSelection)
       },

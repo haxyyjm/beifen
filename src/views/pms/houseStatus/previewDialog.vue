@@ -210,7 +210,7 @@
                     <el-input  v-model.trim="item.telephone "  placeholder="联系方式"  style="width: 9.8vw"></el-input>
                 </div>
                 <div style="display: inline-block">
-                    <el-input  v-model.trim="item.street_add "  placeholder="请输入联系地址"  style="width: 40vw; margin-left: 15vw; margin-top: 10px"></el-input>
+                    <el-input  v-model.trim="item.street_add "  placeholder="请输入联系地址"  style="width: 40vw; margin-left: 64px; margin-top: 10px"></el-input>
                 </div>
                 <!-- 预定房间入住人多选 +-->
                 <!-- <img style="cursor: pointer; float: right; position: relative; top: 10px" src="../../../assets/images/pms/houseStatus/add.png"> -->
@@ -1726,6 +1726,7 @@ export default {
             scopeParam.reserve_guest = [] //删掉这个空对象
           }
           console.log('scopeParam',scopeParam)
+          // return
           that.$axios.post(url,scopeParam).then(res=>{
             if(res.data.message === 'success'){
               this.isLoading = false
