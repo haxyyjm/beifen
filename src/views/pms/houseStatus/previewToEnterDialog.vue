@@ -2578,7 +2578,12 @@ export default {
           // let url= that.api.api_bill_9202 + '/v1/' + `checkin/nobooking_checkin/`
           let url= that.api.api_newBill_9204 + '/v2/' + `checkin/batch_booking_check_in/`
           console.log('scopeParam===true==传入param',scopeParam)
-          scopeParam.remarkList = this.remarkNewList
+          // scopeParam.remarkList = this.remarkNewList
+          let obj = {}
+          this.remarkNewList.map((item) => { 
+            obj[item.roomNo] = item.remark
+          });
+          scopeParam.remarkList = obj
           console.log('scopeparam',scopeParam)
           // return
           setTimeout(() => {
@@ -3701,8 +3706,11 @@ export default {
           // if(this.preBillParam.remarkList.length === 1 && this.preBillParam.remarkList[0].remarkContent === ''){
           //   this.preBillParam.remarkList = []
           // }
+          this.remarkContent_value = this.preBillParam.reserve_base[0].remark_id_list
         },
-        //根据房间号获取实时的备注信息
+        /**
+         * @desc 根据房间号获取实时的备注信息,前提过滤出来相应的数组
+         */
         getRemarkByRoom(param){
           let array = this.remarkNewList.filter(item=>item.roomNo == param)
           console.log('array',array)

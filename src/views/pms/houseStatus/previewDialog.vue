@@ -226,7 +226,7 @@
                 <!-- <el-button style="height: 50px; width: 100px" type="info" @click="consumeDialog = true">消费</el-button> -->
                 <!-- <el-button style="height: 50px; width: 100px" type="info" @click="settingDialog = false">服务设置</el-button> -->
                 <!-- <el-button style="height: 50px; width: 100px" type="info" @click="breakfastDialog = true; getBreakfastList()">早餐</el-button> -->
-                <!-- <el-button style="height: 50px; width: 100px" type="primary" @click="addAndUpdate_remarkDialog = true;">备注</el-button> -->
+                <el-button style="height: 50px; width: 100px" type="primary" @click="addAndUpdate_remarkDialog = true;">备注</el-button>
                 <div style="float: right">
                     <!-- 应收总额:<span style="margin-right: 10px">{{countMoney}}</span> -->
                     <el-popover
@@ -240,7 +240,7 @@
                      <!-- <el-button slot="reference" style="margin-right: 10px;">明细</el-button> -->
                     </el-popover>
                 <!-- <el-button style="height: 50px; width: 100px" type="primary" @click="authorizationDialog = true">预授权</el-button> -->
-                <el-button :loading="isLoading" style="height: 50px; width: 100px;" type="success" @click="senToParent();confirmPreview()">确认预定</el-button>
+                <el-button :loading="isLoading" style="height: 50px; width: 100px;" type="primary" @click="senToParent();confirmPreview()">确认预定</el-button>
                 </div>
             </el-row>
         </el-dialog>
@@ -701,6 +701,7 @@ export default {
               real_rate: 1,
             }],
             reserve_base:{
+              remark_id_list: '',
               rate_code: '',//房价码
               is_change_rate: '',
               rsv_type : 1,//预定类型
@@ -966,6 +967,7 @@ export default {
         let param = {
           room_type: this.parentParam.room_type_name
         }
+        this.remarkContent_value = ''
         this.getCardListInfo()//获取房子信息所有数据
         this.getRateCode(item,param) //====下面没有用
         this.getCanLiveRoom(param.room_type) //根据房型选未占用房间
@@ -1726,7 +1728,6 @@ export default {
             scopeParam.reserve_guest = [] //删掉这个空对象
           }
           console.log('scopeParam',scopeParam)
-          // return
           that.$axios.post(url,scopeParam).then(res=>{
             if(res.data.message === 'success'){
               this.isLoading = false
@@ -2149,7 +2150,7 @@ export default {
             room_no: that.room_no_value
           }
           let params = util.deleteNullParam(scopeParams)//删除对象里属性值为空的属性
-          let url = that.api.api_newPrice_9114 + '/v1/' + `room/room_status/get_room_map_list?page_size=1000`
+          let url = that.api.api_newPrice_9114 + '/v1/' + `room/room_status/get_room_map_list/?page_size=1000`
           that.$axios({
             method : 'get',
               url : url,
@@ -2432,6 +2433,8 @@ export default {
         //预订单=》新增备注
         add_remark(){
          if(this.remarkContent_value){
+            this.preBillParam.reserve_base.remark_id_list =  this.remarkContent_value
+            this.addAndUpdate_remarkDialog = false
             // let that = this
             // let id = that.remark_id
             // let url = that.api.api_9022_9519+ '/v1/' + `finance/account_tip/add`

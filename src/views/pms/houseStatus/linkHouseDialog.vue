@@ -88,6 +88,12 @@
                   <el-table height="220" :data="preBillLinkParam.master_guest" :header-cell-style="{background:'#373d41', color: '#FFFFFF'}" style="width: 100%">
                     <el-table-column prop="name" label="姓名"></el-table-column>
                     <!-- <el-table-column prop="member" label="会员"></el-table-column> -->
+                    <el-table-column label="性别">
+                       <template slot-scope="scope">
+                        <span v-if="scope.row.sex==='0'">男</span>
+                        <span v-else>女</span>
+                      </template>
+                    </el-table-column>
                     <el-table-column prop="telephone" label="联系方式"></el-table-column>
                     <el-table-column label="证件类型">
                        <template slot-scope="scope">
@@ -309,8 +315,16 @@
                 </el-table>
               </div>
              </el-tab-pane>
-             <!-- <el-tab-pane label="借物" name="6">
-             </el-tab-pane> -->
+             <el-tab-pane label="房卡" name="7">
+                <el-table height="300" :data="cardList" :header-cell-style="{background:'#373d41', color: '#FFFFFF'}" style="width: 100%">
+                <el-table-column prop="room_no" label="房间号"></el-table-column>
+                  <el-table-column prop="lock_no" label="门锁号"></el-table-column>
+                  <el-table-column prop="start_time" label="开始时间"></el-table-column>
+                  <el-table-column prop="end_time" label="结束时间"></el-table-column>
+                  <el-table-column prop="operate_type" label="操作类型"></el-table-column>
+                  <el-table-column prop="create_user_name" label="操作人"></el-table-column>
+              </el-table>
+             </el-tab-pane>
           </el-tabs>
         </el-col>
       </el-row>
@@ -1445,6 +1459,7 @@ export default {
       //   return data;
       // };
         return {
+          cardList: [],
           isDiscount: false,
           linkUrl: '',
           roomOnlyTypeList: [],
@@ -3917,7 +3932,23 @@ export default {
           console.log('jinruruuu')
           this.getInvoice()//按照主帐id查看一条开票记录
           // this.billDialog = true
+        }else if(row.name == '7'){
+          console.log('jinruruuu')
+          this.getCardInfo()//查看房卡
+          // this.billDialog = true
         }
+      },
+      //获取房卡记录
+      getCardInfo(){
+        let that = this
+        let url = that.api.api_newPrice_9114+ '/v1/' + `room/room_lock/get_door_lock_status_list/`
+        that.$axios.get(url,{
+          params: {
+            reference_id: this.preBillLinkParam.id
+          }}).then(res=>{
+            this.cardList = res.data.data.results
+            console.log('res',res.data.data.results)
+        })
       },
       getRemarkInfo(){
         let that = this
@@ -3945,7 +3976,9 @@ export default {
         }
         that.$axios.post(url,scopeParam).then(res=>{
          if(res.data.message == 'success'){
+           console.log('res,,',res.data.data.id)
             let resUrl = res.data.data.url
+            let id = res.data.data.id
             //  that.$http.jsonp(resUrl, {
             //   }).then(function (res) {
             //     console.log(res);
@@ -3955,7 +3988,8 @@ export default {
             //  that.$http.jsonp(resUrl).success(function(data){
             //    console.log(data,'shuju')
             //  })
-            this.zhicard(resUrl)
+            this.zhicard(resUrl,id)
+            // this.updateCard(id)
           }else{
             that.message.error('本地服务没开启!')
           }
@@ -3963,7 +3997,16 @@ export default {
             console.error();
         })
       },
-      zhicard(url){
+      updateCard(id){
+        let that = this
+        let url = that.api.api_newPrice_9114 + '/v1/' + `room/room_lock/update_door_lock_card/` + id + '/'
+         that.$axios.post(url).then(res=>{
+           console.log('res',res.data)
+         }).catch(error=>{
+           console.log('error')
+         })
+      },
+      zhicard(url,id){
         url = url.replace('angular.callbacks._1','userHandler') //替换
         console.log('url获取',url)
         // url = 'http://127.0.0.1:32727/?startTime=2019-05-29%2010:35:55&endTime=2019-05-23%2010:43:35&type=2&roomNo=522&lockNo=None&guestNum=0&Lock_EnableLock=True&Lock_Factory=LockSDK_Card&Lock_ComPort=USB&Lock_ReaderType=RF57&Lock_SysCode=&Lock_HotelCode=1703936&Lock_CancelCard=True&Lock_WriteCardNum=10&Lock_ElevatorlsTrue=True&Lock_BeforeHour=0.0&Lock_AfterHour=0.0&jsonp=userHandler'
@@ -3974,6 +4017,7 @@ export default {
           console.log('json',res.body)
           if(res.body.Result === true){
             this.$message.success('制卡成功!')
+            this.updateCard(id)
           }else{
             this.$message.warning('制卡失败!')
           }

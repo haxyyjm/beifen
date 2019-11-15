@@ -3287,6 +3287,7 @@ export default {
         },
         //入住单=>确认入住
         confirmEnter(){
+          //。。。。。。
           this.isLoading = true
           if(!this.validatePreviewData() || !this.validatePreData() || !this.validateEnterData()){
               // this.isErrorClass=true
@@ -3458,11 +3459,14 @@ export default {
          */
         truePostEnter(scopeParam){
           let that = this
-          // let url= 'http://192.168.2.165:9005' + '/v2/' + `checkin/nobooking_checkin/`.
+          // let url= 'http://192.168.2.165:9005' + '/v2/' + `checkin/nobooking_checkin/`
           let url= that.api.api_newBill_9204 + '/v2/' + `checkin/nobooking_checkin/`
-          scopeParam.remarkList = this.remarkNewList
-          console.log('scopeparam',scopeParam)
-          // return
+          let obj = {}
+          this.remarkNewList.map((item) => { 
+            obj[item.roomNo] = item.remark
+          });
+          scopeParam.remarkList = obj
+          console.log('scopeparam222',scopeParam)
           setTimeout(() => {
             that.$axios.post(url,scopeParam).then(res=>{
               // if(res.data.message === 'fail'){

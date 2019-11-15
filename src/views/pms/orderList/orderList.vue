@@ -340,7 +340,7 @@
               <div>
                 <span>订单号: <span>{{props.row.order_no}}</span></span>
                 <span>联系电话:</span><span v-for="(col,index) in props.row.master_guest" :key="index">{{col.telephone}}、</span>
-                <span>备注：<span>{{props.row.remark}}</span></span>
+                <!-- <span>备注：<span>{{props.row.remark}}</span></span> -->
               </div>
             </div>
           </template>
@@ -382,6 +382,20 @@
             <span v-for="(col,index) in scope.row.master_guest">{{col.telephone}}、</span>
           </template>
         </el-table-column>
+        <el-table-column label="备注" prop="remark_id_list" key="0" v-if="remark_flag == 0">
+        </el-table-column>
+        <el-table-column label="备注" key="1" v-if="remark_flag == 1">
+          <template slot-scope="scope">
+            <span v-if="scope.row.reserve_base">{{scope.row.reserve_base[0].remark_id_list}}</span>
+          </template>
+        </el-table-column>
+         <el-table-column label="备注" prop="remark_id_list" key="2" v-if="remark_flag == 2">
+        </el-table-column>
+         <el-table-column label="备注" key="3" v-if="remark_flag == 3">
+          <template slot-scope="scope">
+            <span v-if="scope.row.reserve_base">{{scope.row.reserve_base[0].remark_id_list}}</span>
+          </template>
+        </el-table-column>
         <el-table-column prop="reserve_guest" width="240" label="预定人联系电话" :key="Math.random()" v-if="rsc_peo_flag">
           <template slot-scope="scope">
             <span v-if="scope.row.reserve_base">{{scope.row.reserve_base[0].telephone_master}}</span>
@@ -409,8 +423,16 @@
             <!-- <span v-else>NULL</span> -->
           </template>
         </el-table-column>
-        <el-table-column prop="remark" label="备注">
-        </el-table-column>
+         <!-- <el-table-column label="备注ying" v-if="remark_flag == 4">
+          <template slot-scope="scope">
+            <span v-if="scope.row.reserve_base">{{scope.row.reserve_base[0].remark_id_list}}</span>
+          </template>
+        </el-table-column> -->
+        <!-- <el-table-column label="备注desc">
+          <template slot-scope="scope" v-if="scope.row.reserve_base">
+            <span>{{scope.row.reserve_base[0].remark_id_list}}</span>
+          </template>
+        </el-table-column> -->
         <el-table-column prop="operation" label="操作" width="250px" fixed="right">
           <template slot-scope="scope" v-if="scope.row.reserve_base || scope.row.master_guest">
             <el-button type="primary" size="small" v-if="!rsc_peo_flag" @click="handleChangeRoom(scope.row)">换房升降</el-button>
@@ -585,6 +607,7 @@
     name: "orderList",
     data() {
       return {
+        remark_flag: 0,
         isDiscount: false,
         unusualList: [],//异常类型数组
         roomTypeList: [],//房型数组
@@ -1177,6 +1200,7 @@
           name: param.name,
           email_master: param.email_master,
           weixin_master: param.weixin_master,
+          remark_id_list: param.remark_id_list, //另加
           mobile_master: param.mobile_master,
           id_no: param.id_no,
           fix_rate: param.room_price,
@@ -1413,6 +1437,7 @@
           /**
            * 在住单
            */
+          this.remark_flag = 0
           that.room_type_flag = true;
           that.room_type_array_flag = false;
           that.rsc_peo_flag = false;
@@ -1421,6 +1446,7 @@
           /**
            * 应到未到
            */
+          this.remark_flag = 1
           that.rsc_peo_flag = true;
           that.room_type_flag = false;
           that.room_type_array_flag = true;
@@ -1429,6 +1455,7 @@
           /**
            * 应离未离
            */
+          this.remark_flag = 2
           that.room_type_flag = true;
           that.room_type_array_flag = false;
           that.rsc_peo_flag = false;
@@ -1437,6 +1464,7 @@
           /**
            * 所有预定
            */
+          this.remark_flag = 3
           that.rsc_peo_flag = true;
           that.room_type_flag = false;
           that.room_type_array_flag = true;
@@ -1445,6 +1473,7 @@
           /**
            * 异常单
            */
+          this.remark_flag = 4
           that.room_type_flag = true;
           that.room_type_array_flag = false;
           that.rsc_peo_flag = false;
