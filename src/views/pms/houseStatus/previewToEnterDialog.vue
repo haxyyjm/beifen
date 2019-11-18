@@ -1375,7 +1375,7 @@ export default {
         });
       },
       clearPhoto(){
-        var c=document.getElementById("canvas");
+        var c=document.getElementById("canvas_2");
           var ctx=c.getContext("2d");
           ctx.fillRect(0, 0, 200, 200);
       },
@@ -1413,7 +1413,7 @@ export default {
         }else{
           //获得Canvas对象
           let video = document.getElementById("video_2");
-          let canvas = document.getElementById("canvas");
+          let canvas = document.getElementById("canvas_2");
           let ctx = canvas.getContext('2d');
           ctx.drawImage(video, 0, 0, 150, 150);
           canvas = canvas.toDataURL("image/png");

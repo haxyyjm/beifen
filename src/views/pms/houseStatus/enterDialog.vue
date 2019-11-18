@@ -661,9 +661,11 @@
         <!--公安摄像头展示-->
         <el-dialog @close="flushMedia" :close-on-click-modal="false" class="police-class" :modal="false" :append-to-body="true" :show-close="false" :visible.sync="policeDialog_2" width="30%">
           <div style="height: 150px;width:100%">
-              <div style="margin:0 auto; margin-left: 40px;height: 150px; width: 160px; border: 1px solid #CCCCCC;background-color: #000000">
-                  <video id="video_2"  width="150px" height="150px" autoplay="autoplay"></video>
-                  <canvas id="canvas" style="position: absolute;left: 220px"  width="150px" height="150px"></canvas>
+              <div style="margin:0 auto; margin-left: 40px;height: 150px; width: 153px; border: 1px solid #CCCCCC;background-color: #000000">
+                  <div style="border:1px solid ; display: flex;">
+                    <video id="video_2"  width="150px" height="150px" autoplay="autoplay"></video>
+                    <canvas id="canvas_2"  width="150px" height="150px" style="margin-left: 2px"></canvas>
+                  </div>
               </div>
           </div>
           <span slot="footer" class="dialog-footer">
@@ -1367,6 +1369,7 @@ export default {
       },
       //上传照片
       handlePicture(item,index){
+        console.log('上传照片','打开摄像头')
         this.pictureComponentDialog = true
         // this.pictureParam.master_guest = [].concat(this.preBillParam.master_guest) //赋值入住人数组
         // console.log('this.pictureParam.master_guest==1',this.pictureParam.master_guest)
@@ -2017,7 +2020,7 @@ export default {
       },
       clearPhoto(){
         try {
-          var c=document.getElementById("canvas");
+          var c=document.getElementById("canvas_2");
           var ctx=c.getContext("2d");
           ctx.fillRect(0, 0, 150, 150);
         } catch (error) {
@@ -2039,25 +2042,26 @@ export default {
         // this.policeInfoParam.remark = ''//刷新
       },
       handleCompare(){
-        try {
-          if(this.policeInfoParam.cardNo){
-            if(this.policeInfoParam.room_no){
-              this.policeDialog_2=true;
-            }else{
-              this.$message.warning('请选择房间号!')
-            }
-          }else{
-            this.$message.warning('请录入信息!')
-          }
-        } catch (error) {
-          this.$message.warning('请正确操作!')
-          console.log('error')
-        }
+        this.policeDialog_2=true;
+        // try {
+        //   if(this.policeInfoParam.cardNo){
+        //     if(this.policeInfoParam.room_no){
+        //       this.policeDialog_2=true;
+        //     }else{
+        //       this.$message.warning('请选择房间号!')
+        //     }
+        //   }else{
+        //     this.$message.warning('请录入信息!')
+        //   }
+        // } catch (error) {
+        //   this.$message.warning('请正确操作!')
+        //   console.log('error')
+        // }
       },
       //认证对比
       comparePic(){
-        console.log('...1',this.card_imgUrl)
-        console.log('...2',this.imageUrl)
+        // console.log('...1',this.card_imgUrl)
+        // console.log('...2',this.imageUrl)
         // this.registerInfo()//入住人登记接口,以后可能还有同住人
         this.getPercent()
       },
@@ -2265,11 +2269,11 @@ export default {
         }else{
           //获得Canvas对象
           let video = document.getElementById("video_2");
-          let canvas = document.getElementById("canvas");
+          let canvas = document.getElementById("canvas_2");
           let ctx = canvas.getContext('2d');
           ctx.drawImage(video, 0, 0, 150, 150);
           canvas = canvas.toDataURL("image/png");
-          console.log('canvas=================base64',canvas)
+          console.log('canvas_2=================base64',canvas)
           /**
            * @desc 拍照以后将video元素移除
            * @desc 拍照将base64转为file文件

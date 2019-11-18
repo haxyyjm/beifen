@@ -516,7 +516,7 @@
                 </div> -->
               </div>
             <!-- card入住房 住净-->
-             <div v-if="item.room_state === 'OC'"  @mouseover="hoverIndex = index;mouseOver()" @mouseout="hoverIndex = -1;mouseOut()"   @click="popoverClick(item,index)"  slot="reference" :class="{popoverActive: activeClassName == index && isActive,lockCss: activeClassName == index && lockCss_active, hoverActive: true}"   @dblclick="openOrderInfo(item)"  class="boxActive_6">
+             <div v-if="item.room_state === 'OC'"  @mouseover="hoverIndex = index;popoverClick(item,index)"   slot="reference" :class="{popoverActive: activeClassName == index && isActive,lockCss: activeClassName == index && lockCss_active, hoverActive: true}"   @dblclick="openOrderInfo(item)"  class="boxActive_6">
                 <!--单个房间(小方块)第一行-->
                 <div  style="display: flex; justify-content: space-between;">
                     <span style="font-size: 14px">{{item.room_type_name}}</span>
@@ -540,7 +540,7 @@
                 </div>
             </div>
                <!-- card入住房 住脏-->
-             <div v-if="item.room_state === 'OD'"  @mouseover="hoverIndex = index;mouseOver()" @mouseout="hoverIndex = -1;mouseOut()"   @click="popoverClick(item,index)"  slot="reference" :class="{popoverActive: activeClassName == index && isActive,lockCss: activeClassName == index && lockCss_active, hoverActive: true}"   @dblclick="openOrderInfo(item)"  class="boxActive_2">
+             <div v-if="item.room_state === 'OD'"  @mouseover="hoverIndex = index;popoverClick(item,index)"  slot="reference" :class="{popoverActive: activeClassName == index && isActive,lockCss: activeClassName == index && lockCss_active, hoverActive: true}"   @dblclick="openOrderInfo(item)"  class="boxActive_2">
                 <!--单个房间(小方块)第一行-->
                 <div  style="display: flex; justify-content: space-between;">
                     <span style="font-size: 14px">{{item.room_type_name}}</span>
@@ -564,7 +564,7 @@
                 </div>
               </div>
               <!-- card脏房 -->
-             <div v-if="item.room_state === 'VD'"  @mouseover="hoverIndex = index;mouseOver()" @mouseout="hoverIndex = -1;mouseOut()"   @click="popoverClick(item,index)"  slot="reference" :class="{popoverActive: activeClassName == index && isActive, lockCss: activeClassName == index && lockCss_active, hoverActive: true}"    class="boxActive_3">
+             <div v-if="item.room_state === 'VD'"  @mouseover="hoverIndex = index;mouseOver()"   @click="popoverClick(item,index)"  slot="reference" :class="{popoverActive: activeClassName == index && isActive, lockCss: activeClassName == index && lockCss_active, hoverActive: true}"    class="boxActive_3">
                 <!--单个房间(小方块)第一行-->
                 <div  style="display: flex; justify-content: space-between;">
                     <span style="font-size: 14px">{{item.room_type_name}}</span>
@@ -580,7 +580,7 @@
                 </div>
               </div>
               <!-- card锁定房间 -->
-             <div v-if="item.room_state === 'OS'"  @mouseover="hoverIndex = index;mouseOver()" @mouseout="hoverIndex = -1;mouseOut()"   @click="popoverClick(item,index)" slot="reference" :class="{popoverActive: activeClassName == index && isActive,  hoverActive: true}"    class="boxActive_5">
+             <div v-if="item.room_state === 'OS'"  @mouseover="hoverIndex = index;mouseOver()"   @click="popoverClick(item,index)" slot="reference" :class="{popoverActive: activeClassName == index && isActive,  hoverActive: true}"    class="boxActive_5">
                 <!--单个房间(小方块)第一行-->
                 <div  style="display: flex; justify-content: space-between;">
                     <span style="font-size: 14px">{{item.room_type_name}}</span>
@@ -596,7 +596,7 @@
                 </div>
               </div>
               <!-- 维修 -->
-             <div v-if="item.room_state === 'OO'"  @mouseover="hoverIndex = index;mouseOver()" @mouseout="hoverIndex = -1;mouseOut()"  slot="reference" :class="{popoverActive: activeClassName == index && isActive,lockCss: activeClassName == index && lockCss_active,  hoverActive: true}"   @dblclick="openOrderInfo()"  class="boxActive_4">
+             <div v-if="item.room_state === 'OO'"  @mouseover="hoverIndex = index;mouseOver()"  slot="reference" :class="{popoverActive: activeClassName == index && isActive,lockCss: activeClassName == index && lockCss_active,  hoverActive: true}"   @dblclick="openOrderInfo()"  class="boxActive_4">
                 <!--单个房间(小方块)第一行-->
                 <div  style="display: flex; justify-content: space-between;">
                   <span style="font-size: 14px">{{item.room_type_name}}</span>
@@ -1544,7 +1544,7 @@
       },
       //点击房间(小方块)预定的时候 传递值给子组件
       sendPreview(item){
-        this.getRoomOccupyInfo(item) //获取该房间占用类型
+        // this.getRoomOccupyInfo(item) //获取该房间占用类型
         setTimeout(() => {
           // if(this.roomOccupyList.length>0){
           //   //此时预定=>未占用
@@ -1587,7 +1587,7 @@
 
       //点击房间(小方块)入住的时候
       sendEnter(item){
-        this.getRoomOccupyInfo(item)
+        // this.getRoomOccupyInfo(item)
         setTimeout(() => {
           // if(this.roomOccupyList.length>0){
           //   //此时入住=>未占用
@@ -1726,7 +1726,8 @@
             try {
               that.enterInfoBillParam.room_type_name = param.room_type_name
             } catch (error) {
-              that.$message.warning('获取后台数据失败!')              
+              console.log(error + '获取后台数据失败！')
+              // that.$message.warning('获取后台数据失败!')              
             }
             console.log('aaaa',res.data.data.results[0])
             that.linInfoParam = _.cloneDeep(this.enterInfoBillParam) //联房详情
@@ -1744,23 +1745,26 @@
                 }else if(limitParam === '入预收'){
                   that.linInfoParam.openChildDialog = '入预收'
                 }else{
-                  that.linInfoParam.openChildDialog = '' //打开相应的dialog根据条件
+                  that.linInfoParam.openChildDialog = '双击' //打开相应的dialog根据条件
                 }
               }else{
                 // let array = []
                 // for(var item of this.enterInfoBillParam.master_guest){
                 //   array.push({name: item.name})
                 // }
-                console.log('that.linInfoParam............',that.linInfoParam)
+                this.linInfoParam = {}
+                that.linkHouseFornVisible = false //联房列表关闭
+                console.log('that.linInfoParam............',that.linInfoParam,that.enterInfoBillParam)
                 this.getEndpayInfoListByAccount(that.enterInfoBillParam.account_id)
                 // that.popverParam = array
-                that.linkHouseFornVisible = false //联房列表关闭
               }
             }else{
-              that.$message.warning('获取后台数据失败!')
+              // that.$message.warning('获取后台数据失败!')
+              console.log('error')
             }
           }else{
-            that.$message.error('获取入住单详情失败!')
+            console.log('error')
+            // that.$message.error('获取入住单详情失败!')
           }
         }).catch(error=>{
           console.log(error)
@@ -1770,7 +1774,6 @@
           let that = this
           // let url= that.api.api_9022_9519+ '/v1/' + `finance/account/get_info_pms/` + id
           let url= that.api.api_newPrice_9114+ '/v1/' + `accounts/get_account_base_info/` + id + '/'
-          console.log('kajhisssssssssssssss',url)
           that.$axios({
             method : 'get',
             url : url,
@@ -2005,8 +2008,9 @@
       mouseOut(){
         this.clickOrHover = 'hover' //触发显示
       },
-      //单击点击方法
+      //单击点击方法===>新版变为触摸显示信息hover
       popoverClick(item,index){
+        console.log(item,index,'触发') //触发
         this.clickOrHover = 'click' //点击显示
         clearTimeout(this.clickTimeId);
         this.activeClassName = index //判断list单个样式标记量

@@ -2018,61 +2018,65 @@ export default {
        * 注意: 监听该父级传来的对象的时候,根据房间号得到相应的处理
        */
       parentInfoParam(){
-        this.getRoomType()
         console.log('this.parentInfoParam 监听父级;openChildDialog',this.parentInfoParam )
         console.log('this.parentInfoParam.openChildDialog',this.parentInfoParam.openChildDialog)
-        if(this.parentInfoParam.openChildDialog === '续住'){
-          this.continueLiveDialog = true
-          this.handleDate()
-        }else if(this.parentInfoParam.openChildDialog === '入消费'){
-          this.enterBillDialog = true
-          this.handleEnterBill() //处理数据====>根据条件监听当中弹出入消费dialog
-        }else if(this.parentInfoParam.openChildDialog === '结账'){
-          this.jieAccountDialog = true
-          this.handleJieAccount()
-        }else if(this.parentInfoParam.openChildDialog === '入预收'){
-          this.preview_enterBillDialog = true;
-          this.handlePreviewEnterBill() //处理数据====>根据条件监听当中弹出入预收dialog
-        }else if(this.parentInfoParam.openChildDialog === '换房'){
-          this.handleChangeRoom(this.parentInfoParam)
-          // this.switchNumberDialog = true;
-          // this.changeNo()
-        }
-        try {
-          this.tabValue = this.parentInfoParam.room_number //tab房间号
-          this.preBillLinkParam = _.cloneDeep(this.parentInfoParam)
-          console.log(this.preBillLinkParam.master_guest,'this.preBillLinkParam')
-          let guestValue = {
-            room_number: this.preBillLinkParam.room_number,
-            account_id: null,
-            guest_id: 123456,
-            id_code: "01",
-            id_no: "",
-            sex: '',
-            master_base_id: "",
-            name: "",
-            reserve_base_id: null,
-            telephone: "",
+        if(this.parentInfoParam.openChildDialog ){
+          this.getRoomType()
+          if(this.parentInfoParam.openChildDialog === '续住'){
+            this.continueLiveDialog = true
+            this.handleDate()
+          }else if(this.parentInfoParam.openChildDialog === '入消费'){
+            this.enterBillDialog = true
+            this.handleEnterBill() //处理数据====>根据条件监听当中弹出入消费dialog
+          }else if(this.parentInfoParam.openChildDialog === '结账'){
+            this.jieAccountDialog = true
+            this.handleJieAccount()
+          }else if(this.parentInfoParam.openChildDialog === '入预收'){
+            this.preview_enterBillDialog = true;
+            this.handlePreviewEnterBill() //处理数据====>根据条件监听当中弹出入预收dialog
+          }else if(this.parentInfoParam.openChildDialog === '换房'){
+            this.handleChangeRoom(this.parentInfoParam)
+            // this.switchNumberDialog = true;
+            // this.changeNo()
           }
-          if(this.preBillLinkParam.master_guest.length ===0){
-            this.preBillLinkParam.master_guest.push(guestValue)
+          try {
+            this.tabValue = this.parentInfoParam.room_number //tab房间号
+            this.preBillLinkParam = _.cloneDeep(this.parentInfoParam)
+            console.log(this.preBillLinkParam.master_guest,'this.preBillLinkParam')
+            let guestValue = {
+              room_number: this.preBillLinkParam.room_number,
+              account_id: null,
+              guest_id: 123456,
+              id_code: "01",
+              id_no: "",
+              sex: '',
+              master_base_id: "",
+              name: "",
+              reserve_base_id: null,
+              telephone: "",
+            }
+            if(this.preBillLinkParam.master_guest.length ===0){
+              this.preBillLinkParam.master_guest.push(guestValue)
+            }
+          } catch (error) {
+            console.log(error)
           }
-        } catch (error) {
-          console.log(error)
+          setTimeout(() => {
+            this.getEndpayInfoListByAccount() //查看主账
+          }, 200);
+          // this.getRoomInfoOther()//查询是否在查房，避免再次新建查房任务 去掉了
+          this.getMarketSrc('src')
+          this.getMarketSrc('market')
+          // this.getRateCode_price(this.preBillLinkParam)  //以后必须要的获取最新房价码
+          this.getRateCode_price_self()
+          // console.log('this.parentInfoParam.openChildDialog',this.parentInfoParam.openChildDialog)
+          // if(this.parentInfoParam.openChildDialog === '续住'){
+          //   console.log('xuzhu===============')
+          //   this.continueLiveDialog = true
+          // }
+        }else{
+          console.log('else')
         }
-        setTimeout(() => {
-          this.getEndpayInfoListByAccount() //查看主账
-        }, 200);
-        // this.getRoomInfoOther()//查询是否在查房，避免再次新建查房任务 去掉了
-        this.getMarketSrc('src')
-        this.getMarketSrc('market')
-        // this.getRateCode_price(this.preBillLinkParam)  //以后必须要的获取最新房价码
-        this.getRateCode_price_self()
-        // console.log('this.parentInfoParam.openChildDialog',this.parentInfoParam.openChildDialog)
-        // if(this.parentInfoParam.openChildDialog === '续住'){
-        //   console.log('xuzhu===============')
-        //   this.continueLiveDialog = true
-        // }
       },
       checkboxList: {
         handler: function (val, oldVal) {

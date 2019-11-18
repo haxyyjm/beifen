@@ -69,10 +69,13 @@
           <!--公安摄像头展示-->
         <el-dialog @close="flushMedia" :close-on-click-modal="false" class="police-class" :modal="false" :append-to-body="true" :show-close="false" :visible.sync="policeDialog_2" width="30%">
           <div style="height: 150px;width:100%">
-              <div style="margin:0 auto; margin-left: 40px;height: 150px; width: 160px; border: 1px solid #CCCCCC;background-color: #000000">
-                  <video id="video_2"  width="150px" height="150px" autoplay="autoplay"></video>
-                  <canvas id="canvas" style="position: absolute;left: 220px"  width="150px" height="150px"></canvas>
+              <div style="margin:0 auto; margin-left: 40px;height: 150px; width: 153px; border: 1px solid #CCCCCC;background-color: #000000">
+              <div style="border:1px solid ; display: flex;">
+                    <video id="video_2"  width="150px" height="150px" autoplay="autoplay"></video>
+                    <canvas id="canvas"  width="150px" height="150px" style="margin-left: 2px"></canvas>
+                  </div>
               </div>
+
           </div>
           <span slot="footer" class="dialog-footer">
             <div style="text-align: center">

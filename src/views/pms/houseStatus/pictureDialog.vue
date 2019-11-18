@@ -2,10 +2,10 @@
 <template>
     <div>
         <el-dialog class="houseTypeClass" width="50%"   title="上传图片" @close="$emit('update:show', false);flushMedia()" :show="show" :visible.sync="pictureComponentDialog" :modal="false">
-            <div style="height: 360px; display: flex; justify-content: space-between;">
-                <div style="border:1px solid; height: 301px;width:100%; text-align:center">
-                    <video id="video_1" style="float:left" width="300px" height="300px" autoplay="autoplay"></video>
-                    <canvas id="canvas" style="float:right"  width="300px" height="300px"></canvas>
+            <div style="height: 300px;width:601px;margin:0 auto">
+                <div style="border:1px solid ; display: flex;">
+                    <video id="video_1" style="width= 100%; height=100%; object-fit: fill"  autoplay="autoplay"></video>
+                    <canvas id="canvas_2"  width="300px" height="300px"></canvas>
                 </div>
           </div>
           <div slot="footer"  class="dialog-footer">
@@ -53,7 +53,6 @@
         },
         watch: {
             show () {
-                console.log('.............show..............')
                 this.pictureComponentDialog = this.show;
             },
             pictureParam(){
@@ -73,7 +72,7 @@
             },
             clearPhoto(){
                 try {
-                    var c=document.getElementById("canvas");
+                    var c=document.getElementById("canvas_2");
                     var ctx=c.getContext("2d");
                     ctx.fillRect(0, 0, 300, 300);
                 } catch (error) {
@@ -94,7 +93,7 @@
                 let that = this
                 //获得Canvas对象
                 let video = document.getElementById("video_1");
-                let canvas = document.getElementById("canvas");
+                let canvas = document.getElementById("canvas_2");
                 let ctx = canvas.getContext('2d');
                 ctx.drawImage(video, 0, 0, 300, 300);
                 canvas = canvas.toDataURL("image/png");

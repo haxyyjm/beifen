@@ -1,6 +1,6 @@
       //获取摄像头
      export function getMedia(wdith_value,height_value,id_value){
-        console.log('进入sss')
+        console.log('进入sss',height_value)
         // navigator.getUserMedia()
         let constraints = {
           video: {width: wdith_value, height: height_value},
