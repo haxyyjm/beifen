@@ -28,7 +28,7 @@
                       </el-col>
                       <el-col :span="7">
                         <span>来源码:</span>
-                        <el-select @focus="getMarketSrc('src')" clearable @change="watchValue"  v-model="preBillParam.master_base[0].code_src" style="width: 70%"  placeholder="请选择">
+                        <el-select @focus="getMarketSrc('src')" clearable   v-model="preBillParam.master_base[0].code_src" style="width: 70%"  placeholder="请选择">
                           <el-option
                             v-for="item in marketSrcList"
                             :key="item.id"
@@ -1404,11 +1404,10 @@ export default {
       //筛选处理房价码
       handleRateCode(param){
         this.rateCodeValue = this.preBillParam.master_base[0].rate_code //获取房价码
-        if(this.preBillParam.master_base[0].master_lable == 1){
-          this.getHour_time(param) //钟点房处理 
-        }
+        console.log('判断条件',this.preBillParam.master_base[0].master_lable,this.rateCode_hour)
         // this.clearMaseterBase() //清空选择房型右边的首日价======>此处隔断<=======
-        if(this.preBillParam.master_base[0].master_lable === 1 && this.rateCode_hour){
+        if(this.preBillParam.master_base[0].master_lable === 1){
+          this.getHour_time(param) //钟点房处理  时间
           console.log('this.rateCode_hour',this.rateCode_hour)
           console.log('这里是处理钟点房的数据===>推出首日价')
           this.getRateCode_NewHourPrice() //获取所有房价==>判断要分为 钟点房和当日房 ===>其实这里是获得首日价
@@ -1420,14 +1419,29 @@ export default {
       /**
        * 处理动态得到相应的房价信息
        */
-      handlePrice(param){
+      handlePrice(param,param2){
         // let key1 = param.room_type
         // let temprateValue = temprate[key1]
+        console.log('this.preBillParam.master_basekaishi',this.preBillParam.master_base)
+        console.log('handle<====',param,param2)
         let key2 = moment(new Date()).format('YYYY-MM-DD') //对象嵌套对象里的key值
         // that.houseType_priceValue_1 = temprateValue[key2]
         for(var item of this.preBillParam.master_base){
-          item.fix_rate = param[item.room_type_value][key2]
+          if(param2 == 'hour'){
+            if(JSON.stringify(param) != "{}"){
+              item.fix_rate = param[item.room_type_value].price
+            }else{
+              item.fix_rate = 0
+            }
+          }else{
+            if(JSON.stringify(param) != "{}"){
+              item.fix_rate = param[item.room_type_value][key2]
+            }else{
+              item.fix_rate = 0
+            }
+          }
         }
+        console.log('this.preBillParam.master_base最终',this.preBillParam.master_base)
       },
       /**
        * @desc 这里是当为当日房价码的的时候，要区分钟点房房价码不同
@@ -1462,13 +1476,12 @@ export default {
       getRateCode_NewHourPrice(){
         let that = this
         let url = that.api.api_newPrice_9114+ '/v1/' + `room/rate_code/get_hours_rate_code/`
-        if(this.preBillParam.master_base[0].master_lable == 1){
-          this.rateCodeList_hour = this.rateCode_list
-        }
+        this.rateCodeList_hour = this.rateCode_list
+        console.log('进入小时',this.rateCodeList_hour)
         let rate_code
         let rate_code_value
         try {
-          rate_code = that.rateCodeList_hour.filter(item=> item.code == that.rateCode_hour)
+          rate_code = that.rateCodeList_hour.filter(item=> item.code == that.preBillParam.master_base[0].rate_code)
           rate_code_value = rate_code[0].code
         } catch (error) {
           console.log('error,没有对应数据匹配')            
@@ -1480,16 +1493,17 @@ export default {
           console.log('钟点房返回....',res.data.data)
             if(res.data.message == 'success'){
               let temprate = res.data.data.price
-              if(JSON.stringify(temprate) != "{}"){
-                let key1 = param.room_type
-                let temprateValue = temprate[key1]
-                that.houseType_priceValue_1 = temprateValue.price
-                item.fix_rate = that.houseType_priceValue_1
-              }else{
-                item.fix_rate = 0
-              }
+              this.handlePrice(temprate,'hour')//处理以得到价格
+              // if(JSON.stringify(temprate) != "{}"){
+              //   let key1 = param.room_type
+              //   let temprateValue = temprate[key1]
+              //   that.houseType_priceValue_1 = temprateValue.price
+              //   item.fix_rate = that.houseType_priceValue_1
+              // }else{
+              //   item.fix_rate = 0
+              // }
             }else{
-                that.message.error('获取数据失败，请重试')
+                that.message.error('获取数据失败，请重试或联系后台!')
             }
         }).catch((error)=>{
         })
@@ -3818,8 +3832,9 @@ export default {
           console.log('data....',data)
           console.log('......this.preBillParam.master_base[0].master_lable',this.preBillParam.master_base[0].master_lable)
           // this.getRateCode_price()
-          this.rateCode_hour = '' //置空操作
+          // this.rateCode_hour = '' //置空操作  无用得modle===>value值
           this.preBillParam.master_base[0].rate_code = ''
+          return
           if(this.preBillParam.master_base[0].master_lable != 1){
           console.log('......this.preBillParam.master_base[0].master_lable2222',this.preBillParam.master_base[0].master_lable)
             this.reSetData('非钟点房')
@@ -3893,7 +3908,7 @@ export default {
         },
         //通过钟点房的值筛选时间=====>自动得到时间
         getHour_time(param){
-          this.reSetData('钟点房')//重置数据 必须要放在前面
+          // this.reSetData('钟点房')//重置数据 必须要放在前面
           console.log('param',param)
           this.rateCode_hour = param
           console.log('this.rateCode_hour2222',this.rateCode_hour)
@@ -3902,7 +3917,7 @@ export default {
           let time2 = moment().add(param,'hours').format('YYYY-MM-DD HH:mm:ss')
           this.preBillParam.master_base[0].leave_time =[new Date() ,time2]
           console.log('------')
-          this.getRateCode_hourPrice()
+          // this.getRateCode_hourPrice()
           console.log('-2------')
           console.log('..chuan.',this.preBillParam.master_base)
         },
@@ -4632,7 +4647,7 @@ export default {
           }
           this.preBillParam.master_guest.forEach(item=>item.room_number='')//遍历清除入住人相关房间的的数据
           //一层判断钟点房和非钟点房判断条件不同 这里默认判断力 根据房价码获取价格
-          this.preBillParam.master_base[0].master_lable === 1 && this.rateCode_hour ? this.getRateCode_hourPrice(item,param) : this.getRateCode_price(item,param)
+          this.preBillParam.master_base[0].master_lable === 1 ? this.getRateCode_hourPrice(item,param) : this.getRateCode_price(item,param)
           item.can_live_num = param.can_live_num
           item.room_type = param.room_type_name
           item.room_type_value = param.room_type

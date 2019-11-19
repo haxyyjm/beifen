@@ -1006,8 +1006,44 @@ export default {
         handleRateCode(){
           this.rateCodeValue = this.preBillParam.reserve_base.rate_code
           console.log('preBillParam.reserve_base.rate_code',this.preBillParam.reserve_base.rate_code)
-          this.clearMaseterBase()
+          this.getRateCode_newPrice()
+          // this.clearMaseterBase()
         },
+        getRateCode_newPrice(){
+          let that = this
+          let url = that.api.api_newPrice_9114 + '/v1/' +  `room/rate_code/get_rate_code/`
+          // let temp = []
+          // temp.push(param.room_type)
+          // this.preBillParam.reserve_base.rsv_type
+          let scopeParam ={
+            rate_code: that.rateCodeValue,
+            begin_date:  moment(new Date()).format('YYYY-MM-DD'),
+            end_date: moment(new Date()).add(1,'days').format('YYYY-MM-DD'),
+          }
+          that.$axios.post(url,scopeParam).then(res=>{
+            console.log('res.data.data',res.data.data)
+            let temprate = res.data.data.price
+            this.handlePrice(temprate)//处理以得到价格
+            }).catch(error=>{
+          })
+        },
+        /**
+       * 处理动态得到相应的房价信息
+       */
+      handlePrice(param){
+        // let key1 = param.room_type
+        // let temprateValue = temprate[key1]
+        console.log('this.preBillParam.master_basekaishi',this.preBillParam.reserve_rate)
+        let key2 = moment(new Date()).format('YYYY-MM-DD') //对象嵌套对象里的key值
+        // that.houseType_priceValue_1 = temprateValue[key2]
+        for(var item of this.preBillParam.reserve_rate){
+          if(JSON.stringify(param) != "{}"){
+            item.room_price = param[item.room_type_code][key2]
+          }else{
+            item.room_price = 0
+          }
+        }
+      },
         //获取房价码list
         getRateCode_list(){
           if(!this.preBillParam.reserve_base.code_src || !this.preBillParam.reserve_base.code_market){

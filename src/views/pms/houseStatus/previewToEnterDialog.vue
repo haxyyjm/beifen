@@ -16,20 +16,15 @@
             <span>联系电话:<span>{{preBillParam.reserve_base[0].telephone_master}}</span></span>
             <span>订单号:<span>{{preBillParam.reserve_base[0].order_no}}</span></span>
           </el-row>
+          <div style="display: flex; padding-top: 15px">
+            <el-input style="padding-left: 67px; width: 50%"  clearable v-model="infoShow"  @focus="queryCardPop" placeholder="请输入信息"></el-input>
+            <el-button style="margin-left: 10px" type="primary">搜索</el-button>
+           </div>
+          <!-- <el-input style="padding-left: 55px" v-if="preBillParam.reserve_base[0].code_src == 'HY' || preBillParam.reserve_base[0].code_market  == 'XYGS'" clearable v-model="infoShow"  @focus="queryCardPop" placeholder="请输入信息"></el-input>
+          <el-button v-if="preBillParam.reserve_base[0].code_src   == 'HY'|| preBillParam.reserve_base[0].code_market  == 'XYGS'" style="margin-left: 10px" type="primary">搜索</el-button> -->
            <div class="wrap_div">
              <div>
                <ul>
-                 <!-- <li>
-                    入住类型:
-                      <el-select disabled  v-model="preBillParam.reserve_base[0].rsv_type " style="width: 65%"  placeholder="请选择">
-                        <el-option
-                        v-for="item in previewTypeList"
-                        :key="item.value"
-                        :label="item.label"
-                        :value="item.value">
-                      </el-option>  
-                    </el-select>
-                 </li> -->
                  <li>
                     &nbsp;入住类型:
                     <el-select  v-model="preBillParam.reserve_base[0].rsv_lable" style="width: 65%"  placeholder="请选择">
@@ -41,55 +36,24 @@
                         </el-option>  
                     </el-select>
                  </li>
-                  <!-- <li>
-                      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;市场码:
-                      <el-select  disabled  v-model="preBillParam.reserve_base[0].code_market" style="width: 65%"  placeholder="请选择">
-                          <el-option
-                            v-for="item in marketSrcList"
-                            :key="item.id"
-                            :label="item.descript"
-                            :value="item.code">
-                          </el-option>  
-                      </el-select>
-                  </li>
-                  <li>
-                      <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;来源码:</span>
-                      <el-select disabled  v-model="preBillParam.reserve_base[0].code_src" style="width: 65%"  placeholder="请选择">
-                        <el-option
-                          v-for="item in marketSrcList"
-                          :key="item.id"
-                          :label="item.descript"
-                          :value="item.code">
-                        </el-option>  
-                      </el-select>
-                  </li> -->
-                    <li>
-                      <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;房价码:</span>
-                      <el-select  v-model="preBillParam.reserve_base[0].rate_code"  style="width: 65%"   placeholder="请选择">
-                      <el-option
-                        v-for="(item,index) in rateCode_list"
-                        :key="index"
-                        :label="item.description"
-                        :value="item.code">
-                      </el-option>  
+                 <li>
+                    <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;房价码:</span>
+                    <el-select @focus="getRateCode_list()" @change="handleRateCode"  v-model="preBillParam.reserve_base[0].rate_code"  style="width: 65%"   placeholder="请选择">
+                    <el-option
+                      v-for="(item,index) in rateCode_list"
+                      :key="index"
+                      :label="item.description"
+                      :value="item.code">
+                    </el-option>  
                     </el-select>
                   </li>
-                 <!-- <li>
-                   <el-col :span="24">
-                      <span style="display: inline-block">入离时间:</span>
-                      <el-date-picker style="width:75%" :disabled="changeTrue"  :picker-options="rangeDate"  :clearable ="false"
-                        v-model="preBillParam.reserve_base[0].leave_time" type="datetimerange" range-separator="~" start-placeholder="开始日期" end-placeholder="结束日期" placeholder="选择日期">
-                      </el-date-picker> 
-                      <span v-if="preBillParam.reserve_base[0].rsv_lable === 0">共 <span style="width: 80px">{{countDateRange}}</span> 晚</span>
-                   </el-col>
-                 </li> -->
                </ul>
              </div>
              <div style="width:100%;">
                <ul>
                  <li>
                       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;市场码:
-                      <el-select  v-model="preBillParam.reserve_base[0].code_market" style="width: 40%"  placeholder="请选择">
+                      <el-select @focus="getMarketSrc('market')"  v-model="preBillParam.reserve_base[0].code_market" style="width: 40%"  placeholder="请选择">
                           <el-option
                             v-for="item in marketSrcList"
                             :key="item.id"
@@ -100,7 +64,7 @@
                   </li>
                   <li>
                       <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;来源码:</span>
-                      <el-select  v-model="preBillParam.reserve_base[0].code_src" style="width: 40%"  placeholder="请选择">
+                      <el-select  @focus="getMarketSrc('src')"  v-model="preBillParam.reserve_base[0].code_src" style="width: 40%"  placeholder="请选择">
                         <el-option
                           v-for="item in marketSrcList"
                           :key="item.id"
@@ -111,14 +75,6 @@
                   </li>
                </ul>
              </div>
-              <!-- <div>
-                <div class="block" style="height: 200px; width: 410px; border: 1px solid #CCCCCC; margin-bottom: 10px">
-                  <video id="video" style="display: left" width="200px" height="200px" autoplay="autoplay"></video>
-                  <canvas id="canvas" style="display: right"  width="200px" height="200px"></canvas>
-                </div>
-                <el-button type="primary" size="mini" @click="getMedia()" >开启摄像头</el-button>
-                <el-button type="primary" size="mini" @click="takePhoto()" >拍照上传</el-button>
-              </div> -->
            </div>
            <el-row style="margin-top: 10px">
               <el-col :span="24">
@@ -627,6 +583,11 @@ import pictureDialog from './pictureDialog'
 export default {
     data(){
         return {
+          infoShow: '',
+          changeTitle: '',//入住类型变动，不同的title
+          cardBaseList: [],//会员信息
+          centerRoomList: [],//订房中心list
+          cardQueryDialog: false,
           remarkNewList: [],
           face_set: '',//获取face-set
           isLoading: false,
@@ -1224,6 +1185,59 @@ export default {
       }
     },
     methods: {
+      //筛选处理房价码
+      handleRateCode(){
+        console.log('this.preBillParam',this.preBillParam)
+        this.rateCodeValue = this.preBillParam.reserve_base[0].rate_code //获取房价码
+        this.getRateCode_newPrice() //获取所有房价==>判断要分为 钟点房和当日房 ===>其实这里是获得首日价
+        // this.rateCodeValue = this.preBillParam.master_base[0].rate_code //获取房价码
+      },
+      /**
+       * @desc 这里是当为当日房价码的的时候，要区分钟点房房价码不同
+       */
+      getRateCode_newPrice(){
+        let that = this
+        let url = that.api.api_newPrice_9114 + '/v1/' +  `room/rate_code/get_rate_code/`
+        let scopeParam ={
+          rate_code: this.rateCodeValue,
+          begin_date:  moment(new Date()).format('YYYY-MM-DD'),
+          end_date: moment(new Date()).add(1,'days').format('YYYY-MM-DD'),
+        }
+        that.$axios.post(url,scopeParam).then(res=>{
+          console.log('房价码==单独',res.data.data)
+          let temprate = res.data.data.price
+          this.handlePrice(temprate)//处理以得到价格
+          // let key1 = param.room_type
+          // let temprateValue = temprate[key1]
+          // let key2 = moment(new Date()).format('YYYY-MM-DD') //对象嵌套对象里的key值
+          // that.houseType_priceValue_1 = temprateValue[key2]
+          // item.fix_rate = that.houseType_priceValue_1
+          // console.log('item.fix_rate检测',item.fix_rate)
+          // console.log('temprateValue',temprateValue)
+          // console.log('111',temprateValue[key2])
+          // console.log('preBillParam.master_base检测',this.preBillParam.master_base)
+          }).catch(error=>{
+        })
+      },
+          /**
+       * 处理动态得到相应的房价信息
+       */
+      handlePrice(param,param2){
+        // let key1 = param.room_type
+        // let temprateValue = temprate[key1]
+        console.log('this.preBillParam.master_basekaishi',this.preBillParam)
+        console.log('handle<====',param,param2)
+        let key2 = moment(new Date()).format('YYYY-MM-DD') //对象嵌套对象里的key值
+        // that.houseType_priceValue_1 = temprateValue[key2]
+        for(var item of this.preBillParam.reserve_rate){
+            if(JSON.stringify(param) != "{}"){
+              item.room_price = param[item.room_type_code][key2]
+            }else{
+              item.room_price = 0
+            }
+        }
+        console.log('this.preBillParam.master_base最终',this.preBillParam.master_base)
+      },
       //上传照片 父传子 但是没传
       handlePicture(item,index){
         this.pictureComponentDialog = true
@@ -4178,7 +4192,7 @@ export default {
         line-height: 65px;
       }
       li:first-child{
-        margin-top: 20px
+        margin-top: 15px
       }
     }
   }
