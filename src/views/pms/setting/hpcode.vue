@@ -1047,7 +1047,7 @@
         let urlData = '';
         if(flag_char == 'category') {
           //分类  需要更改接口的地方
-          urlData = "http://47.98.113.173:9103/v1/system/settings/get_code_base_list/?parent_code=ratecode_categroy&page_size=100"
+          urlData = "http://47.98.113.173:9103/v1/system/settings/get_code_base_sys_list/?parent_code=ratecode_categroy&page_size=100"
           that.fatherData({
             url: urlData
           }).then((res) => {
@@ -1072,7 +1072,7 @@
           });
         } else if(flag_char == 'amenities') {
           //客房布置
-          urlData = 'http://47.98.113.173:8095/v1/system/settings/get_code_base_list/?parent_code=amenities&page_size=100';
+          urlData = 'http://47.98.113.173:8095/v1/system/settings/get_code_base_sys_list/?parent_code=amenities&page_size=100';
           that.fatherData({
             url: urlData
           }).then((res) => {
@@ -1082,7 +1082,7 @@
           });
         } else if(flag_char == 'market') {
           //市场码
-          urlData = 'http://47.98.113.173:8095/v1/system/settings/get_code_base_list/?parent_code=market_code&page_size=100';
+          urlData = 'http://47.98.113.173:8095/v1/system/settings/get_code_base_sys_list/?parent_code=market_code&page_size=100';
           that.fatherData({
             url: urlData
           }).then((res) => {
@@ -1091,7 +1091,7 @@
           });
         } else if(flag_char == 'src') {
           //来源码
-          urlData = 'http://47.98.113.173:8095/v1/system/settings/get_code_base_list/?parent_code=src_code&page_size=100';
+          urlData = 'http://47.98.113.173:8095/v1/system/settings/get_code_base_sys_list/?parent_code=src_code&page_size=100';
           that.fatherData({
             url: urlData
           }).then((res) => {

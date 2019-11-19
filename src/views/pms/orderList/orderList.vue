@@ -1237,7 +1237,7 @@
        */
       get_market_code_list() {
         let that = this;
-        let url = that.api.api_code_9103+ '/v1/' + 'system/settings/get_code_base_list/?parent_code=ratecode_categroy&page_size=100';
+        let url = that.api.api_code_9103+ '/v1/' + 'system/settings/get_code_base_sys_list/?parent_code=ratecode_categroy&page_size=100';
         that.$axios({
           method: 'get',
           url: url
@@ -1255,7 +1255,7 @@
        */
       get_src_code() {
         let that = this;
-        let url = that.api.api_code_9103+ '/v1/' + 'system/settings/get_code_base_list/?parent_code=src_code&page_size=100';
+        let url = that.api.api_code_9103+ '/v1/' + 'system/settings/get_code_base_sys_list/?parent_code=src_code&page_size=100';
         that.$axios({
           method: 'get',
           url: url,

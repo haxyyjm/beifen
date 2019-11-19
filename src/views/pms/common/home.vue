@@ -720,8 +720,8 @@
       /**
        * @writeCard 写卡
        */
-       writeCard(){
-
+      writeCard(){
+        
       },
       getEnterInfoByRoom(param){
         let scopeParams = {

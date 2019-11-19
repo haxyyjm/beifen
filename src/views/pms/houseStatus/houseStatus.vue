@@ -354,9 +354,11 @@
                       <!-- <ul style="font-size: 12px;margin: 2px 0px 0px 5px" v-for="(item,index) of item.room_guest.split(',')" :key = index>
                         <li>{{item}}</li>
                       </ul> -->
-                      <ul style="font-size: 12px;margin: 2px 0px 0px 5px" v-for="(item,index) of linInfoParam.master_guest" :key = index>
-                        <li>{{item.name}}</li>
-                      </ul>
+                      <div v-if="linInfoParam && linInfoParam.master_guest">
+                        <ul style="font-size: 12px;margin: 2px 0px 0px 5px" v-for="(item,index) of linInfoParam.master_guest" :key = index>
+                          <li>{{item.name}}</li>
+                        </ul>
+                      </div>
                     </div>
                     <div>
                       <el-row style="display: flex; justify-content: flex-end">
@@ -378,15 +380,18 @@
                   </div>
                   <el-row style="margin-top: 5px; color: #666"><hr/></el-row>
                   <div  class="pop_bottom">
-                    <div style="margin-top: 5px;color: #8e8e8e; width: 60%">
-                      <el-row>{{linInfoParam.arr_time}}</el-row>
-                      <el-row>{{linInfoParam.leave_time}}</el-row>
-                      <div v-if="linInfoParam.combine_room_list" style="color: #5bbbf5">
+                    <div style="margin-top: 5px;color: #8e8e8e; width: 60%;height: 100%">
+                      <el-row v-if="linInfoParam && linInfoParam.arr_time">{{linInfoParam.arr_time}}</el-row>
+                      <el-row v-if="linInfoParam">{{linInfoParam.leave_time}}</el-row>
+                      <div v-if="linInfoParam && linInfoParam.combine_room_list" style="color: #5bbbf5">
                         <span>关联：</span>
                         <span v-for="(item,index) of linInfoParam.combine_room_list" :key="index">
                           {{item[0]}}、
                         </span>
                       </div>
+                      <!-- <div v-if="linInfoParam" style="overflow: hidden; white-space: nowrap; text-overflow: ellipsis;width:100%;">备注: {{linInfoParam.remark_id_list}} </div> -->
+                      <div v-if="linInfoParam && linInfoParam.remark_id_list">备注: {{linInfoParam.remark_id_list}} </div>
+                      <div v-else>备注: 无 </div>
                     </div>
                     <div>
                       <el-row style="margin-top: 5px">消费金额:{{popverParam.general_consumption}}</el-row>
@@ -409,9 +414,14 @@
                       <!-- <ul style="font-size: 12px;margin: 2px 0px 0px 5px" v-for="(item,index) of item.room_guest.split(',')" :key = index>
                         <li>{{item}}</li>
                       </!-->
-                      <ul style="font-size: 12px;margin: 2px 0px 0px 5px" v-for="(item,index) of linInfoParam.master_guest" :key = index>
+                      <!-- <ul style="font-size: 12px;margin: 2px 0px 0px 5px" v-for="(item,index) of linInfoParam.master_guest" :key = index>
                         <li>{{item.name}}</li>
-                      </ul>
+                      </ul> -->
+                      <div v-if="linInfoParam && linInfoParam.master_guest">
+                        <ul style="font-size: 12px;margin: 2px 0px 0px 5px" v-for="(item,index) of linInfoParam.master_guest" :key = index>
+                          <li>{{item.name}}</li>
+                        </ul>
+                      </div>
                     </div>
                     <div>
                       <el-row style="display: flex; justify-content: flex-end">
@@ -434,9 +444,9 @@
                   <el-row style="margin-top: 5px; color: #666"><hr/></el-row>
                     <div  class="pop_bottom">
                       <div style="margin-top: 5px;color: #8e8e8e;">
-                        <el-row>{{linInfoParam.arr_time}}</el-row>
-                        <el-row>{{linInfoParam.leave_time}}</el-row>
-                        <div v-if="linInfoParam.combine_room_list" style="color: #5bbbf5">
+                        <el-row v-if="linInfoParam && linInfoParam.arr_time">{{linInfoParam.arr_time}}</el-row>
+                        <el-row v-if="linInfoParam">{{linInfoParam.leave_time}}</el-row>
+                        <div v-if="linInfoParam && linInfoParam.combine_room_list" style="color: #5bbbf5">
                         <span>关联：</span>
                         <span v-for="(item,index) of linInfoParam.combine_room_list" :key="index">
                           {{item[0]}}、
@@ -1752,8 +1762,9 @@
                 // for(var item of this.enterInfoBillParam.master_guest){
                 //   array.push({name: item.name})
                 // }
-                this.linInfoParam = {}
-                that.linkHouseFornVisible = false //联房列表关闭
+                console.log('恩嫩嫩嗯嗯de 进入')
+                // this.linInfoParam = {}
+                // that.linkHouseFornVisible = false //联房列表关闭
                 console.log('that.linInfoParam............',that.linInfoParam,that.enterInfoBillParam)
                 this.getEndpayInfoListByAccount(that.enterInfoBillParam.account_id)
                 // that.popverParam = array
@@ -2019,9 +2030,14 @@
         if(item.room_state == 'OC' || item.room_state =='OD'){
           this.clickTimeId = setTimeout(() => {
             this.getEnterInfoByRoom(item,'单击')//获取账务
-          }, 250);
+          }, 200);
           // console.log('popverParam')
           // console.log('数据==>',this.enterInfoBillParam)
+        }else{
+          this.linInfoParam = {}
+          console.log('this.linInfoParam',this.linInfoParam)
+          console.log('enter...')
+          return
         }
       },
       //制卡
@@ -2490,7 +2506,7 @@
       getRepairReason(){
         let that = this
         let parent_code = 'room_lock_reason'
-        let url = that.api.api_code_9103 + '/v1/'+ 'system/settings/get_code_base_list/'
+        let url = that.api.api_code_9103 + '/v1/'+ 'system/settings/get_code_base_sys_list/'
         that.$axios({
           method : 'get',
           url : url,

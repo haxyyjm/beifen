@@ -3847,7 +3847,7 @@ export default {
           console.log('param-------',param)
           let that = this
           that.marketSrcList = []
-          let url =  that.api.api_code_9103+ '/v1/' + 'system/settings/get_code_base_list/'
+          let url =  that.api.api_code_9103+ '/v1/' + 'system/settings/get_code_base_sys_list/'
           let params = {}
           //src 代表市场码
           if(param == 'market'){

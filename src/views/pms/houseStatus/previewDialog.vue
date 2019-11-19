@@ -2563,7 +2563,7 @@ export default {
         },
         // getMarket(param){
           //   let that = this
-        //   let url =  that.api.api_code_9103+ '/v1/' + 'system/settings/get_code_base_list'
+        //   let url =  that.api.api_code_9103+ '/v1/' + 'system/settings/get_code_base_sys_list'
         //   let params = {
           //    parent_code: param == 'market' ? 'market_code' : 'src_code'
         //   }
@@ -2582,7 +2582,7 @@ export default {
           let that = this
           this.preBillParam.reserve_base.rate_code = ''//置空房价码
           that.marketSrcList = []
-          let url =  that.api.api_code_9103+ '/v1/' + 'system/settings/get_code_base_list'
+          let url =  that.api.api_code_9103+ '/v1/' + 'system/settings/get_code_base_sys_list/'
           let params = {}
           //src 代表市场码
           if(param == 'market'){

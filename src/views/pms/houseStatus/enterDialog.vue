@@ -1265,7 +1265,6 @@ export default {
         for(var item of this.preBillParam.master_guest){
           item.room_number = this.parentParam.roomNo
         }
-        console.log('this.preBillParam.master_basethis.preBillParam.master_base',this.preBillParam)
         // 此种就是进来子组件 得到相应房型房间价格 然后可选房号
         for(var item of this.preBillParam.master_base){
           item.room_type = this.parentParam.roomType
@@ -1278,12 +1277,10 @@ export default {
         }
         this.getCardListInfo()//获取房子信息所有数据
         this.getRateCode_price(item,param) //====下面没有用
-        console.log('watch',param.room_type,param)
         this.cloneData.room_type = _.cloneDeep(param.room_type)  //开始限制数据
         this.cloneData.room_no = _.cloneDeep(this.parentParam.roomNo)
         this.getCanLiveRoom(param.room_type) //根据房型选未占用房间===>可以在这个地方废弃
         // this.previewEnterBill.room_no_value = this.parentParam.roomNo
-        console.log('roomNumberList',this.roomNumberList,this.previewEnterBill.room_no_value)
       }
     },
     // 注册一个局部的自定义指令 v-focus
@@ -1302,7 +1299,6 @@ export default {
       focus_focus: {
         // 指令的定义
         inserted: function (el) {
-          console.log('el',el)
           // 聚焦元素
           el.querySelector('input').focus()
         },
@@ -1365,7 +1361,6 @@ export default {
             item.face_id = param.face_id
           }
         })
-        console.log('this.preBillParam.master_guest=====end',this.preBillParam.master_guest)
       },
       //上传照片
       handlePicture(item,index){
@@ -1378,10 +1373,7 @@ export default {
         localStorage.setItem('pictureParam_guest',JSON.stringify(item))
         localStorage.setItem('pictureParam_index',index)
         // localStorage.setItem('face_set',face_set)
-        console.log('1111', JSON.parse(localStorage.getItem('pictureParam_guest')))
-        console.log('hotel_info',JSON.parse(localStorage.getItem('userInfo')))
         let param = JSON.parse(localStorage.getItem('userInfo'))
-        console.log('param-param',param)
         this.getFaceSet(param)
       },
       /**
@@ -1401,7 +1393,6 @@ export default {
             if (res.data.message === "success"){
               this.face_set = res.data.data.face_set
               localStorage.setItem('face_set',this.face_set)
-              console.log('....',res.data)
             }
             else{
             }
@@ -1412,12 +1403,96 @@ export default {
       },
       //筛选处理房价码
       handleRateCode(param){
-        this.rateCodeValue = this.preBillParam.master_base[0].rate_code
+        this.rateCodeValue = this.preBillParam.master_base[0].rate_code //获取房价码
         if(this.preBillParam.master_base[0].master_lable == 1){
-          this.getHour_time(param) //钟点房处理
+          this.getHour_time(param) //钟点房处理 
         }
-        console.log('preBillParam.master_base[0].rate_code',this.preBillParam.master_base[0].rate_code)
-        this.clearMaseterBase()
+        // this.clearMaseterBase() //清空选择房型右边的首日价======>此处隔断<=======
+        if(this.preBillParam.master_base[0].master_lable === 1 && this.rateCode_hour){
+          console.log('this.rateCode_hour',this.rateCode_hour)
+          console.log('这里是处理钟点房的数据===>推出首日价')
+          this.getRateCode_NewHourPrice() //获取所有房价==>判断要分为 钟点房和当日房 ===>其实这里是获得首日价
+        }else{
+          console.log('跳转else选择房型一行',this.preBillParam.master_base)
+          this.getRateCode_newPrice() //获取所有房价==>判断要分为 钟点房和当日房 ===>其实这里是获得首日价
+        }
+      },
+      /**
+       * 处理动态得到相应的房价信息
+       */
+      handlePrice(param){
+        // let key1 = param.room_type
+        // let temprateValue = temprate[key1]
+        let key2 = moment(new Date()).format('YYYY-MM-DD') //对象嵌套对象里的key值
+        // that.houseType_priceValue_1 = temprateValue[key2]
+        for(var item of this.preBillParam.master_base){
+          item.fix_rate = param[item.room_type_value][key2]
+        }
+      },
+      /**
+       * @desc 这里是当为当日房价码的的时候，要区分钟点房房价码不同
+       */
+      getRateCode_newPrice(){
+        let that = this
+        let url = that.api.api_newPrice_9114 + '/v1/' +  `room/rate_code/get_rate_code/`
+        let scopeParam ={
+          rate_code: this.rateCodeValue,
+          begin_date:  moment(new Date()).format('YYYY-MM-DD'),
+          end_date: moment(new Date()).add(1,'days').format('YYYY-MM-DD'),
+        }
+        that.$axios.post(url,scopeParam).then(res=>{
+          console.log('房价码==单独',res.data.data)
+          let temprate = res.data.data.price
+          this.handlePrice(temprate)//处理以得到价格
+          // let key1 = param.room_type
+          // let temprateValue = temprate[key1]
+          // let key2 = moment(new Date()).format('YYYY-MM-DD') //对象嵌套对象里的key值
+          // that.houseType_priceValue_1 = temprateValue[key2]
+          // item.fix_rate = that.houseType_priceValue_1
+          // console.log('item.fix_rate检测',item.fix_rate)
+          // console.log('temprateValue',temprateValue)
+          // console.log('111',temprateValue[key2])
+          // console.log('preBillParam.master_base检测',this.preBillParam.master_base)
+          }).catch(error=>{
+        })
+      },
+      /**
+       * 获取钟点房房价码<====实时更新
+       */
+      getRateCode_NewHourPrice(){
+        let that = this
+        let url = that.api.api_newPrice_9114+ '/v1/' + `room/rate_code/get_hours_rate_code/`
+        if(this.preBillParam.master_base[0].master_lable == 1){
+          this.rateCodeList_hour = this.rateCode_list
+        }
+        let rate_code
+        let rate_code_value
+        try {
+          rate_code = that.rateCodeList_hour.filter(item=> item.code == that.rateCode_hour)
+          rate_code_value = rate_code[0].code
+        } catch (error) {
+          console.log('error,没有对应数据匹配')            
+        }
+        let scopeParam = {
+          rate_code: rate_code_value
+        }
+        that.$axios.post(url,scopeParam).then(res=>{
+          console.log('钟点房返回....',res.data.data)
+            if(res.data.message == 'success'){
+              let temprate = res.data.data.price
+              if(JSON.stringify(temprate) != "{}"){
+                let key1 = param.room_type
+                let temprateValue = temprate[key1]
+                that.houseType_priceValue_1 = temprateValue.price
+                item.fix_rate = that.houseType_priceValue_1
+              }else{
+                item.fix_rate = 0
+              }
+            }else{
+                that.message.error('获取数据失败，请重试')
+            }
+        }).catch((error)=>{
+        })
       },
       //获取房价码list
       getRateCode_list(){
@@ -1444,7 +1519,6 @@ export default {
         that.$axios.get(url,{
           params: scopeParam
         }).then(res=>{
-          console.log('res.data.data.results',res.data.data.results,res.data.data)
             if(res.data.message == 'success'){
                 that.rateCode_list = res.data.data.results
             }else{
@@ -1454,7 +1528,6 @@ export default {
         })
       },
       watchValue(){
-        console.log('preBillParam.master_base[0].code_src',this.preBillParam.master_base[0].code_src)
       },
       handleAuthorization(){
         // this.authorizationParam.mainAccount_id='222'
@@ -1467,7 +1540,6 @@ export default {
       //新版上传公安
       handleNewPolice(item,index){
         this.policeInfoParam.liveStatus = 0
-        console.log('item',item)
         //开始
         this.policeInfoParam.room_no = item.room_number
         this.policeInfoParam.nation = item.nation
@@ -1488,9 +1560,6 @@ export default {
       },
       handlePolice(){
         this.policeInfoParam.liveStatus = 0
-        console.log('card身份',this.cardInfoParam)
-        console.log('policeInfoParam',this.policeInfoParam)
-        console.log('this.preBillParam.master_guest<=====',this.preBillParam.master_guest)
         // this.policeInfoParam
         this.policeInfoParam.name = this.cardInfoParam.name
         this.policeInfoParam.sex = this.cardInfoParam.sex === '0' ? '男' : '女'
@@ -1521,12 +1590,10 @@ export default {
         this.getRateCode_BreakFast()
       },
       getMaxNumber(item){
-        console.log('itemkaish',item)
         let maxLength = item.can_live_num === '' ? 2 : item.can_live_num
         return maxLength
       },
       flushTime(){
-        console.log('关掉')
         clearInterval(this.timer_src)
         clearInterval(this.timer_r)
       },
@@ -1549,7 +1616,6 @@ export default {
             },
           }).then(res=>{
               if (res.data.message === "success"){
-                console.log(res.data._id);
                 that.order_form = res.data._id;
                 that.handlePayCharge()//主帐付钱
               }
@@ -1569,7 +1635,6 @@ export default {
           if (that.previewEnterBill.payMode === 1 || that.previewEnterBill.payMode === 38) {
             // that.article_number() //可能有异步产生 此处不要
             //判断是不是选择扫码枪 在弹出的扫码页面里进行支付
-            console.log('that.scan_code',that.scan_code)
             if (that.scan_code === "0") {
               that.dialog_alipay = true;
             }
@@ -1611,7 +1676,6 @@ export default {
           })
             .then(res=>{
               if (res.data.message="success"){
-                console.log(res.data.data.alipay_trade_precreate_response.qr_code);
                 that.img_wz=false;
                 that.qr_w = res.data.data.alipay_trade_precreate_response.qr_code;
                 that.$nextTick (function () {
@@ -1980,12 +2044,10 @@ export default {
       //入预收==>付款 客人付款(针对现金从而进行支付)
       payCharge(){
         this.extraParam = []//置空操作
-        console.log('...xinxi1',this.extraInformation)
         this.handleExtraParam()
         console.log('this.returnEnterParam',this.returnEnterParam,this.returnEnterParam)
         let that = this
         let value = Object.values(this.returnEnterParam) //需要联房的主账值
-        console.log('accountId 的值',value)
         let url= that.api.api_9022_9519+ '/v1/' + `finance/pay_detail/pay_money_pms`
         // let url= `http://192.168.5.96:9519/v1/finance/pay_detail/pay_by_charges`
         let scopeParam = {
@@ -2001,9 +2063,7 @@ export default {
           // ar_account_id: '',//	ar账户id, ar支付必须.
           cashier_id:	9,
         }
-        console.log('scopeParam',scopeParam)
         that.$axios.post(url,scopeParam).then(res=>{
-          console.log('aa',res.data)
           if(res.data.message != 'success'){
             that.$message.warning('调用后台接口失败')
           }else{
@@ -2163,8 +2223,6 @@ export default {
               this.$message.warning('请登记入住人或选择房间号!')
             }
         }
-        console.log('url',url)
-        console.log('scopeParamscopeParam',scopeParam)
         that.$axios({
           method: "POST",
           url: url,
@@ -2173,7 +2231,6 @@ export default {
           //     'authorization': 'auth_156cd3fefe2a40f5bd0308b897bdb768'
           // }
     }).then(res=>{
-          console.log('res',res)
           if(res.data.msg == 'OK'){
             that.$message.warning('登记成功')
             that.policeDialog_2 = false;//关闭dialog
@@ -2221,11 +2278,9 @@ export default {
       },
       //字典量获取
       findHtNation(){
-        console.log('jinruruuuuuuuuuuu')
         let that= this
         let url = 'http://117.186.167.138:8086/inn-app-rest/rest/appDs/findHtNation?deviceCode=1&interfaceKey=1&tokenId=789dcaa028444ac9998b154c4b925634'
         that.$http.jsonp(url).then(res =>{
-          console.log('json',res)
           if(res.body.Result === true){
             that.$message.success('制卡成功!')
           }else{
@@ -2239,7 +2294,6 @@ export default {
       takePhoto(param){
         let that = this
         if(param){
-          console.log('enter')
                /**
              * 元素移除操作不进行，因为是直接发送照片，但是不进行照片的展示。
              */
@@ -2247,7 +2301,6 @@ export default {
             let file = that.blobToFile(blob, "imgName");
             var fd = new FormData();
             fd.append("upfile", file,"image.png");
-            console.log('fd',fd)
             let config = {
               headers: {
                 'Content-Type': 'multipart/form-data'
@@ -2256,7 +2309,6 @@ export default {
             if(blob){
               let url = that.uploadUrl;
               that.$axios.post(url,fd,config).then(res=>{
-                console.log('res==blob',res)
                 if(res.data.url){
                   // that.card_imgUrl = 'https://image.eloadspider.com/' +  res.data.url
                   that.card_imgUrl = res.data.complete
@@ -2273,7 +2325,6 @@ export default {
           let ctx = canvas.getContext('2d');
           ctx.drawImage(video, 0, 0, 150, 150);
           canvas = canvas.toDataURL("image/png");
-          console.log('canvas_2=================base64',canvas)
           /**
            * @desc 拍照以后将video元素移除
            * @desc 拍照将base64转为file文件
@@ -2286,7 +2337,6 @@ export default {
             let file = that.blobToFile(blob, "imgName");
             var fd = new FormData();
             fd.append("upfile", file,"image.png");
-            console.log('fd',fd)
             let config = {
               headers: {
                 'Content-Type': 'multipart/form-data'
@@ -2295,12 +2345,10 @@ export default {
             if(blob){
               let url = that.uploadUrl;
               that.$axios.post(url,fd,config).then(res=>{
-                console.log('res==blob',res)
                 if(res.data.url){
                   // that.imageUrl = 'https://image.eloadspider.com/' +  res.data.url
                   that.imageUrl = res.data.complete
                   that.$message.success('上传图片成功!')
-                  console.log('。。。。',this.preBillParam.master_guest)
                   for(var item of that.preBillParam.master_guest){
                      if(!item.pic_now && !item.pic_photo){
                           item.pic_now = that.imageUrl  //拍摄照片传入
@@ -2322,7 +2370,6 @@ export default {
       },
       //手动上传
       submitUpload(){
-        console.log('111')
         this.$refs.upload.submit()
       },
       //上传之后==废弃
@@ -2343,7 +2390,6 @@ export default {
       //确认导入入住人信息
       confirmGuestInfo(){
         //当为1的时候没有手输的情况，默认通过卡导入填充===>进行赋值
-        console.log('this.preBillParam.master_guest最开始',this.preBillParam.master_guest)
         if(this.preBillParam.master_guest[0].id_no ===''){
           this.cardInfoDialog = false
           this.preBillParam.master_guest[0].name = this.cardInfoParam.name
@@ -2417,7 +2463,6 @@ export default {
           }
           console.log('需要判断preBillParam.master_guest===>第二',this.preBillParam.master_guest)
           //避免重复的身份证号
-          console.log('this.cardInfoParam.cardNo',this.cardInfoParam.cardNo)
           for(var item of this.preBillParam.master_guest){
             if(item.id_no === this.cardInfoParam.cardNo){
               this.$message.warning('不能有重复的身份证号!')
@@ -2477,7 +2522,6 @@ export default {
          /**分割=====>上面为测试数据 */
           if(res.data.Result === true){
             that.police_img_src= "data:image/png;base64,"+res.data.Data.Photo;
-            console.log('tuphoto',res.data.Data.Photo)
             that.cardInfoParam.name = res.data.Data.Name
             that.cardInfoParam.sex = res.data.Data.Sex === '男' ? '0' : '1'
             that.cardInfoParam.cardNo = res.data.Data.Code //读卡获取到身份证信息了
@@ -2497,7 +2541,6 @@ export default {
       },
       //验证是否存在已经住人的房间继续刷卡住人
         validateId_no(param,param2){
-          console.log('param=====,card',param,param2)
           let that = this
           // let url= `http://192.168.2.224:9005/v1/checkin/is_checkin_info/`
           let url= that.api.api_bill_9202 + '/v1/' + `checkin/is_checkin_info/`
@@ -2641,9 +2684,7 @@ export default {
             //   if(item.id_no === ''){
             //   }else{}
             // }
-            console.log('需要判断preBillParam.master_guest===>第二',this.preBillParam.master_guest)
             //避免重复的身份证号
-            console.log('this.cardInfoParam.cardNo',this.cardInfoParam.id_no)
             for(var item of this.preBillParam.master_guest){
               if(item.id_no === row.id_no){
                 this.$message.warning('不能有重复的证件号!')
@@ -2677,15 +2718,11 @@ export default {
             card_level: row.card_level,
           }
           that.$axios.post(url,scopeParam).then(res=>{
-            console.log('res,会员信息返回房价码',res.data.data.results)
             let temp = res.data.data.results
             let rateValue = temp.find(item=>item.extra_item === 'rate_code')
-            console.log('rateValue,',rateValue)
-            console.log('rateValue[extra_item_value]',rateValue.extra_item_value)
             if(this.preBillParam.master_base[0].code_src === 'HY'){
               this.rateCodeValue = rateValue.extra_item_value
             }
-            console.log('this.rateCodeValue',this.rateCodeValue)
             }).catch(error=>{
           })
         },
@@ -2723,7 +2760,6 @@ export default {
         },
         //扫码枪触发查询
         getcardInfo(){
-          console.log('触发')
           this.getCardMemberList()
         },
         //暂时 置空操作
@@ -2741,7 +2777,6 @@ export default {
         },
         //卡查询
         getCardMemberList(){
-          console.log(this.cardParam,'cardparam')
           let _this = this
           let card_name__contains = _this.cardParam.name
           let id_no__contains = _this.cardParam.number
@@ -2756,7 +2791,6 @@ export default {
           }else{
             url = _this.api.api_member_9102+ '/v1/'  + `customer/member/get_card_base_list/`
           }
-          console.log('ur',url)
           _this.$axios({
             method: 'get',
             url: url,
@@ -2764,8 +2798,6 @@ export default {
             if (res.data.message == "success") {
               if (res.data.data.results.length != 0) {
                  _this.cardBaseList = res.data.data.results;
-                 console.log('llll11111111111',_this.cardBaseList)
-                 console.log('222222222因该开始',_this.CardTypeTree)
                   // 数据转换---
                   for (let i in _this.cardBaseList) {
                     // 状态转换
@@ -2991,7 +3023,6 @@ export default {
         },
         //点击选项时重新计算(有时间的话可以优化方法)
         getCanLiveRoom_self_2(param){
-          console.log('param_2222222',param)
           param.dynamic_roomNumber = []//点击选项时重新计算避免上次的数据干扰
           param.room_amount = 1//点击选项时重新计算避免上次的数据干扰
           let start = moment(this.preBillParam.master_base[0].leave_time[0]).format('YYYY-MM-DD HH:mm:ss')
@@ -3008,7 +3039,6 @@ export default {
             that.maxNumber = that.roomNo_data_list.length
             let array = []
             array = this.roomNo_data_list.filter(itemm=>param.dynamic_roomNumber.indexOf(itemm.room_no) === -1)
-            console.log('array',array)
             console.log('===比较',param.room_amount,param.dynamic_roomNumber)
             if(param.room_amount > param.dynamic_roomNumber.length){
               console.log('进入')
@@ -4835,7 +4865,7 @@ export default {
           let that = this
           this.preBillParam.master_base[0].rate_code = ''//置空房价码
           that.marketSrcList = []
-          let url =  that.api.api_code_9103+ '/v1/' + 'system/settings/get_code_base_list/'
+          let url =  that.api.api_code_9103+ '/v1/' + 'system/settings/get_code_base_sys_list/'
           let params = {}
           //src 代表市场码
           if(param == 'market'){
@@ -4881,7 +4911,7 @@ export default {
             room_no: that.room_no_value
           }
           let params = util.deleteNullParam(scopeParams)//删除对象里属性值为空的属性
-          let url = that.api.api_newPrice_9114 + '/v1/' + `room/room_status/get_room_map_list?page_size=1000`
+          let url = that.api.api_newPrice_9114 + '/v1/' + `room/room_status/get_room_map_list/?page_size=1000`
           that.$axios({
             method : 'get',
               url : url,
@@ -4910,7 +4940,7 @@ export default {
             room_no: that.room_no_value
           }
           let params = util.deleteNullParam(scopeParams)//删除对象里属性值为空的属性
-          let url = that.api.api_newPrice_9114 + '/v1/' + `room/room_status/get_room_map_list?page_size=1000`
+          let url = that.api.api_newPrice_9114 + '/v1/' + `room/room_status/get_room_map_list/?page_size=1000`
           that.$axios({
             method : 'get',
               url : url,

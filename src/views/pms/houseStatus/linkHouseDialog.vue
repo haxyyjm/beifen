@@ -2018,10 +2018,8 @@ export default {
        * 注意: 监听该父级传来的对象的时候,根据房间号得到相应的处理
        */
       parentInfoParam(){
-        console.log('this.parentInfoParam 监听父级;openChildDialog',this.parentInfoParam )
-        console.log('this.parentInfoParam.openChildDialog',this.parentInfoParam.openChildDialog)
-        if(this.parentInfoParam.openChildDialog ){
-          this.getRoomType()
+        if(this.parentInfoParam && this.parentInfoParam.openChildDialog ){
+          // this.getRoomType()
           if(this.parentInfoParam.openChildDialog === '续住'){
             this.continueLiveDialog = true
             this.handleDate()
@@ -3934,7 +3932,7 @@ export default {
           this.findAuthorizationList()
         }else if(row.name == '5'){
           console.log('jinruruuu')
-          this.getInvoice()//按照主帐id查看一条开票记录
+          // this.getInvoice()//按照主帐id查看一条开票记录 废弃?
           // this.billDialog = true
         }else if(row.name == '7'){
           console.log('jinruruuu')
@@ -5493,7 +5491,7 @@ export default {
         getMarketSrc(param){
           let that = this
           that.marketSrcList = []
-          let url =  that.api.api_code_9103+ '/v1/' + 'system/settings/get_code_base_list/'
+          let url =  that.api.api_code_9103+ '/v1/' + 'system/settings/get_code_base_sys_list/'
           let params = {}
           //src 代表市场码
           if(param == 'market'){
