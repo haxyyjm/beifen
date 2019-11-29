@@ -933,7 +933,7 @@
       getRateCode_price(param){
         // this.preBillLinkParam.room_type_name
         let that = this
-        let url = that.api.api_newPrice_9114 + '/v1/' +  `room/rate_code/get_rate_code/`
+        let url = that.api.api_newPrice_9107 + '/v1/' +  `room/rate_code/get_rate_code/`
         // let temp = []
         // temp.push(param.room_type)
         let scopeParam ={
@@ -960,7 +960,7 @@
           start = moment(this.rowParam.arr_time).format('YYYY-MM-DD')
           end = moment(this.rowParam.leave_time).format('YYYY-MM-DD')
         }
-        let url= that.api.api_newPrice_9114 + '/v1/' + `room/room_status/can_live_room_list/`
+        let url= that.api.api_newPrice_9107 + '/v1/' + `room/room_status/can_live_room_list/`
         let scopeParam = {
           room_type: this.roomParam.newType,
           start_time: start,
@@ -975,7 +975,8 @@
       //获取房型
       getRoomType(){
         let that = this
-        let url =  that.api.api_newPrice_9114 + '/v1/' + 'room/room_status/get_room_type_occupy_list/'
+        // let url =  that.api.api_newPrice_9107 + '/v1/' + 'room/room_status/get_room_type_occupy_list/'
+        let url =  that.api.api_newPrice_9107 + '/v1/' + 'room/room_status/can_live_room_type_num/'
         let start 
         let end
         if(this.rowParam.arr_time && this.rowParam.leave_time){
@@ -991,7 +992,7 @@
           },
         }).then(res=>{
           if(res.data.message === 'success'){
-            this.roomTypeList = res.data.data.results
+            this.roomTypeList = res.data.data.data
           }else{
               that.$message.error('获取房型失败!')
           }
@@ -1272,7 +1273,7 @@
        */
       get_room_type_list(){
         let that = this
-        let url = that.api.api_newPrice_9114+ '/v1/' + `room/room_status/get_room_type_list/`
+        let url = that.api.api_newPrice_9107+ '/v1/' + `room/room_status/get_room_type_list/`
         that.$axios.get(url).then(res=>{
             if(res.data.message == 'success'){
                 that.item_room_types = res.data.data.results

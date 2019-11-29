@@ -180,7 +180,7 @@
                         </div>
                         <ul class="popSelect_class">
                             <li v-for="(itemm,index) of roomInfoList" :key="itemm.id" @click="showPop_right=true; getHouseTypeNextValue(item,index,itemm)">
-                              <span>{{itemm.room_type_name}}</span>
+                              <span>{{itemm.room_type_desc}}</span>
                               <div style="line-height: 20px;">
                                 <span style="display: block">可售: {{itemm.can_live_num}}</span>
                                 <span>超预留:</span>
@@ -194,18 +194,18 @@
                     <img @click="chooseNo(item,index)" style="margin-left: 2px; cursor: pointer;  position: relative; top: 15px;"  src="../../../assets/images/pms/houseStatus/chooseNumm.png">
                     <!-- 标签组=》即为房间数 -->
                     <div style="display: inline-block; width: 220px; height: 40px;">
-                    <el-tag  :show-overflow-tooltip="true" :key="tag"  v-for="tag in item.dynamic_roomNumber" closable :disable-transitions="false" @close="handleClose(item,tag)">
-                      {{tag}}
-                    </el-tag>
-                    <el-popover placement="right-start" width="200" trigger="click">
-                      <div>
-                        <el-tag :show-overflow-tooltip="true" :key="tag" v-for="tag in item.dynamic_roomNumber">
-                          {{tag}}
-                        </el-tag>
-                      </div>
-                      <!-- 溢出的tag则显示在popover里面 -->
-                      <span v-if="item.dynamic_roomNumber.length>3 ? showPoint = true : showPoint =false"  slot="reference" style="cursor: pointer; line-height: 40px;color: #378ff6; margin-left: 10px">...</span>
-                    </el-popover>
+                      <el-tag  :show-overflow-tooltip="true" :key="tag"  v-for="tag in item.dynamic_roomNumber" closable :disable-transitions="false" @close="handleClose(item,tag)">
+                        {{tag}}
+                      </el-tag>
+                      <el-popover placement="right-start" width="200" trigger="click">
+                        <div>
+                          <el-tag :show-overflow-tooltip="true" :key="tag" v-for="tag in item.dynamic_roomNumber">
+                            {{tag}}
+                          </el-tag>
+                        </div>
+                        <!-- 溢出的tag则显示在popover里面 -->
+                        <span v-if="item.dynamic_roomNumber.length>3 ? showPoint = true : showPoint =false"  slot="reference" style="cursor: pointer; line-height: 40px;color: #378ff6; margin-left: 10px">...</span>
+                      </el-popover>
                     </div>
                     <div style="position: relative; top: 20px; float: right; height: 30px">
                     <!-- 房间首日价 -->
@@ -213,7 +213,7 @@
                     <!-- item.fix_rate || item.fix_rate === 0 这个判断条件可能有误 -->
                       <div v-if="String(item.fix_rate)" style="display: inline-block">
                         首日价<el-input v-show="span_input_flag" @blur="span_input_flag = false" v-model="item.fix_rate" style="color: #f3565d;width: 60px"></el-input>
-                        <span v-show="!span_input_flag" @click="span_input_flag = true" style="color: #f3565d">{{item.fix_rate}}</span> /间
+                        <span v-show="!span_input_flag" @click="span_input_flag = true" style="color: #f3565d">{{item.fix_rate}}</span> 元/间
                       </div>
                       <div v-else style="display: inline-block">
                         <el-input v-show="span_input_flag" @blur="span_input_flag = false" v-model="item.fix_rate" style="color: #f3565d;width: 60px"></el-input>
@@ -303,8 +303,8 @@
                 </div>
             </el-row>
         </el-dialog>
-        <!-- 身份证信息 -->
         <a-dialog :show.sync= authorizationDialog :parentInfoParam='authorizationParam' v-on:listenTochildEvent="getConsumeData"></a-dialog>
+        <!-- 身份证信息 -->
         <el-dialog class="houseTypeClass deletePadding_Class" title="身份证信息" :visible.sync="cardInfoDialog" :modal="true">
           <ul class="cardInfoClass">
             <li>
@@ -1270,7 +1270,12 @@ export default {
           item.room_type = this.parentParam.roomType
           item.room_type_value = this.parentParam.roomType_code
           // item.roomCount = 0
-          item.dynamic_roomNumber.push(this.parentParam.roomNo)
+          if(this.parentParam.roomNo){
+            item.dynamic_roomNumber.push(this.parentParam.roomNo)
+          }else{
+            item.dynamic_roomNumber = []
+          }
+          // item.dynamic_roomNumber.push(this.parentParam.roomNo)
         }
         let param = {
           room_type: this.parentParam.room_type_name
@@ -1279,7 +1284,7 @@ export default {
         this.getRateCode_price(item,param) //====下面没有用
         this.cloneData.room_type = _.cloneDeep(param.room_type)  //开始限制数据
         this.cloneData.room_no = _.cloneDeep(this.parentParam.roomNo)
-        this.getCanLiveRoom(param.room_type) //根据房型选未占用房间===>可以在这个地方废弃
+        // this.getCanLiveRoom(param.room_type) //根据房型选未占用房间===>可以在这个地方废弃
         // this.previewEnterBill.room_no_value = this.parentParam.roomNo
       }
     },
@@ -1448,7 +1453,7 @@ export default {
        */
       getRateCode_newPrice(){
         let that = this
-        let url = that.api.api_newPrice_9114 + '/v1/' +  `room/rate_code/get_rate_code/`
+        let url = that.api.api_newPrice_9107 + '/v1/' +  `room/rate_code/get_rate_code/`
         let scopeParam ={
           rate_code: this.rateCodeValue,
           begin_date:  moment(new Date()).format('YYYY-MM-DD'),
@@ -1475,7 +1480,7 @@ export default {
        */
       getRateCode_NewHourPrice(){
         let that = this
-        let url = that.api.api_newPrice_9114+ '/v1/' + `room/rate_code/get_hours_rate_code/`
+        let url = that.api.api_newPrice_9107+ '/v1/' + `room/rate_code/get_hours_rate_code/`
         this.rateCodeList_hour = this.rateCode_list
         console.log('进入小时',this.rateCodeList_hour)
         let rate_code
@@ -1515,7 +1520,7 @@ export default {
           return
         }
         let that = this
-        let url = that.api.api_newPrice_9114+ '/v1/' + `room/rate_code/get_rate_code_list/`
+        let url = that.api.api_newPrice_9107+ '/v1/' + `room/rate_code/get_rate_code_list/`
         let scopeParam
         if(this.preBillParam.master_base[0].master_lable != 1){
           scopeParam = {
@@ -2509,30 +2514,8 @@ export default {
         that.$http.jsonp(url,{
           jsonpCallback: "userHandler"
         }).then(res =>{
-          /**
-           * 测试数据
-           */
-          // res.body = {
-          //   Result: true,
-          //   Msg: "读贵宾身份证信息成功",
-          //   Id: "05-03-20190118-0009300013",
-          //   Name: "徐立杰",
-          //   Sex: "男",
-          //   Nation: "汉",
-          //   Birthday: "1976-12-11",
-          //   Address: "河南省潢川县城关镇航空南道97-8",
-          //   Code: "413024197612110019",
-          // }
-          // res.Data = res.body
-          // that.cardInfoParam.name = res.Data.Name
-          // that.cardInfoParam.sex = res.Data.Sex === '男' ? '0' : '1'
-          // that.cardInfoParam.cardNo = res.Data.Code
-          // that.cardInfoParam.address = res.Data.Address
-          // that.cardInfoParam.birthday = res.Data.Birthday
-          // that.cardInfoParam.nation = res.Data.Nation
-          // res.data.Result = true
           console.log('that.cardInfoParam==>读卡成功',res)
-          that.validateId_no(that.cardInfoParam.cardNo)//验证身份证 //测试数据==>终废弃
+          // that.validateId_no(that.cardInfoParam.cardNo)//验证身份证 //测试数据==>终废弃
          /**分割=====>上面为测试数据 */
           if(res.data.Result === true){
             that.police_img_src= "data:image/png;base64,"+res.data.Data.Photo;
@@ -3042,7 +3025,7 @@ export default {
           let start = moment(this.preBillParam.master_base[0].leave_time[0]).format('YYYY-MM-DD HH:mm:ss')
           let end = moment(this.preBillParam.master_base[0].leave_time[1]).format('YYYY-MM-DD HH:mm:ss')
           let that = this
-          let url= that.api.api_newPrice_9114 + '/v1/' + `room/room_status/can_live_room_list/`
+          let url= that.api.api_newPrice_9107 + '/v1/' + `room/room_status/can_live_room_list/`
           let scopeParam = {
             room_type: param.room_type_value,
             start_time: start,
@@ -3073,7 +3056,7 @@ export default {
           let start = moment(this.preBillParam.master_base[0].leave_time[0]).format('YYYY-MM-DD HH:mm:ss')
           let end = moment(this.preBillParam.master_base[0].leave_time[1]).format('YYYY-MM-DD HH:mm:ss')
           let that = this
-          let url= that.api.api_newPrice_9114 + '/v1/' + `room/room_status/can_live_room_list/`
+          let url= that.api.api_newPrice_9107 + '/v1/' + `room/room_status/can_live_room_list/`
           let scopeParam = {
             room_type: param.room_type_value,
             start_time: start,
@@ -3581,7 +3564,7 @@ export default {
           console.log('this.rateValueList----2',this.rateValueList)
           console.log('item====数据',item)
           let that = this
-          let url = that.api.api_newPrice_9114 + '/v1/' +  `room/rate_code/get_rate_code/`
+          let url = that.api.api_newPrice_9107 + '/v1/' +  `room/rate_code/get_rate_code/`
           let scopeParam ={
             rate_code: this.rateCodeValue,
             begin_date:  moment(new Date(item.master_base[0].arr_time)).format('YYYY-MM-DD'),
@@ -3779,7 +3762,8 @@ export default {
           //暂时加判断，当为钟点房的时候时间需要推一天
           let end = this.preBillParam.master_base[0].master_lable != 1 ? moment(this.preBillParam.master_base[0].leave_time[1]).format('YYYY-MM-DD'): moment(new Date()).add(+1,'days').format('YYYY-MM-DD')
           let that = this
-          let url =  that.api.api_newPrice_9114 + '/v1/' + 'room/room_status/get_room_type_occupy_list/'
+          // let url =  that.api.api_newPrice_9107 + '/v1/' + 'room/room_status/get_room_type_occupy_list/'
+          let url =  that.api.api_newPrice_9107 + '/v1/' + 'room/room_status/can_live_room_type_num/'
           that.$axios({
             url : url,
             method : 'get',
@@ -3789,21 +3773,22 @@ export default {
             },
           }).then(res=>{
           if(res.data.message === 'success'){
-            let arrayInfo = res.data.data.results
+            let arrayInfo = res.data.data.data
             // that.roomInfoList = res.data.data.results
             console.log('that.roomInfoList',that.roomInfoList)
             // let start = '2019-04-06'
             // let end =  '2019-04-09'
-            for(var item of arrayInfo){
-              for(var itemm of that.roomTypeList){
-                if(item.room_type === itemm.code){
-                  item.room_type_name = itemm.descript
-                  // item.can_live_num = item.can_live_num
-                  break
-                }
-              }
-            }
-            that.roomInfoList = _.uniqBy(arrayInfo,'room_type') //过滤具有相同属性的数组对象
+            // for(var item of arrayInfo){
+            //   for(var itemm of that.roomTypeList){
+            //     if(item.room_type === itemm.code){
+            //       item.room_type_name = itemm.descript
+            //       // item.can_live_num = item.can_live_num
+            //       break
+            //     }
+            //   }
+            // }
+            that.roomInfoList = arrayInfo
+            // that.roomInfoList = _.uniqBy(arrayInfo,'room_type') //过滤具有相同属性的数组对象
           }else{
               that.$message.error('获取房型信息列表失败!')
           }
@@ -3817,7 +3802,7 @@ export default {
         //获取code对应房型数据
         getRoomType(){
           let that = this
-          let url = that.api.api_newPrice_9114+ '/v1/' + `room/room_status/get_room_type_list/`
+          let url = that.api.api_newPrice_9107+ '/v1/' + `room/room_status/get_room_type_list/`
           that.$axios.get(url).then(res=>{
               if(res.data.message == 'success'){
                   that.roomTypeList = res.data.data.results
@@ -3835,6 +3820,7 @@ export default {
           // this.rateCode_hour = '' //置空操作  无用得modle===>value值
           this.preBillParam.master_base[0].rate_code = ''
           return
+          //----------以下全部没用
           if(this.preBillParam.master_base[0].master_lable != 1){
           console.log('......this.preBillParam.master_base[0].master_lable2222',this.preBillParam.master_base[0].master_lable)
             this.reSetData('非钟点房')
@@ -3849,30 +3835,8 @@ export default {
                 item.fix_rate = ''//重新选择房价码
               }
             }
-            //限制客户来源
-            // this.previewTypeList =  [{
-            //   label: '会员',
-            //   value: 0
-            //   },{
-            //   label: '散客入住',
-            //   value: 1
-            //   },{
-            //   label: '团队入住',
-            //   value: 2
-            //   },{
-            //   label: '订房中心/OTA',
-            //   value: 3
-            //   },{
-            //   label: '协议单位',
-            //   value: 4
-            // }]
           }else if(this.preBillParam.master_base[0].master_lable === 1){
             this.preBillParam.master_base[0].master_type = 1//入住类型变为散客入住 当为钟点房的时候固定住
-            //限制客户来源
-            // this.previewTypeList =  [{
-            //   label: '散客入住',
-            //   value: 1
-            // }]
           }
         },
         //点击市场码刷新房价码等数据
@@ -3938,7 +3902,7 @@ export default {
         getRateCode_hourPrice(item,param){
           console.log('jinrrr',item,param)
           let that = this
-          let url = that.api.api_newPrice_9114+ '/v1/' + `room/rate_code/get_hours_rate_code/`
+          let url = that.api.api_newPrice_9107+ '/v1/' + `room/rate_code/get_hours_rate_code/`
          if(this.preBillParam.master_base[0].master_lable == 1){
             this.rateCodeList_hour = this.rateCode_list
           }
@@ -3980,7 +3944,7 @@ export default {
         //获取所有的钟点房房价码列表
         getRateCode_hour(){
           let that = this
-          let url = that.api.api_newPrice_9114+ '/v1/' + `room/rate_code/get_rate_code_list/?category=T`
+          let url = that.api.api_newPrice_9107+ '/v1/' + `room/rate_code/get_rate_code_list/?category=T`
           that.$axios.get(url).then(res=>{
             console.log('res.data.data.results',res.data.data.results,res.data.data)
               if(res.data.message == 'success'){
@@ -3996,7 +3960,7 @@ export default {
           let start = moment(this.preBillParam.master_base[0].leave_time[0]).format('YYYY-MM-DD HH:mm:ss')
           let end = moment(this.preBillParam.master_base[0].leave_time[1]).format('YYYY-MM-DD HH:mm:ss')
           let that = this
-          let url= that.api.api_newPrice_9114 + '/v1/' + `room/room_status/can_live_room_list/`
+          let url= that.api.api_newPrice_9107 + '/v1/' + `room/room_status/can_live_room_list/`
           let scopeParam = {
             room_type: param,
             start_time: start,
@@ -4006,14 +3970,14 @@ export default {
             let array
             array = res.data.data.data
               //组装带标签的数组
-              for(var item of array){
-                for(var itemm of that.roomTagList){
-                  if(item.room_no == itemm.room_no){
-                    item.tagName = itemm.feature_name
-                    break
-                  }
-                }
-              }
+              // for(var item of array){
+              //   for(var itemm of that.roomTagList){
+              //     if(item.room_no == itemm.room_no){
+              //       item.tagName = itemm.feature_name
+              //       break
+              //     }
+              //   }
+              // }
               that.roomNo_data_list = array  //选房号tabel数组
           }).catch(error=>{
 
@@ -4036,7 +4000,7 @@ export default {
         //得到房间占用
         getRoomOccupy(){
           let that = this
-          let url = that.api.api_newPrice_9114 + '/v1/' + 'room/room_status/get_room_occupy_list/'
+          let url = that.api.api_newPrice_9107 + '/v1/' + 'room/room_status/get_room_occupy_list/'
           that.$axios.get(url).then(res=>{
               if(res.data.message == 'success'){
                   that.roomOccupyList = res.data.data.results
@@ -4473,14 +4437,16 @@ export default {
               this.$message.warning("房间号是必填项!")
               return false
             }
-            if(!item.pic_now){
-              this.$message.warning(item.name + '没有上传照片或者没有录入正确人脸!,' + '请重新上传照片!')
-              return false
-            }
-            if(!item.face_id){
-              this.$message.warning(item.name + '上传照片不对,' + '请重新上传照片!')//没有获取sxm的token
-              return false
-            }
+            item.pic_now = 'https://ispider-oss.oss-cn-hangzhou.aliyuncs.com/live/4577c1b6.png'
+            // if(!item.pic_now){
+            //   this.$message.warning(item.name + '没有上传照片或者没有录入正确人脸!,' + '请重新上传照片!')
+            //   return false
+            // }
+            // if(!item.face_id){
+            //   this.$message.warning(item.name + '上传照片不对,' + '请重新上传照片!')//没有获取sxm的token
+            //   return false
+            // }
+            //以上以后要恢复
             // return(
             //   // util.validateBlank(item.telephone,'入住人中联系电话是必填项',this)&&
             //   // util.validateTelNumber(item.telephone,'请输入正确手机格式',this)&&
@@ -4649,7 +4615,7 @@ export default {
           //一层判断钟点房和非钟点房判断条件不同 这里默认判断力 根据房价码获取价格
           this.preBillParam.master_base[0].master_lable === 1 ? this.getRateCode_hourPrice(item,param) : this.getRateCode_price(item,param)
           item.can_live_num = param.can_live_num
-          item.room_type = param.room_type_name
+          item.room_type = param.room_type_desc
           item.room_type_value = param.room_type
           console.log('this.cloneData.room_type',this.cloneData.room_type)//缓存进来的到的房型数据
           console.log('item.dynamic_roomNumber111',item.dynamic_roomNumber)
@@ -4691,7 +4657,7 @@ export default {
           console.log('this.rateValueList----2',this.rateValueList)
           console.log('item',item)
           let that = this
-          let url = that.api.api_newPrice_9114 + '/v1/' +  `room/rate_code/get_rate_code/`
+          let url = that.api.api_newPrice_9107 + '/v1/' +  `room/rate_code/get_rate_code/`
           let scopeParam ={
             rate_code: this.rateCodeValue,
             begin_date:  moment(new Date()).format('YYYY-MM-DD'),
@@ -4729,7 +4695,7 @@ export default {
         getRateCode_BreakFast(){
           this.getEnter_RommNumber()//得到选中的房间数
           let that = this
-          let url = that.api.api_newPrice_9114 + '/v1/' +  `room/rate_code/get_rate_code/`
+          let url = that.api.api_newPrice_9107 + '/v1/' +  `room/rate_code/get_rate_code/`
           let scopeParam ={
             rate_code: this.rateCodeValue,
             begin_date:  moment(new Date()).format('YYYY-MM-DD'),
@@ -4763,7 +4729,7 @@ export default {
         getRateCode_price(item,param){
           console.log('item,param==普通的',item,param)
           let that = this
-          let url = that.api.api_newPrice_9114 + '/v1/' +  `room/rate_code/get_rate_code/`
+          let url = that.api.api_newPrice_9107 + '/v1/' +  `room/rate_code/get_rate_code/`
           // let temp = []
           // temp.push(param.room_type)
           let scopeParam ={
@@ -4926,7 +4892,7 @@ export default {
             room_no: that.room_no_value
           }
           let params = util.deleteNullParam(scopeParams)//删除对象里属性值为空的属性
-          let url = that.api.api_newPrice_9114 + '/v1/' + `room/room_status/get_room_map_list/?page_size=1000`
+          let url = that.api.api_newPrice_9107 + '/v1/' + `room/room_status/get_room_map_list/?page_size=1000`
           that.$axios({
             method : 'get',
               url : url,
@@ -4955,7 +4921,7 @@ export default {
             room_no: that.room_no_value
           }
           let params = util.deleteNullParam(scopeParams)//删除对象里属性值为空的属性
-          let url = that.api.api_newPrice_9114 + '/v1/' + `room/room_status/get_room_map_list/?page_size=1000`
+          let url = that.api.api_newPrice_9107 + '/v1/' + `room/room_status/get_room_map_list/?page_size=1000`
           that.$axios({
             method : 'get',
               url : url,

@@ -383,7 +383,7 @@
                     <div style="margin-top: 5px;color: #8e8e8e; width: 60%;height: 100%">
                       <el-row v-if="linInfoParam && linInfoParam.arr_time">{{linInfoParam.arr_time}}</el-row>
                       <el-row v-if="linInfoParam">{{linInfoParam.leave_time}}</el-row>
-                      <div v-if="linInfoParam && linInfoParam.combine_room_list" style="color: #5bbbf5">
+                      <div v-if="linInfoParam && linInfoParam.combine_room_list && linInfoParam.combine_room_list.length > 1" style="color: #5bbbf5">
                         <span>关联：</span>
                         <span v-for="(item,index) of linInfoParam.combine_room_list" :key="index">
                           {{item[0]}}、
@@ -509,21 +509,29 @@
                 </div>
               </div>
               <!-- 小方块即房间的v-if===>start 净房-->
-              <div v-if="item.room_state === 'VC'"  slot="reference"  @mouseover="hoverIndex = index;mouseOver()" @mouseout="hoverIndex = -1;mouseOut()"   @click="popoverClick(item,index)"  :class="{popoverActive: activeClassName == index && isActive, lockCss: activeClassName == index && lockCss_active, hoverActive: true}"   @dblclick="sendEnter(item);flushData()"  class="boxActive">
+              <div v-if="item.room_state === 'VC'"  slot="reference"  @mouseover="hoverIndex = index;mouseOver()" @mouseout="hoverIndex = -1;mouseOut()"    :class="{popoverActive: activeClassName == index && isActive, lockCss: activeClassName == index && lockCss_active, hoverActive: true}"   @dblclick="sendEnter(item);flushData()"  class="boxActive">
                 <!--单个房间(小方块)第一行-->
                 <div  style="display: flex; justify-content: space-between;">
                     <span style="font-size: 14px">{{item.room_type_name}}</span>
                     <!-- <span>11</span> -->
                     <span style="font-weight: bold; font-size: 16px">{{item.room_no}}</span>
                 </div>
-                <div style="text-align: center;line-height: 35px">
+                <div style="text-align: center;line-height: 35px;height: 35px">
                   <span>
                     <!-- {{item.expandAttribute.name}} -->
                   </span>
                 </div>
-                <!-- <div :class="{iconEnd: item.expandAttribute.isleave === 1 ? true : false}">
-                  <img src="@/assets/images/pms/houseStatus/preLeave.png" style="height: 16px">
-                </div> -->
+                  <div :class="{iconEnd: item.room_state_extra.length != 0 ? true : false}">
+                  <img v-if="item.room_state_extra[0] == '1'" src="@/assets/images/pms/houseStatus/team.png" style="height: 16px">
+                  <img v-if="item.room_state_extra[1] == '1'" src="@/assets/images/pms/houseStatus/qianFei.png" style="height: 16px">
+                  <img v-if="item.room_state_extra[2] == '1'" src="@/assets/images/pms/houseStatus/timeHouse.png" style="height: 16px">
+                  <img v-if="item.room_state_extra[3] == '1'" src="@/assets/images/pms/houseStatus/preLeave.png" style="height: 16px;float: right;">
+                  <img v-if="item.room_state_extra[4] == '1'&& item.master_room_no != item.room_no" src="@/assets/images/pms/houseStatus/and.png" style="height: 16px">
+                  <img v-if="item.room_state_extra[4] == '1'&& item.master_room_no == item.room_no" src="@/assets/images/pms/houseStatus/main.png" style="height: 16px">
+                  <img v-if="item.room_state_extra[5] == '1'" src="@/assets/images/pms/houseStatus/selfUse.png" style="height: 16px">
+                  <img v-if="item.room_state_extra[6] == '1'" src="@/assets/images/pms/houseStatus/selfHelp.png" style="height: 16px">
+                  <img v-if="item.room_state_extra[7] == '1'" src="@/assets/images/pms/houseStatus/preDestine.png" style="height: 16px">
+                </div>
               </div>
             <!-- card入住房 住净-->
              <div v-if="item.room_state === 'OC'"  @mouseover="hoverIndex = index;popoverClick(item,index)"   slot="reference" :class="{popoverActive: activeClassName == index && isActive,lockCss: activeClassName == index && lockCss_active, hoverActive: true}"   @dblclick="openOrderInfo(item)"  class="boxActive_6">
@@ -535,7 +543,7 @@
                 </div>
                 <div style="text-align: center;line-height: 35px; height: 35px">
                   <span class="text-ellipsis" v-if="item.room_guest">
-                    {{item.room_guest.split(',')[0]}}
+                    <span>{{item.room_guest}}</span>
                   </span>
                 </div>
                 <div :class="{iconEnd: item.room_state_extra.length != 0 ? true : false}">
@@ -547,6 +555,7 @@
                   <img v-if="item.room_state_extra[4] == '1'&& item.master_room_no == item.room_no" src="@/assets/images/pms/houseStatus/main.png" style="height: 16px">
                   <img v-if="item.room_state_extra[5] == '1'" src="@/assets/images/pms/houseStatus/selfUse.png" style="height: 16px">
                   <img v-if="item.room_state_extra[6] == '1'" src="@/assets/images/pms/houseStatus/selfHelp.png" style="height: 16px">
+                  <img v-if="item.room_state_extra[7] == '1'" src="@/assets/images/pms/houseStatus/preDestine.png" style="height: 16px">
                 </div>
             </div>
                <!-- card入住房 住脏-->
@@ -559,7 +568,7 @@
                 </div>
                 <div style="text-align: center;line-height: 35px; height: 35px">
                   <span class="text-ellipsis" v-if="item.room_guest">
-                    {{item.room_guest.split(',')[0]}}
+                    <span>{{item.room_guest}}</span>
                   </span>
                 </div>
                 <div :class="{iconEnd: item.room_state_extra.length != 0 ? true : false}">
@@ -571,10 +580,11 @@
                   <img v-if="item.room_state_extra[4] == '1'&& item.master_room_no == item.room_no" src="@/assets/images/pms/houseStatus/main.png" style="height: 16px">
                   <img v-if="item.room_state_extra[5] == '1'" src="@/assets/images/pms/houseStatus/selfUse.png" style="height: 16px">
                   <img v-if="item.room_state_extra[6] == '1'" src="@/assets/images/pms/houseStatus/selfHelp.png" style="height: 16px">
+                  <img v-if="item.room_state_extra[7] == '1'" src="@/assets/images/pms/houseStatus/preDestine.png" style="height: 16px">
                 </div>
               </div>
               <!-- card脏房 -->
-             <div v-if="item.room_state === 'VD'"  @mouseover="hoverIndex = index;mouseOver()"   @click="popoverClick(item,index)"  slot="reference" :class="{popoverActive: activeClassName == index && isActive, lockCss: activeClassName == index && lockCss_active, hoverActive: true}"    class="boxActive_3">
+             <div v-if="item.room_state === 'VD'"  @mouseover="hoverIndex = index;mouseOver()"   slot="reference" :class="{popoverActive: activeClassName == index && isActive, lockCss: activeClassName == index && lockCss_active, hoverActive: true}"    class="boxActive_3">
                 <!--单个房间(小方块)第一行-->
                 <div  style="display: flex; justify-content: space-between;">
                     <span style="font-size: 14px">{{item.room_type_name}}</span>
@@ -772,7 +782,7 @@
           </span>
         </el-dialog>
           <!--新建预定单 新建预定单 新建预定单 新建预定单 新建预定单  新建预定单   新建预定单   新建预定单   新建预定单-->
-          <preview-dialog :show.sync= previewFormVisible :parentParam='previewBillParam' v-on:listenToPreview="getPreviewFromChild"></preview-dialog>
+          <preview-dialog :show.sync= previewFormVisible :parentParam='previewBillParam' v-on:listenToPreview="flushByPreview"></preview-dialog>
           <!--新建入住单dialog-->
           <enter-dialog :show.sync= enterFormVisible :parentParam='enterBillParam' v-on:listenToFlushEnter="flushByEnter"></enter-dialog>
           <!--预定单详情dialog-->
@@ -1361,8 +1371,8 @@
           page : 1,
           page_size : 300,
         }
-        // let url = that.api.api_newPrice_9114 + '/v1/' + `room/room_status/get_room_map_list?page_size=1000`
-        let url =  that.api.api_newPrice_9114 + '/v1/' +  'room/room_status/get_room_map_list/page_size=1000'
+        // let url = that.api.api_newPrice_9107 + '/v1/' + `room/room_status/get_room_map_list?page_size=1000`
+        let url =  that.api.api_newPrice_9107 + '/v1/' +  'room/room_status/get_room_map_list/page_size=1000'
         that.$axios({
            method : 'get',
           url : url,
@@ -1492,8 +1502,8 @@
           room_no: that.room_no_value
         }
         let params = util.deleteNullParam(scopeParams)//删除对象里属性值为空的属性
-        // let url = that.api.api_newPrice_9114 + '/v1/' + `room/room_status/get_room_map_list?page_size=1000`
-        let url =  that.api.api_newPrice_9114 + '/v1/' +  'room/room_status/get_room_map_list/?page_size=1000'
+        // let url = that.api.api_newPrice_9107 + '/v1/' + `room/room_status/get_room_map_list?page_size=1000`
+        let url =  that.api.api_newPrice_9107 + '/v1/' +  'room/room_status/get_room_map_list/?page_size=1000'
         that.$axios({
            method : 'get',
             url : url,
@@ -1643,7 +1653,7 @@
           let start = moment(new Date()).format('YYYY-MM-DD HH:mm:ss')
           let end = moment(new Date()).format('YYYY-MM-DD 23:59:59')
           let room_no = param.room_no
-          let url =  that.api.api_newPrice_9114 + '/v1/' + 'room/room_status/get_room_occupy_list/'
+          let url =  that.api.api_newPrice_9107 + '/v1/' + 'room/room_status/get_room_occupy_list/'
           that.$axios({
             url : url,
             method : 'get',
@@ -1782,9 +1792,10 @@
         })
       },
       getEndpayInfoListByAccount(id){
+        console.log('房态上的账务')
           let that = this
           // let url= that.api.api_9022_9519+ '/v1/' + `finance/account/get_info_pms/` + id
-          let url= that.api.api_newPrice_9114+ '/v1/' + `accounts/get_account_base_info/` + id + '/'
+          let url= that.api.api_newPrice_9107+ '/v1/' + `accounts/get_account_base_info/` + id + '/'
           that.$axios({
             method : 'get',
             url : url,
@@ -1976,6 +1987,10 @@
           util.validateTelNumber(this.preBillParam.reserve_base.telephone_master,'请输入正确手机格式',this)
         )
       },
+      //预定后
+      flushByPreview(data){
+        this.getCardList()
+      },
       //=入住子组件====入住成功后刷新页面数据
       flushByEnter(data){
         console.log('listenToFlushEnter',data)
@@ -2043,7 +2058,7 @@
       //制卡
       activateCard(param){
         let that = this
-        let url = that.api.api_newPrice_9114 + '/v1/' + `room/room_lock/activate_card/`
+        let url = that.api.api_newPrice_9107 + '/v1/' + `room/room_lock/activate_card/`
         let scopeParam ={
           operate_type: 2,//1, "读卡"), (2, "写卡"), (4, "销卡"),
           start_time: this.enterInfoBillParam.arr_time,
@@ -2215,7 +2230,7 @@
               this.repairAndParam.room_occupy_after_code = 'NNZ'
               this.repairAndParam.room_no = param.room_no
               let that = this
-              let url= that.api.api_newPrice_9114 + '/v1/' + `room/room_status/manual_change_room_status/`
+              let url= that.api.api_newPrice_9107 + '/v1/' + `room/room_status/manual_change_room_status/`
               let scopeParam = that.repairAndParam
               console.log('scopeParam',scopeParam)
               that.$axios.post(url,scopeParam).then(res=>{
@@ -2323,7 +2338,7 @@
            }
            // console.log(new Date(new Date(that.repairAndParam.end_time).setHours(23,59,59)),'that.repairAndParam')
            let that = this
-           let url= that.api.api_newPrice_9114 + '/v1/' + `room/room_status/manual_change_room_status/`
+           let url= that.api.api_newPrice_9107 + '/v1/' + `room/room_status/manual_change_room_status/`
            let scopeParam = that.repairAndParam
            that.$axios.post(url,{
               room_no: array[i].room_no,
@@ -2356,7 +2371,7 @@
         if(array.length>0){
           for(let i in array){
             let that = this
-            let url = that.api.api_newPrice_9114 + '/v1/' + 'room/room_status/manual_change_room_status/'
+            let url = that.api.api_newPrice_9107 + '/v1/' + 'room/room_status/manual_change_room_status/'
             that.$axios.post(url,{
               room_no: array[i].room_no,
               start_time: moment(this.repairAndParam.start_time).format('YYYY-MM-DD HH:mm:ss'),
@@ -2390,7 +2405,7 @@
         this.repairAndParam.start_time = moment(this.repairAndParam.start_time).format('YYYY-MM-DD HH:mm:ss')
         this.repairAndParam.end_time = moment(this.repairAndParam.end_time).format('YYYY-MM-DD HH:mm:ss')
         let that = this
-        let url = that.api.api_newPrice_9114 + '/v1/' + 'room/room_status/manual_change_room_status/'
+        let url = that.api.api_newPrice_9107 + '/v1/' + 'room/room_status/manual_change_room_status/'
         let scopeParam = that.repairAndParam
         that.$axios.post(url,scopeParam).then(res=>{
           this.$message.success('置脏成功')
@@ -2427,7 +2442,7 @@
         this.repairAndParam.room_occupy_after_code = 'NNZ'
         this.repairAndParam.room_no = param.room_no
         let that = this
-        let url= that.api.api_newPrice_9114 + '/v1/' + `room/room_status/manual_change_room_status/`
+        let url= that.api.api_newPrice_9107 + '/v1/' + `room/room_status/manual_change_room_status/`
         let scopeParam = that.repairAndParam
         console.log('scopeParam',scopeParam)
         that.$axios.post(url,scopeParam).then(res=>{
@@ -2466,7 +2481,7 @@
         }
         // console.log(new Date(new Date(that.repairAndParam.end_time).setHours(23,59,59)),'that.repairAndParam')
         let that = this
-        let url= that.api.api_newPrice_9114 + '/v1/' + `room/room_status/manual_change_room_status/`
+        let url= that.api.api_newPrice_9107 + '/v1/' + `room/room_status/manual_change_room_status/`
         let scopeParam = that.repairAndParam
         that.$axios.post(url,scopeParam).then(res=>{
           that.$message.success('操作成功')
@@ -2492,7 +2507,7 @@
       getRepairOccupy(){
         let that = this
         let parent_code = 'room_lock_reason'
-        let url = that.api.api_newPrice_9114 + '/v1/' + 'room/room_status/get_code_room_occupy_list/'
+        let url = that.api.api_newPrice_9107 + '/v1/' + 'room/room_status/get_code_room_occupy_list/'
         // let url= `http://192.168.4.99:8002/v1/room/room_status/get_code_room_occupy_list/`
         that.$axios({
           method : 'get',
@@ -2521,7 +2536,7 @@
       //获取楼栋列表option
       getBuilding(){
         let that = this
-        let url = that.api.api_newPrice_9114+ '/v1/' + 'room/room_status/get_room_building_list/'
+        let url = that.api.api_newPrice_9107+ '/v1/' + 'room/room_status/get_room_building_list/'
         that.$axios.get(url).then(res=>{
             if(res.data.message == 'success'){
                 that.buildingList = res.data.data.results
@@ -2534,7 +2549,7 @@
       //获取楼层数据
       getFloor(){
         let that = this
-        let url = that.api.api_newPrice_9114+ '/v1/' + 'room/room_status/get_room_floor_list/'
+        let url = that.api.api_newPrice_9107+ '/v1/' + 'room/room_status/get_room_floor_list/'
         that.$axios.get(url).then(res=>{
             if(res.data.message == 'success'){
                 that.floorList = res.data.data.results
@@ -2547,7 +2562,7 @@
       //获取房型数据
       getRoomType(){
         let that = this
-        let url = that.api.api_newPrice_9114+ '/v1/' + `room/room_status/get_room_type_list/`
+        let url = that.api.api_newPrice_9107+ '/v1/' + `room/room_status/get_room_type_list/`
         that.$axios.get(url).then(res=>{
             if(res.data.message == 'success'){
                 that.roomTypeList = res.data.data.results
@@ -2918,7 +2933,7 @@
   .firstIndex{
     width: calc(100% - 58px);
     .left{
-      background:rgba(234,237,241,1);
+      background: #ffffff;
       #tab-first,#tab-second{
         width: 151px;
         line-height: 32px;
@@ -2939,10 +2954,20 @@
       // left: 2px;
     }
     .text-ellipsis{
+      width: 100%;
+      font-size: 13px;
       overflow:hidden;
       text-overflow:ellipsis;
       white-space:nowrap;
+      display:block;
+      text-align: center;
     }
+    // .text-ellipsis  span:hover{
+    //   display: inline-block;
+    //   width: 90px;
+    //   overflow: auto;
+    //   white-space: normal;
+    // }
   }
   .houseTypeClass{
     .breakfast_class{

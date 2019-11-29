@@ -1,7 +1,7 @@
 
 <template>
     <div>
-        <el-dialog class="houseTypeClass" width="50%"   title="上传公安" @close="$emit('update:show', false);policeParamInfo.liveStatus = 0" :show="show" :visible.sync="policeComponentDialog" :modal="false">
+        <el-dialog class="houseTypeClass" width="50%" append-to-body   title="上传公安" @close="$emit('update:show', false);policeParamInfo.liveStatus = 0" :show="show" :visible.sync="policeComponentDialog" :modal="false">
           <div style="height: 400px; display: flex; justify-content: space-between;">
             <div>
               <el-form  label-width="80px" :inline="true" :model="policeParamInfo">
@@ -121,6 +121,7 @@
                 this.policeComponentDialog = this.show;
             },
             policeParam(){
+                console.log('policeComponentDialog',this.policeComponentDialog)
                 console.log('policeParamInfo=======子组件',this.policeParamInfo)
                 this.policeParamInfo = _.cloneDeep(this.policeParam)
                 this.policeParamInfo.liveStatus = 0

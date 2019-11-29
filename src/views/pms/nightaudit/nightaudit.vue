@@ -23,7 +23,7 @@
             </template>
           </el-table-column>
         </el-table>
-        <!-- <span class="start-night">点击开始夜审</span> -->
+        <span @click="startNight" class="start-night">点击开始夜审</span>
       </el-aside>
       <el-main class="right">
         <div>
@@ -46,7 +46,7 @@
                 <el-table-column prop="arr_time" label="到达时间"></el-table-column>
                 <el-table-column prop="leave_time" label="离店时间"></el-table-column>
               </el-table>
-              <el-table size="mini" height="550px" v-show="qingAccount" :data="qingAccountData" :header-cell-style="{background:'#CCCCCCFF', color: '#333333'}" style="width: 100%">
+              <el-table @row-dblclick="rowClick" size="mini" height="550px" v-show="qingAccount" :data="qingAccountData" :header-cell-style="{background:'#CCCCCCFF', color: '#333333'}" style="width: 100%">
                 <el-table-column type="index" width="90"  label="序号"></el-table-column>
                 <el-table-column label="姓名">
                   <template slot-scope="scope">
@@ -87,7 +87,7 @@
                 <el-table-column prop="arr_time" label="到达时间"></el-table-column>
                 <el-table-column prop="leave_time" label="离开时间"></el-table-column>
               </el-table>
-              <el-table size="mini" height="550px" v-show="noArrive" :data="noArriveData" :header-cell-style="{background:'#CCCCCCFF', color: '#333333'}" style="width: 100%">
+              <el-table size="mini" @row-dblclick="rowClick" height="550px" v-show="noArrive" :data="noArriveData" :header-cell-style="{background:'#CCCCCCFF', color: '#333333'}" style="width: 100%">
                 <el-table-column type="index" width="90"  label="序号"></el-table-column>
                 <el-table-column prop="rsv_person_name" label="预定人"></el-table-column>
                 <el-table-column prop="rate_code" label="房价码"></el-table-column>
@@ -204,15 +204,13 @@
                 <el-table-column type="index" width="90"  label="序号"></el-table-column>
                 <el-table-column prop="room_number" label="房间号"></el-table-column>
                 <el-table-column prop="room_type" label="房间类型"></el-table-column>
-                <el-table-column label="预定/入住类型">
+                <el-table-column label="入住类型">
                    <template slot-scope="scope">
-                      <span v-if="scope.row.master_from_label === 0">散客</span>
+                      <span v-if="scope.row.master_lable === '0'">散客</span>
                       <span v-else>团队</span>
                     </template>
                 </el-table-column>
-                <el-table-column prop="order_no" label="预定单号"></el-table-column>
                 <el-table-column prop="fix_rate" label="房价"></el-table-column>
-                <el-table-column prop="room_amount" label="房间数量"></el-table-column>
                 <el-table-column prop="arr_time" label="到达时间"></el-table-column>
                 <el-table-column prop="leave_time" label="离开时间"></el-table-column>
               </el-table>
@@ -550,12 +548,14 @@ import _ from 'lodash'
           nightItem: '取消预订列表',
           number: 0,
           src: '',
-        },{
-          index: 12,
-          nightItem: '餐饮服务关账检查',
-          number: 0,
-          src: '',
-        },{
+        },
+        // {
+        //   index: 12,
+        //   nightItem: '餐饮服务关账检查',
+        //   number: 0,
+        //   src: '通过',
+        // },
+        {
           index: 13,
           nightItem: '即将到期维修/锁房列表',
           number: 0,
@@ -567,9 +567,9 @@ import _ from 'lodash'
           src: '',
         },{
           index: 15,
-          nightItem: '房租预审及入账',
+          nightItem: '房租预审',
           number: 0,
-          src: '',
+          // src: '',
         },
         // {
         //   index: 18,
@@ -650,7 +650,56 @@ import _ from 'lodash'
       this.availHeight = (screen.availHeight -10)  +'px';
     },
     methods: {
+      startNight(){
+        let nowTime = moment(new Date()).format('YYYY-MM-DD HH:mm:ss')
+        let endTime = moment(new Date()).format('YYYY-MM-DD 22:00:00')
+        // if(nowTime < endTime){
+        //   this.$message.warning('还未到夜审时间!')
+        //   return 
+        // }
+        //进入判断开始
+        if(!nowTime){
+        // if(nowTime > endTime){
+          this.$message({
+            type:'warning',
+            duration:6000,
+            message:'还未到夜审时间,不能入账!'
+          });
+          return 
+        }else if(this.is_night == true){
+          // this.$router.push('/login')//跳转到登陆界面
+          // this.$message.warning('夜审时间未到或者已经夜审了，不能进行批量入账操作!')
+          this.$message({
+            type:'warning',
+            duration:4000,
+            message:'夜审时间未到或者已经夜审了，不能进行批量入账操作!'
+          });
+        }else{
+          console.log('..router',this.$router)
+          this.$confirm('开始进行入账操作?','提示',{
+            confirmButtonText: '是',
+            cancelButtonText: '否',
+            type: 'warning'
+          }).then(()=>{
+            console.log('...开始进行入账操作?',this.nightData)
+            let flag = false
+            this.nightData.forEach(item=>{
+              if(item.src == '' || item.src == '异常'){
+                flag = true
+                return
+              }
+            })
+            if(!flag){
+              this.enterAccount()
+            }else{
+              this.$message.warning('存在异常数据或者没有夜审的项目，请先处理在入账!')
+            }
+          }).catch(()=>{
+            this.$message.info('已取消入账!')
+        })}
+      },
       rowClick(row){
+        console.log('row',row)
         this.getEnterInfoByRoom(row.room_number)
       },
         //===>联房列表打开
@@ -829,7 +878,7 @@ import _ from 'lodash'
         let that = this
         let url 
         if(param == 'refund'){
-          url= that.api.api_newPrice_9114+ '/v1/' + `accounts/add_close_detail/`
+          url= that.api.api_newPrice_9107+ '/v1/' + `accounts/add_close_detail/`
         }else{
           // let url= that.api.api_9022_9519+ '/v1/' + `finance/pay_detail/refund_pms`
         }
@@ -910,7 +959,7 @@ import _ from 'lodash'
         console.log('...xinxi1',this.extraInformation)
         this.handleExtraParam()
         let that = this
-        let url = that.api.api_newPrice_9114 + '/v1/' + 'accounts/pay/'
+        let url = that.api.api_newPrice_9107 + '/v1/' + 'accounts/pay/'
         // let url= that.api.api_9022_9519+ '/v1/' + `finance/pay_detail/pay_money_pms`
         // let url= `http://192.168.5.96:9519/v1/finance/pay_detail/pay_by_charges`
         let scopeParam = {
@@ -1460,12 +1509,6 @@ import _ from 'lodash'
       },
       //上一步或下一步
       nextOrBackTip(param){
-        let nowTime = moment(new Date()).format('YYYY-MM-DD HH:mm:ss')
-        let endTime = moment(new Date()).format('YYYY-MM-DD 22:00:00')
-        // if(nowTime < endTime){
-        //   this.$message.warning('还未到夜审时间!')
-        //   return 
-        // }
         console.log('this.index_flag',this.index_flag)
         let index_flag = param === 'up' ? this.index_flag - 1 : this.index_flag + 1
         console.log('index_flag构造',index_flag)
@@ -1670,7 +1713,13 @@ import _ from 'lodash'
             this.enterPreview = false
             this.repairLock = false
           break;
-          case '房租预审及入账':
+          case '即将删除宾客档案列表':
+            this.selfControl(row)
+          break;
+          case '夜审钟点房未离列表':
+            this.selfControl(row)
+          break;
+          case '房租预审':
             this.getNight_enterPreview(row)
             this.errorCheck = false
             this.noPay = false
@@ -1685,34 +1734,6 @@ import _ from 'lodash'
             this.cardRepeat = false
             this.repairLock = false
             this.enterPreview = true
-            //进入判断开始
-            if(!nowTime){
-            // if(nowTime > endTime){
-              this.$message({
-                type:'warning',
-                duration:6000,
-                message:'还未到夜审时间,不能入账!'
-              });
-              return 
-            }else if(this.is_night == true){
-              // this.$router.push('/login')//跳转到登陆界面
-              // this.$message.warning('夜审时间未到或者已经夜审了，不能进行批量入账操作!')
-              this.$message({
-                type:'warning',
-                duration:4000,
-                message:'夜审时间未到或者已经夜审了，不能进行批量入账操作!'
-              });
-            }else{
-              console.log('..router',this.$router)
-              this.$confirm('开始进行入账操作?','提示',{
-                confirmButtonText: '是',
-                cancelButtonText: '否',
-                type: 'warning'
-              }).then(()=>{
-                this.enterAccount()
-              }).catch(()=>{
-                this.$message.info('已取消入账!')
-            })}
             break;
           case '即将到期维修/锁房列表':
             this.getNight_repairLock(row)
@@ -1733,11 +1754,18 @@ import _ from 'lodash'
             break;
         }
       },
+      /**
+       * 暂时控制
+       */
+      selfControl(row){
+        row.src = '通过'
+      },
       //批量入账操作 =====新版本
       enterAccount(){
+        //入账
         let that = this
         // let url = that.api.api_9022_9519 + '/v1/' + 'report/night_audit/batch_add_rent'
-        let url = that.api.api_newPrice_9114 + '/v1/' + 'report/night_audit/add_YSFF/'
+        let url = that.api.api_newPrice_9107 + '/v1/' + 'report/night_audit/add_YSFF/'
         that.$axios.post(url).then(res=>{
           console.log('res入账',res.data)
           if(res.data.message === 'success'){
@@ -1765,7 +1793,7 @@ import _ from 'lodash'
         this.is_night = false//防止干扰
         console.log('jinrurururuur')
         let that = this
-        let url = that.api.api_newPrice_9114 + '/v1/' + 'report/night_audit/night_check/'
+        let url = that.api.api_newPrice_9107 + '/v1/' + 'report/night_audit/night_check/'
         that.$axios.get(url).then(res=>{
           console.log('resss',res.data.data.data)
           if(res.data.message == 'success'){
@@ -1808,7 +1836,7 @@ import _ from 'lodash'
       getNight_noPing(row){
         // row.number= 1
         let that = this
-        let url = that.api.api_newPrice_9114+ '/v1/' + `report/night_audit/check_out_but_no_closed/`
+        let url = that.api.api_newPrice_9107+ '/v1/' + `report/night_audit/check_out_but_no_closed/`
         that.$axios.get(url).then(res=>{
           try {
             row.number = res.data.data.data.length
@@ -1825,32 +1853,34 @@ import _ from 'lodash'
         })
       },
       //异常检查
-      getNight_errorCheck(){
+      getNight_errorCheck(row){
         let that = this;
-        let url = that.api.api_newPrice_9114+ '/v1/' + `report/night_audit/get_abnormal_master_base/`
+        let url = that.api.api_newPrice_9107+ '/v1/' + `report/night_audit/get_abnormal_master_base/`
         that.$axios({
           method: 'get',
           url: url,
         }).then((res) => {
             try {
-            row.number = res.data.data.data.length
-            row.src = row.number == 0 ? '通过' : '异常'
+              row.number = res.data.data.data.length
+              row.src = row.number == 0 ? '通过' : '异常'
             if(row.src === '异常'){
               this.$message.warning('存在异常数据!')
             }
             that.errorCheckData = res.data.data.data
             // localStorage.setItem('qingAccount',row.number)
           } catch (error) {
-            console.log('error')
+            console.log(error)
           }
         }).catch((err) => {
           console.error(err);
         })
       },
-      // 应离未离钟点房列表
+      // 应离未离钟点房列表 接口没有
       getNight_hourLeave(row){
+        row.src = '通过'
+        return
         let that = this;
-        let url = that.api.api_newPrice_9114 + '/v1/checkin/night_audit/get_leave_hour_night_list/';
+        let url = that.api.api_newPrice_9107 + '/v1/night_audit/get_leave_hour_night_list/';
         that.$axios({
           method: 'post',
           url: url,
@@ -1873,8 +1903,8 @@ import _ from 'lodash'
       //应离未离宾客列表
       getNight_qingAccount(row){
         let that = this;
-        // let url = that.api.api_newPrice_9114 + '/v1/checkin/get_leave_night_list/?page_size=300';
-        let url = that.api.api_newPrice_9114+ '/v1/' + `report/night_audit/should_leave_without_leave/`
+        // let url = that.api.api_newPrice_9107 + '/v1/checkin/get_leave_night_list/?page_size=300';
+        let url = that.api.api_newPrice_9107+ '/v1/' + `report/night_audit/should_leave_without_leave/`
         that.$axios({
           method: 'get',
           url: url,
@@ -1897,7 +1927,7 @@ import _ from 'lodash'
       //缺少市场码来源码登记单
       getNight_noSrc(row){
         let that = this
-        let url = that.api.api_newPrice_9114 + '/v1/report/night_audit/without_market_code_src_code/';
+        let url = that.api.api_newPrice_9107 + '/v1/report/night_audit/without_market_code_src_code/';
         that.$axios({
           method: 'get',
           url: url,
@@ -1921,8 +1951,8 @@ import _ from 'lodash'
       //应到未到客人列表
       getNight_noArrive(row){
         let that = this
-        // let url = that.api.api_newPrice_9114 + '/v1/booking/get_not_arrive_night_list/?page_size=300';
-        let url = that.api.api_newPrice_9114+ '/v1/' + `report/night_audit/should_check_in_without_check_in/`
+        // let url = that.api.api_newPrice_9107 + '/v1/booking/get_not_arrive_night_list/?page_size=300';
+        let url = that.api.api_newPrice_9107+ '/v1/' + `report/night_audit/should_check_in_without_check_in/`
         that.$axios({
           method: 'get',
           url: url,
@@ -1944,8 +1974,10 @@ import _ from 'lodash'
       },
       //取消预订列表
       getNight_cancleOrder(row){
+        row.src = '通过'
+        return
         let that = this
-        let url = that.api.api_newPrice_9114+ '/v1/' + `booking/get_cancel_reserve_night_list/?page_size=300`
+        let url = that.api.api_newPrice_9107+ '/v1/' + `booking/get_cancel_reserve_night_list/?page_size=300`
         that.$axios.post(url).then(res=>{
           row.number = res.data.data.results.length
           row.src = row.number == 0 ? '通过' : '异常'
@@ -1957,6 +1989,8 @@ import _ from 'lodash'
       },
       //到期预授权
       getNight_authorize(row){
+        row.src = '通过'
+        return
         let that = this
         let url = that.api.api_9022_9519+ '/v1/' + `report/account/expire_pre_authorized_detail`
         that.$axios.post(url).then(res=>{
@@ -1981,24 +2015,36 @@ import _ from 'lodash'
           that.cardRepeatData = res.data.data
         })
       },
-      //房租预审及入账
+      //房租预审及入账==>调dyl的
       getNight_enterPreview(row){
         let that = this
         // let url = that.api.api_9022_9519+ '/v1/' + `report/account/check_rent_and_entry_account`
-        let url = that.api.api_9022_9519+ '/v1/' + `report/night_audit/check_rent`
-        that.$axios.post(url).then(res=>{
-          row.number = res.data.data.length
-          row.src = row.number == 0 ? '通过' : '异常'
+        let url = that.api.api_newBill_9204 + '/v2/checkin/all_master_list/'
+        that.$axios({
+           method: 'post',
+            url: url,
+            data: {
+              guest_list: {
+                master_from_lable: [],
+                room_type: that.room_types,
+                code_market: that.code_market_ids,
+                code_src: that.src_codes
+              }
+            }
+        }).then(res=>{
+          console.log('res.data',res.data)
+          row.number = res.data.data.results.length
+          // row.src = row.number == 0 ? '通过' : '异常'
           // if(row.src === '异常'){
             // this.$message.warning('存在异常数据!')
           // }
-          that.enterPreviewData = res.data.data
+          that.enterPreviewData = res.data.data.results
         })
       },
       //即将到期维修和锁定房
       getNight_repairLock(row){
         let that = this
-        let url = that.api.api_newPrice_9114+ '/v1/' + `report/get_OO_room_list/`
+        let url = that.api.api_newPrice_9107+ '/v1/' + `report/get_OO_room_list/`
         that.$axios.get(url).then(res=>{
           console.log('res.data.data==repair',res.data.data.results)
           row.number = res.data.data.results.length
@@ -2051,7 +2097,7 @@ import _ from 'lodash'
           return
         }
         // let url =  that.api.api_9022_9519+ '/v1/' +  'finance/incoming_account_code/info_list'
-        let url =  that.api.api_newPrice_9114 + '/v1/' +  'system/settings/get_code_pay_for_list/?parent_id=' + parent_id + '&page_size=300'
+        let url =  that.api.api_newPrice_9107 + '/v1/' +  'system/settings/get_code_pay_for_list/?parent_id=' + parent_id + '&page_size=300'
         that.$axios.get(url).then(res=>{
             console.log('res.data',res.data.data.results)
             that.incomingAccoutList = res.data.data.results
@@ -2064,7 +2110,7 @@ import _ from 'lodash'
       getCashRegister(){
         let that = this
         // let url= that.api.api_9022_9519+ '/v1/' + `finance/cash_register/info_list`
-        let url =  that.api.api_newPrice_9114 + '/v1/' +  'accounts/get_cash_register_list/'
+        let url =  that.api.api_newPrice_9107 + '/v1/' +  'accounts/get_cash_register_list/'
 
         that.$axios({
           method : 'get',
@@ -2080,7 +2126,7 @@ import _ from 'lodash'
       getPayReason(){
         let that = this
         // let url= that.api.api_9022_9519+ '/v1/' + `finance/code_pay_for/info_list?page_size=999`
-        let url = that.api.api_newPrice_9114+ '/v1/' + `system/settings/get_code_pay_for_list/?code_type=2&page_size=300&parent_id=`
+        let url = that.api.api_newPrice_9107+ '/v1/' + `system/settings/get_code_pay_for_list/?code_type=2&page_size=300&parent_id=`
         that.$axios({
           method : 'get',
           url : url,
@@ -2144,6 +2190,7 @@ import _ from 'lodash'
         display: block; 
         margin-top: 10px; 
         margin-bottom: 120px;
+        margin-left: 9px;
         cursor: pointer;
         color: #4488E9FF;
       }
