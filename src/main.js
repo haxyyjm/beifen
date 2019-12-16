@@ -5,10 +5,12 @@ import App from './App'
 import axios from 'axios'
 import 'normalize.css'
 import api from '../config/api'
+import Print from 'vue-print-nb'
 Vue.prototype.api = api;
 //为了支持jsonp
 import VueResource from 'vue-resource'
 Vue.use(VueResource)
+Vue.use(Print)
 //暂未开放的组件
 import Not_opened from '@/components/Not-opened'
 Vue.component('Not-opened',Not_opened);
@@ -69,13 +71,18 @@ axios.interceptors.response.use((response)=>{
        * 如果后端有接口没有返回授权信息的时候，直接给控制台打印出来提示语
        * @type {{authorization: string}}
        */
+      console.log(response)
+      console.log(response.data)
       if(response.data.new_authorization){
          localStorage.setItem('authorization',response.data.new_authorization);
          console.info('最后一次的授权信息====：' + response.data.new_authorization);
          return response;
-      }else if (response.data.message === 'success'){
+      }else if (response.data.message === 'success' || response.data.msg == 'OK'){
         return response;
-      }else if(response.data.message === 'authorization invalid'){
+      }else if (response.data.status == 400 || response.status == 200){
+        return response;
+      }
+      else if(response.data.message === 'authorization invalid'){
          router.push({path:'/login'});
       }else{
          console.error('do not get it from the back end');

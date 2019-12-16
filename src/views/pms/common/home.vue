@@ -24,6 +24,7 @@
               <el-menu-item index="" @click="setMaskShow">交接班</el-menu-item>
               <el-menu-item index="/nightaudit">夜审</el-menu-item>
               <el-menu-item index="/setting/CRS">设置</el-menu-item>
+              <el-menu-item index="/team">团队</el-menu-item>
             </el-menu>
           </el-col>
         </el-row>
@@ -135,14 +136,14 @@
         <!--遮罩层-->
       </div>
 
-      <!--
-        右侧导航栏
-       -->
       <!--新建预定单-->
       <preview-dialog :parentParam='preBillParam' :show.sync= previewFormVisible  v-on:listenToPreview="getPreviewFromChild"></preview-dialog>
       <!--新建入住单-->
       <enter-dialog :parentParam='preBillParam' :show.sync= enterFormVisible  v-on:listenToPreview="getPreviewFromChild"></enter-dialog>
       <link-house-dialog :show.sync= linkHouseFornVisible :parentInfoParam='linInfoParam' v-on:listenToPreview="getPreviewFromChild"></link-house-dialog>
+      <!--
+        右侧导航栏
+       -->
       <div class="rightNav column" :style="{ height: availHeight }">
         <ul class="navItem">
           <li v-for="(item,index) in rightNav" :key="index" @click="actionFun(item)">
@@ -186,9 +187,16 @@
 
     <!--中间-->
     <transition name="fade" mode="out-in">
-      <router-view></router-view>
+        <router-view></router-view>
     </transition>
-
+    <!--公共底部end-->
+    <div class="end_bottom">
+      <div class="content">
+        <span>{{today}}</span>
+        <span>{{hotelInfo.full_name}}</span>
+        <span>营业日期:{{hotelInfo.biz_date}}</span>
+      </div>
+    </div>
     <!--收银员交接表 - dialog  目前不做这个-->
     <!--<el-dialog title="收银员交接表" id="print_001" :close-on-click-modal = 'false'  :visible.sync="dialogTableVisible_001">
       <el-table :data="gridData_001" size="mini">
@@ -384,6 +392,9 @@
     },
     data () {
       return {
+        hotelInfo:{},
+        timer: null,//定时器
+        today: '',
         enter_cardList: [],//所有再住房间
         enterCardVisible: false,
         // 排班数据
@@ -595,7 +606,8 @@
     created() {// 组件创建完后获取数据，
       // 此时 data 已经被 observed 了
       //this.fetchNavData();
-      this.availHeight = screen.availHeight +'px';
+      this.availHeight = (screen.availHeight - 163) +'px';
+      // this.availHeight = (screen.availHeight - 115) +'px';
     },
     methods: {
       //制卡操作/销卡操作（直接） 还有远程销卡
@@ -1188,15 +1200,38 @@
              console.error(err);
           });
         }).catch(() => {});
-      }
+      },
+       /**
+       * 获取酒店信息
+       */
+      getHotel_info(){
+        let that = this
+        let url = that.api.api_newPrice_9107+ '/v1/' + `report/hotel_info/`
+        that.$axios.get(url).then(res=>{
+          that.hotelInfo = res.data.data.results[0]
+          console.log(res.data.data.results[0])
+        }).catch(error=>{
+          that.$message.error(error)
+        })
+      },
     },
     mounted() {
+      let that = this
+      that.getHotel_info()
+      that.timer = setInterval(() => {
+        that.today = moment().format('YYYY-MM-DD HH:mm:ss')
+      }, 1000);
       let user = localStorage.getItem('access-user');
       if (user) {
         user = JSON.parse(user);
         this.nickname = user.nickname || '';
       }
     },
+    beforeDestroy(){
+      if(this.timer){
+        clearInterval(this.timer)
+      }
+    }
     /* watch: {
        '$route': 'fetchNavData'  //监听router值改变时，改变导航菜单激活项
      }*/
@@ -1210,10 +1245,37 @@
     top: 60px;
     z-index: 99;
   }
+  /**
+    底部位置固定在底下
+   */
+  .end_bottom{
+    width:100%;
+    position: fixed;
+    bottom:0;
+    height:30px;
+    background: #373d41;
+    .content{
+      color: #ffffff;
+      line-height: 30px;
+      margin-left: 15px;
+      span:nth-child(3){
+        float: right;
+        margin-right: 70px;
+      }
+    }
+  }
   .navItem{
     width: 38px;
     height: 38px;
     margin: 10px;
+  }
+  /**
+  新增右边要有间距
+   */
+  .navItem{
+    li{
+      padding-bottom: 10px;
+    }
   }
   .mask{
     width: 100%;

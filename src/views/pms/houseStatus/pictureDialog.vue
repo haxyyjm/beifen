@@ -1,7 +1,7 @@
 
 <template>
     <div>
-        <el-dialog class="houseTypeClass" width="50%"   title="上传图片" @close="$emit('update:show', false);flushMedia()" :show="show" :visible.sync="pictureComponentDialog" :modal="false">
+        <el-dialog class="houseTypeClass"  append-to-body width="50%"   title="上传图片" @close="$emit('update:show', false);flushMedia()" :show="show" :visible.sync="pictureComponentDialog" :modal="false">
             <div style="height: 300px;width:601px;margin:0 auto">
                 <div style="border:1px solid ; display: flex;">
                     <video id="video_1" style="width= 100%; height=100%; object-fit: fill"  autoplay="autoplay"></video>

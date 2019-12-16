@@ -1,10 +1,10 @@
 <template>
   <div>
-    <el-dialog :close-on-click-modal = 'false' width="80%" class="previewInfo-dialog deletePadding_Class" title="联房列表"  :visible.sync="linkHouseFornVisible"
-      @close="$emit('update:show', false);refundHouse = true;"
+    <el-dialog :close-on-click-modal = 'false' width="80%" class="previewInfo-dialog deletePadding_Class" :title="orderTitle"  :visible.sync="linkHouseFornVisible"
+      @close="$emit('update:show', false);flushByLink();refundHouse = true;"
       :show="show">
       <el-row style="background-color: #fff; height: 450px">
-        <el-col :span="5" style="background-color: #FFF; height: 100%">
+        <el-col :span="6" style="background-color: #FFF; height: 100%">
             <el-row >
             <div style="margin-top: 10px;margin-bottom: 10px">
               <!-- <el-checkbox style="margin-left: 15px; float: left; height: 50px;" :indeterminate="isIndeterminate" v-model="checkAll" @change="handleCheckAllChange">
@@ -26,26 +26,56 @@
               <div style="display: inline-block; width: 18vw" @click="chooseInfo(item)">
             </div>
             </div> -->
-              <ul v-for="(item,index) of preBillLinkParam.combine_room_list" :key="index">
+              <ul v-for="(item,index) of endPayListParam.room_list" :key="index">
                 <li @click="getInfoByImportant(item,index)" :class="{activeColor: isActiveColor === index ? true : false}"  style="display: flex;justify-content:space-between; line-height: 40px; cursor: pointer;">
                   <input type='checkbox'  name='checkboxinput' class='input-checkbox' v-model='checkboxList' :value="item[0]">
                   <el-tag style="position: absolute;left: 16px;margin-top: 2px"  :disable-transitions="false">
-                    <span style="color: #4488E9">{{item[0]}}</span>
+                    <span style="color: #4488E9">{{item.room_num}}</span>
                   </el-tag>
-                    <span style="color: #7AAAEF;">{{item[2]}}</span>
-                  <div style="margin-top: 5px">
-                    <div class="refundClass" v-if="item[5] === 1">已退房</div>
-                    <el-button v-if="item[3] === item[4]" size="mini" circle type="warning">主</el-button>
-                    <el-button v-else-if="item[3] != null" size="mini" circle type="success">联</el-button>
+                  <span style="color: #7AAAEF;">{{item.room_type}}</span>
+                  <div style="margin-top: 5px;">
+                     <el-button v-if="item.master_status == 1 || item.master_status == 2 || item.master_status == 3" size="mini" circle type="danger">
+                      <span>退</span>
+                    </el-button>
+                    <el-button v-else size="mini" circle type="success">
+                      <span>住</span>
+                    </el-button>
+                    <!-- <el-button  size="mini" circle type="success">
+                      <span v-if="item.account_status == 0">常</span>
+                      <span v-if="item.account_status == 1">结</span>
+                      <span v-if="item.account_status == 2">挂</span>
+                      <span v-if="item.account_status == 3">锁</span>
+                      <span v-if="item.account_status == 4">异</span>
+                    </el-button> -->
+                    <el-button v-if="item.account_status == 0" size="mini" circle type="success">
+                      <span>常</span>
+                    </el-button>
+                     <el-button v-if="item.account_status == 1" size="mini" circle type="danger">
+                      <span>结</span>
+                    </el-button>
+                     <el-button v-if="item.account_status == 2" size="mini" circle type="warning">
+                      <span>挂</span>
+                    </el-button>
+                     <el-button v-if="item.account_status == 3" size="mini" circle type="success">
+                      <span>锁</span>
+                    </el-button>
+                     <el-button v-if="item.account_status == 4" size="mini" circle type="success">
+                      <span>异</span>
+                    </el-button>
+                    <el-button v-if="endPayListParam.room_list.length>1 && item.is_main" size="mini" circle type="warning">主</el-button>
+                    <el-button v-if="endPayListParam.room_list.length>1 && !item.is_main" size="mini" circle type="success">联</el-button>
                   </div>
                 </li>
               </ul>
           </el-row>
         </el-col>
-        <el-col :span="18">
+        <el-col :span="17">
         <!--上传公安-->
         <police-dialog :show.sync= policeComponentDialog :policeParam='policeParam' v-on:listenToPolice="getPrebillParam"></police-dialog>
-          <el-tabs  v-model="activeName" @tab-click='tabClick' type="card" style="margin-left: 20px; width: 100%;">
+        <!--上传照片-->
+        <picture-dialog :show.sync= pictureComponentDialog :pictureParam='pictureParam' v-on:listenToPicture="getPictureParam"></picture-dialog>
+        <!--主体内容-->
+        <el-tabs  v-model="activeName" @tab-click='tabClick' type="card" style="margin-left: 20px; width: 100%;">
             <el-tab-pane :label="tabValue" name="1">
               <div>
                 <el-row class="buttonStyle">
@@ -58,49 +88,53 @@
                   <el-button type="info" :disabled="banDisable()" @click="continueLiveDialog = true; handleDate()" round  size="mini">续住</el-button>
                   <!-- <el-button type="info" round  size="small">无等待</el-button> -->
                   <el-button type="info" :disabled="banDisable()" round @click="enterPersonVisible = true;handleEnterPeople()"  size="mini">+入住人</el-button>
-                  <!-- <el-button type="info" :disabled="banDisable()" round @click="handleUpdate()"  size="mini">更新</el-button> -->
                 </el-row>
                 <!--转全天房-->
-                <div>
-                  <div class="inline-div">
-                    <span>订单状态：<span style="color: #9FBDF2 ">入住</span></span>
-                    <span>市场码:<span>{{market_src}}</span></span>
-                    <span>房型：<span>{{preBillLinkParam.room_type}}</span></span>
-                    <!-- <span>当日价：<span style="color: #FC6784">¥{{current_rate_price}}元</span></span> -->
-                    
-                    <span style="margin-top: -13px;" v-show="span_input_flag">当日价:<el-input style="color: #f3565d;width: 50px;"  @blur="span_input_flag = false" v-model="current_rate_price"></el-input></span>
-                    <span v-show="!span_input_flag">
-                      当日价:
-                      <span style="color: #FC6784"  @click="span_input_flag = true">¥{{current_rate_price}}元</span>
-                    </span>
-                    <!-- <span style="width: 10%">
-                      <img style="cursor: pointer"  src="../../../assets/images/pms/houseStatus/date2x.png">
-                    </span> -->
-                  </div>
-                  <div class="inline-div">
-                    <!-- <span style="width: 25%">入住类型：（共<span style="color: #FC6784 "></span>天)</span> -->
-                    <span>来源码:
-                      <!-- <span v-if="preBillLinkParam.master_type === 0">非会员/会员</span>
-                      <span v-if="preBillLinkParam.master_type === 1">散客入住</span>
-                      <span v-if="preBillLinkParam.master_type === 2">团队入住</span>
-                      <span v-if="preBillLinkParam.master_type === 3">订房中心/OTA</span>
-                      <span v-if="preBillLinkParam.master_type === 4">协议单位</span> -->
+                <div  style="display: flex">
+                  <div style="width: 55%;height:140px;display: flex;align-items:center;flex-wrap: wrap">
+                    <!-- <div>订单状态：<span style="color: #9FBDF2 ">入住</span></div> -->
+                    <div class="panduan">市场码:<span>{{market_src}}</span></div>
+                    <div class="panduan">来源码:
                       {{enter_src}}
-                    </span>
-                    <span>房价码:<span>{{preBillLinkParam.rate_code}}</span></span>
-                    <span>入住日期:<span>{{preBillLinkParam.arr_time}}</span></span>
-                    <span>预计离店：<span>{{preBillLinkParam.leave_time}}</span></span>
+                    </div>
+                    <!-- <div>房型：<span>{{preBillLinkParam.room_type}}</span></div> -->
+                    <div class="panduan">
+                      当日价:<el-input  size="mini" style="color: #f3565d;width: 70px;"  @blur="span_input_flag = false;update_price()" v-model="current_rate_price"></el-input>
+                    </div>
+                    <!-- <div v-show="!span_input_flag">
+                      当日价:
+                      <span style="color: #FC6784"  @click="changeFlag()">¥{{current_rate_price}}元 </span> 
+                    </div> -->
+                    <div class="panduan">
+                      <span>房价码:<span>{{preBillLinkParam.rate_code}}</span></span>
+                    </div>
+                    <div class="panduan">
+                      <span>入住日期:<span>{{preBillLinkParam.arr_time}}</span></span>
+                    </div>
+                    <div class="panduan">
+                      <span>预计离店：<span>{{preBillLinkParam.leave_time}}</span></span>
+                    </div>
                   </div>
-                  <div class="inline-div">
-                    <span>备注:
-                      <span v-if="preBillLinkParam.remark_id_list">{{preBillLinkParam.remark_id_list}}</span>
-                      <span v-else>暂无</span>
-                    </span>
+                  <div style="width: 20%;height:140px;display: flex;padding-top: 1vw;flex-wrap: wrap;margin-right: 10px">
+                    <div>
+                      <span style="font-weight: 600">备注:</span>
+                    </div>
+                    <div style="flex: 1">
+                      <el-input placeholder="暂无"  @blur="handleRemark" resize="none" v-model="preBillLinkParam.remark_id_list" type="textarea" :rows="4"></el-input>
+                    </div>
+                  </div>
+                  <div style="width: 20%;height:140px;padding-top: 1vw;display: flex;flex-wrap: wrap;flex-direction: row;">
+                    <div>
+                      <span style="font-weight: 600">提醒:</span>
+                    </div>
+                    <div style="flex: 1">
+                      <el-input @blur="updateAccountRemark" resize="none" v-model="endPayListParam.remark" type="textarea" :rows="4"></el-input>
+                    </div>
                   </div>
                 </div>
                 <el-row style="height: 20px"></el-row>
                 <div>
-                  <el-table height="220" :data="preBillLinkParam.master_guest" :header-cell-style="{background:'#373d41', color: '#FFFFFF'}" style="width: 100%">
+                  <el-table height="180" :data="preBillLinkParam.master_guest" :header-cell-style="{background:'#373d41', color: '#FFFFFF'}" style="width: 100%">
                     <el-table-column prop="name" label="姓名"></el-table-column>
                     <!-- <el-table-column prop="member" label="会员"></el-table-column> -->
                     <el-table-column label="性别">
@@ -292,16 +326,6 @@
                   <el-table-column prop="person" label="操作"></el-table-column>
               </el-table>
             </el-tab-pane>
-            <el-tab-pane label="备注" name="4">
-              <div>
-                <el-input
-                    @blur="handleRemark"
-                    type="textarea"
-                    :autosize="{ minRows: 16, maxRows: 16}"
-                    placeholder="请输入内容"
-                    v-model="preBillLinkParam.remark_id_list">
-                </el-input>
-              </div>
               <!-- <el-row style="background-color: #F4F4F4; padding: 10px;5px;10px;5px; border: 1px solid #E9E9E9">
                 <div style="float: left;">
                 </div>
@@ -318,7 +342,6 @@
                     </template>
                   </el-table-column>
               </el-table> -->
-            </el-tab-pane>
              <el-tab-pane label="发票" name="5">
               <div style="height: 350px">
                 <el-table :data="invoiceList" height="300" :header-cell-style="{background:'#373d41', color: '#FFFFFF'}" style="width: 100%">
@@ -457,9 +480,9 @@
          <div class="roomClass">
             <el-input size="mini" style="width: 13vw" v-model="roomParam.oldNumber"></el-input>
             <span>换房号</span>
-            <el-select  style="width: 12vw" size="mini" v-model="roomParam.newNumber">
+            <el-select @focus="getRoomNo()" style="width: 12vw" size="mini" v-model="roomParam.newNumber">
               <el-option
-                v-for="item in roomNo_data_list"
+                v-for="item in roomNoList"
                 :key="item.id"
                 :label="item.room_no"
                 :value="item.room_no">
@@ -561,48 +584,30 @@
                   <div style="diplay: inline-block">
                       <span style="padding-left: 14px">入住人:</span>
                       <el-input size="mini"  v-model="item.room_number" style="width: 9.8vw" disabled placeholder="房间号"></el-input>
-                      <el-input size="mini" :disabled="index<disableLength" v-model="item.name" style="width: 9.8vw" placeholder="请输入姓名"></el-input>
-                      <el-select size="mini" :disabled="index<disableLength" v-model="item.sex " style="width: 5.8vw"  placeholder="性别">
+                      <el-input size="mini" :disabled="sameDisabled(item)" v-model="item.name" style="width: 9.8vw" placeholder="请输入姓名"></el-input>
+                      <el-select size="mini" :disabled="sameDisabled(item)" v-model="item.sex " style="width: 5.8vw"  placeholder="性别">
                         <el-option v-for="item in sexOptions" :key="item.value" :label="item.label" :value="item.value"></el-option>
                       </el-select>
-                      <el-select size="mini" :disabled="index<disableLength" v-model="item.id_code " style="width: 8.8vw"  placeholder="证件">
+                      <el-select size="mini" :disabled="sameDisabled(item)" v-model="item.id_code " style="width: 8.8vw"  placeholder="证件">
                         <el-option v-for="itemm in idCodeOptions" :key="itemm.value" :label="itemm.label" :value="itemm.value"></el-option>
                       </el-select>
-                      <el-input size="mini" :disabled="index<disableLength"  v-model="item.id_no "  @blur="validateId_no(item,'输入')" placeholder="证件号码"  style="width: 12vw"></el-input>
-                      <el-input size="mini" :disabled="index<disableLength"  v-model="item.telephone "  placeholder="联系方式"  style="width: 9.8vw"></el-input>
+                      <el-input size="mini" :disabled="sameDisabled(item)" maxlength="18" v-model="item.id_no "  @blur="validateId_no(item,'输入')" placeholder="证件号码"  style="width: 12vw"></el-input>
+                      <el-input size="mini" :disabled="sameDisabled(item)"  v-model="item.telephone "  placeholder="联系方式"  style="width: 9.8vw"></el-input>
                   </div>
                   <div style="display: inline-block">
-                    <el-input size="mini" :disabled="index<disableLength"  v-model="item.street_add "  placeholder="请输入联系地址"  style="width: 40vw; margin-left: 64px; margin-top: 10px"></el-input>
+                    <el-input size="mini" :disabled="sameDisabled(item)"  v-model="item.street_add "  placeholder="请输入联系地址"  style="width: 40vw; margin-left: 64px; margin-top: 10px"></el-input>
                     <el-button type="danger" size="mini" @click="handleNewPolice(item,index)">上传公安</el-button>
                     <el-button type="danger" size="mini" @click="handlePicture(item,index)">上传照片</el-button>
                   </div>
                   <!-- 预定房间入住人多选 +-->
                   <!-- <img style="cursor: pointer; float: right; position: relative; top: 10px" src="../../../assets/images/pms/houseStatus/add.png"> -->
                   <img style="cursor: pointer; position: relative; top: 20px; float: right" v-show="showAddButton_2" @click="addSelect_2" src="../../../assets/images/pms/houseStatus/add.png">
-                  <img style="cursor: pointer; position: relative; top: 20px; float: right" v-show="showDeleteButton_2" @click="deleteSelect_2(index)" src="../../../assets/images/pms/houseStatus/delete2x.png">
+                  <img :disabled="sameDisabled(item)" style="cursor: pointer; position: relative; top: 20px; float: right" v-show="showDeleteButton_2" @click="deleteSelect_2(item,index)" src="../../../assets/images/pms/houseStatus/delete2x.png">
                 </div>
             </div>
           </div>
           <div slot="footer" class="dialog-footer">
             <el-button type="danger"   @click="cardImport()">证件导入</el-button>
-            <el-button type="danger"   @click="confirmAddPeople()">确定</el-button>
-          </div>
-        </el-dialog>
-        <!--更新入住后的数据-->
-       <el-dialog class="houseTypeClass" width="50%" title="更新" :visible.sync="updateVisible" :modal="true">
-          <div style="height: 400px">
-            <div style="height: 400px;margin-top: 10px; overflow: auto">
-              <el-form ref="ruleForm" label-width="100px">
-                <el-form-item label="市场码" prop="name">
-                  <el-input v-model="market_src"></el-input>
-                </el-form-item>
-                <el-form-item label="来源码" prop="region">
-                  <el-input v-model="enter_src"></el-input>
-                </el-form-item>
-              </el-form>
-            </div>
-          </div>
-          <div slot="footer" class="dialog-footer">
             <el-button type="danger"   @click="confirmAddPeople()">确定</el-button>
           </div>
         </el-dialog>
@@ -652,7 +657,7 @@
           </div>
       </el-dialog>
        <!--针对支付明细进行退款 -->
-      <el-dialog class="houseTypeClass" title="退款" :visible.sync="refunAccountDialog" :modal="false">
+      <el-dialog class="houseTypeClass" @close="refundFlag = false" title="退款" :visible.sync="refunAccountDialog" :modal="false">
         <div style="height: 400px">
           <!-- <el-row>
             退款金额:
@@ -797,7 +802,7 @@
       </el-dialog>
       <!--结账-->
       <el-dialog @close="extraInformation=[];previewEnterBill.pre_author_id = '';jie_authorization_flag = false;jie_flag = false " class="houseTypeClass" :title="jieAccountTitle" :visible.sync="jieAccountDialog">
-        <div style="height: 550px; overflow: auto">
+        <div style="height: 400px; overflow: auto">
           <el-form>
             <!-- <el-form-item label="加收房费:">
               <el-radio>免加收</el-radio>
@@ -899,7 +904,7 @@
               <el-switch active-text="是" inactive-text="否"  v-model="switchValue"></el-switch>
             </el-form-item> -->
             <el-form-item label="备注:">
-              <el-input size="mini" v-model="previewEnterBill.remark" type="textarea" :rows="4" style="width: 85%"></el-input>
+              <el-input size="mini" v-model="previewEnterBill.remark" resize="none" type="textarea" :rows="5" style="width: 85%"></el-input>
             </el-form-item>
           </el-form>
         </div>
@@ -910,7 +915,6 @@
           <el-button type="primary" v-if="moneydesc.balance > 0" @click="jie_addChargeDetail">结账(退款)</el-button> -->
           <el-button type="primary" @click="jie_addChargeDetail">结账</el-button>
           <!-- <el-button type="primary" v-if="(previewEnterBill.payMode != 1 && previewEnterBill.payMode != 38) &&moneydesc.balance > 0" @click="jie_addChargeDetail">结账(退款)</el-button>
-          <el-button type="primary" v-if="(previewEnterBill.payMode == 1 || previewEnterBill.payMode == 38) && moneydesc.balance > 0" @click="refundByWxWay">退款</el-button> -->
           <!-- <el-button v-else type="primary" @click="handlePayCharge()">付款</el-button> -->
         </div>
       </el-dialog>
@@ -1762,7 +1766,16 @@ export default {
       //   return data;
       // };
         return {
+          roomNoList: [],
+          cloneMasterGuest: [],//克隆的深拷贝的入住人数组
+          cloneMainId: null,
+          cloneRightData: [],//联房右边的数组(旧数组)
+          orderTitle: '',
+          refundFlag: false,
+          face_set: '',
+          pictureComponentDialog: false,//子组件==>上传照片打开
           policeComponentDialog: false,//子组件==>公安dialog打开
+          pictureParam: {},//上传照片的功能
           policeParam: {},//父组件的公安对象，下面对象的拷贝
           policeInfoParam:{},//上传公安的对象?
           /**证件导入的对象同住人 start*/
@@ -1898,7 +1911,6 @@ export default {
           consume_sum: 0,
           calculateDialog: false,
           checkList: [],
-          pay_checked: false,
           refund_checked: false,
           consume_checked: false,
           img_wz: true,
@@ -2012,11 +2024,6 @@ export default {
           search2:"",
           transferData_left:[],
           transferData_right:[],
-          // //可以在回调函数中进行提交操作以及数据操作。
-          // callback:function () {
-          //     console.log(this.transferData_left)
-          //     console.log(this.transferData_right)
-          // },
           countConsume: 0,
           countPay: 0,
           endPayListParam: {},
@@ -2379,6 +2386,7 @@ export default {
        */
       parentInfoParam(){
         this.span_input_flag = false//初始化
+        this.endPayListParam.room_list = []
         console.log('parentInfoParam=====',this.parentInfoParam)
         if(this.parentInfoParam || this.parentInfoParam.openChildDialog ){
           // this.getRoomType()
@@ -2402,6 +2410,7 @@ export default {
           try {
             this.tabValue = this.parentInfoParam.room_number //tab房间号
             this.preBillLinkParam = _.cloneDeep(this.parentInfoParam)
+            this.orderTitle = `入住单[${this.preBillLinkParam.order_no}]`
             console.log(this.preBillLinkParam.master_guest,'this.preBillLinkParam')
             let guestValue = {
               room_number: this.preBillLinkParam.room_number,
@@ -2425,7 +2434,7 @@ export default {
             this.getEndpayInfoListByAccount() //查看主账
           }, 200);
           // this.getRoomInfoOther()//查询是否在查房，避免再次新建查房任务 去掉了
-          this.getMarketSrc('src')
+          this.getMarketSrc('src')//可能要改
           this.getMarketSrc('market')
           // this.getRateCode_price(this.preBillLinkParam)  //以后必须要的获取最新房价码
           this.getRateCode_price_self()
@@ -2450,18 +2459,40 @@ export default {
       }
     },
     computed:{
-      // sumMoney(){
-			// 	return this.preBillParam.consumeInfoList.map(
-			// 		item=>item.number*item.price).reduce(
-			// 		(acc, cur) => (parseFloat(cur) + acc), 0)
-      //   },
-      sumBreakfastMoney(){
-        return this.preBillParam.breakfastInfoList.map(
-					item=>item.number*item.price).reduce(
-					(acc, cur) => (parseFloat(cur) + acc), 0)
-        },
     },
     methods: {
+      /**
+       * 已经离店的就不能更改房价了
+       */
+      changeFlag(){
+        // span_input_flag = true
+        let todaty = moment().format('YYYY-MM-DD HH:mm:ss');
+        if(this.preBillLinkParam.leave_time < todaty){
+          this.span_input_flag = false
+          this.$message.warning('超过入住日期了，不能更改房价了!')
+        }else{
+          this.span_input_flag = true
+        }
+      },
+      /**
+       * @desc 更新房价
+      */
+      update_price(){
+        //current_rate_price
+        let that = this
+        let url = that.api.api_newBill_9204 + '/v2/' + `checkin/update_price/`
+        // let url = `http://192.168.2.165:9005/v2/checkin/update_price/`
+        let scopeParam = {
+          order_no: that.preBillLinkParam.order_no,
+          price_date: moment().format('YYYY-MM-DD'),
+          room_price: that.current_rate_price
+        }
+        that.$axios.post(url,scopeParam).then(res=>{
+
+        }).catch(error=>{
+          console.log(error)
+        })
+      },
       /**暂时不用 */
       handlePrint(){
         // document.querySelector("#print_img").src = this.printParam.logo;
@@ -2494,31 +2525,149 @@ export default {
           console.log('error')
         })
       },
+      /**
+       * @desc  同住人上传照片 父传子 但是没传
+      */
+      handlePicture(item,index){
+        this.pictureComponentDialog = true
+        // this.pictureParam.check_guest = [].concat(this.preBillParam.check_guest) //赋值入住人数组
+        // console.log('this.pictureParam.check_guest==1',this.pictureParam.check_guest)
+        // console.log('this.pictureParam..',this.pictureParam)
+        // localStorage.setItem('pictureParam_guest',JSON.stringify(this.pictureParam))
+        localStorage.setItem('pictureParam_guest',JSON.stringify(item))
+        localStorage.setItem('pictureParam_index',index)
+        console.log('1111', JSON.parse(localStorage.getItem('pictureParam_guest')))
+        let param = JSON.parse(localStorage.getItem('userInfo'))
+        console.log('param-param',param)
+        this.getFaceSet(param)//上传照片需要
+      },
+       /**
+       *@desc 获取酒店的face_set
+       */
+      getFaceSet(param){
+        let that = this
+        that.$axios({
+          url: 'http://sms.crowncrystalhotel.com/v1/authentication/ht/rf/query_hotel_face_set/',
+          method: "post",
+          data:{
+            group_id: param.hotel_group_id,
+            hotel_id: param.hotel_id
+          },
+        }).then(res=>{
+            //如果扫码成功
+            if (res.data.message === "success"){
+              this.face_set = res.data.data.face_set
+              localStorage.setItem('face_set',this.face_set)
+              console.log('....',res.data)
+            }
+            else{
+            }
+          })
+        .catch(error=>{
+          console.log(error);
+        });
+      },
       //子组件传过来的值，以便于更新入住人this.preBillParam.reserve_guest的证件地址和拍照地址
       getPrebillParam(msg){
         console.log('msg传过来得信息',msg)
-        this.preBillParam.master_guest = [].concat(msg.reserve_guest) //更新了入住人的信息==>主要是为了更新入住人的照片和证件照信息
+        this.preBillLinkParam.master_guest = [].concat(msg.reserve_guest) //更新了入住人的信息==>主要是为了更新入住人的照片和证件照信息
+      },
+      getPictureParam(param){
+        console.log('接收从子组件传来的入住人对应的入住照片!',param)
+        this.preBillLinkParam.master_guest.forEach((item,index)=>{
+          if(index == param.index){
+            item.pic_now =  param.imageUrl
+            item.face_id = param.face_id
+          }
+        })
+      },
+      /**
+       * 添加入住人(这里就是同住人)
+       */
+      confirmAddPeople(){
+        let that = this
+        // let url =
+        this.master_guest_value = this.master_guest_value.filter(item=>item.id_no != '')//需要过滤一下
+        console.log('部分',this.master_guest_value)
+        console.log('全部',this.preBillLinkParam.master_guest)
+        if(that.master_guest_value){
+          if(!this.validateSamePeople()){
+            return false
+          }
+          // let url= that.api.api_bill_9202 + '/v1/' + `checkin/add_master_guest_list/`
+          let url= that.api.api_newBill_9204 + '/v2/' + `checkin/add_master_guest/`
+          // let url= `http://192.168.2.224:9005/v1/checkin/add_master_guest_list/`
+          that.$axios.post(url, that.master_guest_value).then(res=>{
+            // that.enterPersonVisible=false;
+            if(res.data.message === 'success'){
+              that.enterPersonVisible=false;
+              that.$message.success('添加成功!')
+            }
+            }).catch(error=>{
+          })
+        }else{
+          that.$message.success('请添加入住人!')
+        }
+      },
+      /**
+       * @desc 增加同住人参数判断
+       */
+      validateSamePeople(){
+        for(var item of this.master_guest_value){
+           if(!item.id_no){
+              this.$message.warning("证件号是必填项!")
+              return false
+            }
+            if(!item.name){
+              this.$message.warning("姓名是必填项!")
+              return false
+            }
+            if(!item.room_number){
+              this.$message.warning("房间号是必填项!")
+              return false
+            }
+            if(!item.id_code){
+               this.$message.warning("证件类型是必填项!")
+              return false
+            }
+            item.pic_now = 'https://ispider-oss.oss-cn-hangzhou.aliyuncs.com/live/4577c1b6.png'
+            // if(!item.pic_now){
+            //   // this.$message.warning(item.name + '没有上传照片,' + '请上传照片!')
+            //   this.$message.warning(item.name + '没有上传照片或者没有录入正确人脸!,' + '请重新上传照片!')
+            //   return false
+            // }
+            // if(!item.face_id){
+            //   this.$message.warning(item.name + '上传照片不对,' + '请重新上传照片!')//没有获取sxm的token
+            //   return false
+            // }
+        }
       },
       /**
        * @desc 新版上传公安
        */
       handleNewPolice(item,index){
+        let index_2 = this.cloneMasterGuest.findIndex(param=>param.id_no == item.id_no)
+        //原来的数组，就不能进行上传公安操作，默认入住的时候进行判断了已经上传公安了<=========需要这样判断吗
+        if(index_2 > -1){
+          this.$message.warning('原有入住人禁止再次上传公安!')
+          return false
+        }
         //开始分情况处理1.有预定且有入住人的信息(包括多条的时候)2.无预定，直接刷身份证的时候
         console.log('....item',item)
         this.handlePoliceParam(item,index)
-        this.policeParam =  Object.assign({},this.policeInfoParam) //刷卡产生的对象赋值
-        console.log('this.policeParam middle',this.policeParam)
+        this.policeParam =  Object.assign({},this.policeInfoParam) //刷卡产生的对象赋值==>手动输入的值
+        console.log('传过来的手动输入的值',this.policeParam)
         // this.getEnter_RommNumber()//获取房间号下拉===>先废弃
-        this.policeParam.card_imgUrl = this.card_imgUrl //公安照片
-        // this.policeParam.liveoptions_Value = this.liveoptions_Value//入住房间
+        this.policeParam.card_imgUrl = this.card_imgUrl //公安照片===>和上传照片所得到的不同
         this.policeParam.reserve_guest = item //赋值入住人数组 ====>这个master_guest 改为 reserve_guest
         this.policeParam.cardIndex = index
+        this.policeParam.enterCardnumber = this.cloneMasterGuest[0].id_no //暂时这样，，默认为标记了不是同住人的入住人
         this.policeComponentDialog = true
       },
       //开始分情况处理1.有入住人的信息(包括多条的时候)
       //2.无入住人，直接刷身份证的时候
       handlePoliceParam(item){
-        this.policeInfoParam.liveStatus = 1
+        this.policeInfoParam.liveStatus = 1 //此时这里是同住人 因此需要为1
         // this.policeInfoParam
         this.policeInfoParam.room_no = item.room_number
         this.policeInfoParam.nation = item.nation
@@ -2531,6 +2680,17 @@ export default {
         // this.policeInfoParam.time = item.arr_time + '至' + item.leave_time
         this.policeInfoParam.time = moment(this.preBillLinkParam.arr_time).format('YYYY-MM-DD HH:mm:ss') + '至'+ moment(this.preBillLinkParam.leave_time).format('YYYY-MM-DD HH:mm:ss')
         this.policeInfoParam.cardType = item.id_code === '01' ? '身份证' : ''
+      },
+      /**
+       * @desc 添加同住人=>禁止
+       * 现有的进行判断
+       */
+      sameDisabled(item){
+        if(this.cloneMasterGuest.findIndex(itemm=>itemm.id_no == item.id_no) != -1){
+          return true
+        }else{
+          return false
+        }
       },
       //证件导入功能 自动填充入住人信息
       cardImport(){
@@ -2556,7 +2716,7 @@ export default {
             that.cardInfoParam.nation = res.data.Data.Nation
             that.validateId_no(that.cardInfoParam)//验证身份证方法
             that.cardInfoDialog = true
-            that.takePhoto(that.police_img_src)
+            that.takePhoto(that.police_img_src)//此时去掉====>获取身份证照片地址//这里貌似你并没有什么用===>标记一下有用
           }else{
             that.cardInfoDialog = false //读卡器失败就不打开dialog
             that.$message.warning('读卡失败!请重新刷身份证!')
@@ -2582,6 +2742,7 @@ export default {
         //当数组长度大于1的时候，要进行2步，自动加行自动填充数据
         }else if(this.preBillLinkParam.master_guest.length>=1){
           let enterValue = {
+            room_number: this.preBillLinkParam.room_number,//房间号
             birthday: this.cardInfoParam.birthday,
             nation: this.cardInfoParam.nation,
             room_floor: 0,
@@ -2593,7 +2754,6 @@ export default {
             arr_time: this.preBillLinkParam.arr_time,//预抵时间
             leave_time: this.preBillLinkParam.leave_time,//离开时间
             liveCount: 0,//可选数
-            room_number: '',//房间号
             telephone: '',//手机号
             last_name: null,
             first_name: null,
@@ -2641,11 +2801,12 @@ export default {
               this.preBillLinkParam.master_guest = this.preBillLinkParam.master_guest.filter(item=>item.id_no != '') //过滤掉身份证号为空的从而删除入住人一行数据
             }
           }
-            this.preBillLinkParam.master_guest.push(enterValue)
-            this.cardInfoDialog = false
-            console.log('需要判断preBillLinkParam.master_guest',this.preBillLinkParam.master_guest)
-            this.showDeleteButton_2 = true
-            // this.takePhoto()
+          this.master_guest_value.push(enterValue)
+          this.preBillLinkParam.master_guest.push(enterValue)
+          this.cardInfoDialog = false
+          console.log('需要判断preBillLinkParam.master_guest',this.preBillLinkParam.master_guest)
+          this.showDeleteButton_2 = true
+          // this.takePhoto() //这里需要去掉吗
           // if(!this.validataRepeatCard()){
           //   return false
           // }else{
@@ -2744,7 +2905,7 @@ export default {
                 if(res.data.url){
                   that.imageUrl = res.data.complete
                   that.$message.success('上传图片成功!')
-                  for(var item of that.preBillParam.master_guest){
+                  for(var item of that.preBillLinkParam.master_guest){
                      if(!item.pic_now && !item.pic_photo){
                           item.pic_now = that.imageUrl  //拍摄照片传入
                           item.pic_photo = that.card_imgUrl //该入住人得证件照
@@ -2969,7 +3130,6 @@ export default {
        */
       handleChangeRoom(row){
         console.log('row',row)
-        this.getLiveRoom(row.room_type_name)
         this.roomParam.isFee = '2' //切换===>重置
         this.changeRoomVisible = true
         this.isDiscount  = false //切换===>重置
@@ -2982,12 +3142,6 @@ export default {
         this.rowParam = row
         // this.roomParam.oldPrice = row.
       },
-        /**
-         * 更新接口数据
-        */
-        handleUpdate(){
-          this.updateVisible = true
-        },
         /**
          *@current_rate_price 从多个数据里获取当日价  
          */
@@ -3035,7 +3189,6 @@ export default {
             console.log('param检测',param.fix_rate)
             console.log('temprateValue',temprateValue)
             console.log('111',temprateValue[key2])
-            console.log('preBillParam.master_base检测',this.preBillParam.master_base)
             }).catch(error=>{
           })
         },
@@ -3343,21 +3496,15 @@ export default {
       },
       //开始切换=====>联房，主房===>得到相应的所有信息
       getInfoByImportant(item,index){
-        // item[0] === '8520' ? item[4] = '2' : item[4] = '3'
-        // if(item[0] === '8502'){
-        //   item[4] = '1'
-        // }
         this.pagination.pageNumber = 1,//分页 ==>数据刷新
         this.pagination.pageSize = 5
-        clearInterval(this.timer_room)
+        // clearInterval(this.timer_room)查房 暂时没啥用
         console.log('开始查询联房===>主房',item)
         this.isActiveColor = index
-        console.log('this.isActiveColor',this.isActiveColor)
         console.log('that.preBillLinkParam==原始',this.preBillLinkParam)
-        console.log('activeName',this.activeName)
-        this.getEnterInfoByRoom(item[1])//这个变为1不是0，从单号开始查
-        this.getRoomInfoOther(item)//查房
-        this.getEndpayInfoListByAccount(item[6])//查询金额防止缓存的影响
+        this.getEnterInfoByRoom(item.order_no)//这个变为1不是0，从单号开始查
+        // this.getRoomInfoOther(item)//查房 暂时没啥用
+        this.getEndpayInfoListByAccount(item.account_id)//查询金额防止缓存的影响
       },
       //联房列表打开==>详情
       getEnterInfoByRoom(param){
@@ -3474,66 +3621,6 @@ export default {
           }
         }
       },
-      //1.先进行支付宝退款2.账上也需要调一层接口进行账方面的退款====>
-      refundByAliWay(param){
-        console.log('param支付宝',param)
-        let scopeParam = {
-          out_trade_no: param.related_pay_id.original_pay_id,//商家唯一定单号，与transaction_id二选一
-          // total_fee: param.related_pay_id.pay_amount,
-          refund_amount: this.refundMoneyValue,   // 	需要退款的金额，该金额不能大于订单金额,单位为元，支持两位小数
-          trade_no: this.order_form,//支付宝交易号，和商户订单号不能同时为空
-          out_request_no: this.refundMoneyValue === this.maxRefundMoney ? null : util.guid(),//	标识一次退款请求，同一笔交易多次退款需要保证唯一，如需部分退款，则此参数必传。
-        }
-        let that = this
-        let url= that.api.api_pay_8094+ '/v1/' + `alipay/trade_refund/`
-        // let url= 'http://192.168.2.224:9006'+ '/v1/' + `alipay/trade_refund/`
-        that.$axios.post(url,scopeParam).then(res=>{
-          console.log('支付宝退款=======>',res.data)
-          if(res.data.data.alipay_trade_refund_response.code === '10000'){
-            that.refund_pointByAccont(param)//开始账务上的退款
-          }else if(res.data.data.alipay_trade_refund_response.code === '40004'){
-            this.$message.warning('交易已经关闭！')
-          }else if(res.data.data.alipay_trade_refund_response.fund_change === 'N'){
-            this.$message.warning('交易失败')
-          }
-          else{
-            this.$message.warning('支付宝退款接口报错!')
-          }
-          // that.queryData()//根据账户查询消费明细
-          // that.$message.success('操作成功!')
-          // that.jieAccountDialog = false
-        }).catch(error=>{
-        })
-      },
-      //1.先进行微信退款2.账上也需要调一层接口进行账方面的退款====>
-      refundByWxWay(param){
-        console.log('param',param)
-        let scopeParam = {
-          out_trade_no: param.related_pay_id.original_pay_id,//商家唯一定单号，与transaction_id二选一
-          // transaction_id: '',//微信自己的付款流水号。与out_trade_no二选一
-          total_fee: param.related_pay_id.pay_amount*100,
-          refund_fee: this.refundMoneyValue*100,   // 退款总金额. 单位为分
-          out_refund_no: this.order_form,//商户内部退款单号，商户内唯一. 以此号入公司账
-          refund_desc: this.previewEnterBill.payReasonValue,//退款原因
-          refund_fee_type: null,//币种, 缺省是CNY
-        }
-        let that = this
-        let url= that.api.api_9530_9503+ '/v1/' + `payment/weixin/refund`
-        that.$axios.post(url,scopeParam).then(res=>{
-          if(res.data.message === 'success'){
-            console.log('成功')
-            that.refund_pointByAccont(param)//开始账务上的退款
-          }else if(res.data.message === 'fail'){
-            this.$message.warning(res.data.data)
-          }else{
-            this.$message.warning('微信退款接口报错!')
-          }
-          // that.queryData()//根据账户查询消费明细
-          // that.$message.success('操作成功!')
-          // that.jieAccountDialog = false
-        }).catch(error=>{
-        })
-      },
       //封装==>针对账务上的现金与非现金的退款====>
       refund_pointByAccont(param){
         let that = this
@@ -3554,9 +3641,12 @@ export default {
         let url= that.api.api_newPrice_9107+ '/v1/' + `accounts/refund/`
         that.$axios.post(url,scopeParam).then(res=>{
           if(res.data.message==='success'){
-            that.queryData()//根据账户查询消费明细
-            that.$message.success('操作成功!')
-            that.refunAccountDialog = false
+            let refund_id = res.data.data.data.id
+            this.refundFlag = true
+            this.check_refund(refund_id)
+            // that.queryData()//根据账户查询消费明细
+            // that.$message.success('操作成功!')
+            // that.refunAccountDialog = false
           }else{
             that.$message.warning(res.data.message)
           }
@@ -3611,22 +3701,33 @@ export default {
         //   members_param.push(item.room_number.split('|')[2])
         // }
         let that = this
-        let url= that.api.api_9022_9519+ '/v1/' + `finance/combine_account_operation/combine_accounts`
+        let url = that.api.api_newBill_9204 + '/v2/' + `checkin/combine_accounts/`
+        // let url = `http://192.168.2.165:9005/v2/checkin/combine_accounts/`
+        let other_account
+        if(this.cloneMainId){
+          if(members_param[0] != this.cloneMainId){
+            other_account = this.cloneMainId
+          }else{
+            other_account = null
+          }
+        }
         let scopeParam = {
-          cashier_id: 9,
           main_account: main_account_param,
-          members: JSON.stringify(members_param),
-          // code_income_types: [] //入账类型代码的数组,为空表示合并账户所有类型的消费
+          secondary_account_list: members_param,//从账房
+          other_account: other_account,//存放===>当原来的主账房被去掉之后的主账id
+          // remark: [] //备注
         }
         console.log('scopeparam',scopeParam)
+        console.log('....有主账的原主账id',this.cloneMainId)
         that.$axios.post(url,scopeParam).then(res=>{
-          if(res.data.message == "success"){
+          console.log('...',res.data.data)
+          if(res.data.data.message == "success"){
             this.$message.success('操作成功!')
             that.linkRoomDialog = false
             that.getEnterInfoByRoom(that.preBillLinkParam.order_no)//查询，重置数据//===>以后要另改(可能)
             that.flushByLink()//刷新房态图
           }else{
-            this.$message.warning(res.data.message)
+            this.$message.warning(res.data.data.message)
           }
         }).catch(error=>{
 
@@ -3660,7 +3761,7 @@ export default {
         let temp = value
         console.log('temp',temp)
         this.rightLinkList = this.linkData.filter(item=>temp.indexOf(item.account_id) != -1)
-        console.log('this.rightLinkList',this.rightLinkList)
+        console.log('this.rightLinkList=====打开dialog',this.rightLinkList)
         console.log('change===========================结束')
       },
       //联房列表获取数据==>构造数据
@@ -3712,7 +3813,10 @@ export default {
           that.preBillLinkParam.combine_room_list.forEach(item=>{
             that.linkValue.push(item[6])
           })
-          console.log('this.linkValue===这里要另加一个数组',this.linkValue)
+          let cloneMain = this.linkData.filter(item=>item.id == item.master_id)
+          this.cloneMainId = cloneMain[0].account_id
+          this.cloneRightData = _.cloneDeep(this.linkValue)
+          console.log('cloneMainId',cloneMain,this.cloneMainId)
           // let tempArray = arrayGet.map(item=>item.room_number+ '|' + item.name+ '|' + item.account_id)
           // // this.transferData_left
           // for(var item of tempArray){
@@ -3785,110 +3889,6 @@ export default {
         this.enterBill.summary = ''
         this.enterBill.accountData = ''
       },
-      //处理附加信息
-      handleExtraParam(){
-        if(this.extraInformation.length>0){
-          console.log('jinru11')
-          let array = []
-          for(var item of this.extraInformation){
-            let key = item.field_name
-            let value = item.field_name_value === undefined ? '' : item.field_name_value
-            let obj = {
-              key_key: key,
-              keyvalue: value
-            }
-            array.push(obj)
-          }
-          console.log(array,'......11.......')
-          let temp ={}
-          for(var item in array){
-            if(array[item].key_key === undefined){
-              break
-            }
-            let key = array[item].key_key
-            temp[key] =  array[item].keyvalue
-          }
-          this.extraParam.push(temp)
-          console.log(this.extraParam,'.....11........')
-        }else{
-          this.extraParam = []
-        }
-      },
-      /**封装获取商品订单号*/
-      article_number(){
-        // console.log('.xinxi..',this.extraInformation)
-        // this.handleExtraParam()
-        this.previewEnterBill.payReasonValue = 1 //付款理由====此时默认
-        if(!this.validatePayData()){
-          return false
-        }
-        let that = this;
-        that.timer=0;
-        //判断付款金额是否小于等于0
-        if(that.previewEnterBill.money<=0){
-          util.hintInfo(this,'warning', '付款金额不能小于等于0！');
-        }else {
-          that.$axios({
-            url: that.api.api_9022_9519+ '/v1/' + 'finance/extend_pay/get_order_number',
-            method: "post",
-            data:{
-              amount:that.previewEnterBill.money,
-            },
-          }).then(res=>{
-              if (res.data.message === "success"){
-                console.log(res.data._id);
-                that.order_form = res.data._id;
-                that.handlePayCharge()//主帐付钱
-              }
-            })
-            .catch(error=>{
-              console.log(error);
-            });
-          }
-      },
-      /**首先请求支付宝二维码接口*/
-      alipay_dxg(){
-          let that = this;
-          let code_pay_for_id="";
-          // if(that.collect_pay === "out"){
-          //   code_pay_for_id=that.pay_reason_one
-          // }else {
-          //   code_pay_for_id=that.pay_reason
-          // };
-          that.$axios({
-            url: that.api.api_pay_8094+"/v1/alipay/trade_precreate/",
-            method: "post",
-            data:{
-              out_trade_no:that.order_form,
-              subject: that.previewEnterBill.payReasonValue,
-              total_amount:parseFloat(that.previewEnterBill.money).toFixed(2),
-            },
-          })
-            .then(res=>{
-              if (res.data.message="success"){
-                console.log(res.data.data.alipay_trade_precreate_response.qr_code);
-                that.img_wz=false;
-                that.qr_w = res.data.data.alipay_trade_precreate_response.qr_code;
-                that.$nextTick (function () {
-                  that.qrcode();
-                });
-                //如果生成了二维码，就要调用查询付款成功
-                if(that.qr_w){
-                  console.log("成功");
-                 that.timer_qr()
-                }
-                that.dialog_img=true;
-                that.$refs.qrcode.innerHTML="";
-              }
-              else{
-                that.error_message(res.data.message)
-              }
-
-            })
-            .catch(error=>{
-              console.log(error);
-            });
-        },
         /**解析后端给的数据生成二维码*/
         qrcode () {
           let that= this;
@@ -3976,7 +3976,7 @@ export default {
           params_obj.incoming_account_code = that.previewEnterBill.enterAccountCode;//入账代码
         }
         console.log('params_obj',params_obj)
-        let url = that.api.api_newPrice_9107 + '/v1/' + 'accounts/new_pay/'
+        let url = that.api.api_newPrice_9107 + '/v1/' + 'accounts/pay/'
         // let url= `http://192.168.5.96:9519/v1/finance/pay_detail/pay_by_charges`
         // let scopeParam = {
         //   pay_amount: -Number(that.previewEnterBill.money),//传负值
@@ -3997,7 +3997,7 @@ export default {
           // if(this.previewEnterBill.money> )
         that.$axios.post(url,params_obj).then(res=>{
           console.log('aa',res.data.message)
-          if(res.data.data.info && res.data.data.info!==false){
+          if(res.data.data.info && res.data.data.info!=false){
               util.hintInfo(this,"warning", res.data.data.info)
           }else{
             that.get_refund_obj = res.data.data.data
@@ -4247,15 +4247,6 @@ export default {
           cashValue: '',
         }
       },
-      // checkSelectable(row){
-      //   //四种情况判断勾选状态。不能进行账务上操作，避免分开慢慢判断(退款、付款、已转账的，转账产生的明细都不能进行转账!)
-      //   if(row.is_deleted == 0 && row.pay_status == 0){
-      //     return true //可勾选
-      //   }else{
-      //     return false //不可勾选
-      //   }
-      //   // return row.related_transfer_id != undefined
-      // },
       //账务明细====>转账操作aR转账
       confirmArTransfer(){
         let that = this
@@ -4655,53 +4646,12 @@ export default {
           }
         }
       },
-      //开始调账
-      setTiaoAccount(){
-        if(this.tiaoMoney == '' || this.tiaoReasonValue == ''){
-          this.$message.warning('数据不能为空!')
-        }else{
-          this.chongOrTiaoAccount(null,'调账')
-        }
-      },
-      //冲调账接口
-      chongOrTiaoAccount(row,param){
-        console.log('qqq',row,param)
-        let that = this
-        // let url= `http://192.168.2.224:9005/v1/checkin/get_combine_list/`
-        let url= that.api.api_9022_9519+ '/v1/' + `finance/arrange_account_operation/add`
-        let scopeParam={
-          account_id: that.preBillLinkParam.account_id,
-          amount: row != null ? row.charge_amount + '' : that.tiaoMoney,
-          arrange_flag: param == '冲账' ? 'y': 'x',//	冲调帐操作类型 x:调账 y:冲账
-          reason_id: that.tiaoReasonValue,//	及冲调账原因，
-          do_flag: 1,//	返回完成标志（冲调账结果标志 0：支付未完成， 1：成功，2：撤销，3：
-          cashier: null,
-          biz_date: moment(new Date()).format('YYYY-MM-DD'),
-          gen_time: moment(new Date()).format('YYYY-MM-DD HH:mm:ss'),
-          return_id: 1, //	返回的是id还是实例本身, 1返回id,0返回实例.
-          charge_id: row != null ? row.id : '',//	int消费明细id,冲账时必须此参数
-        }
-        that.$axios.post(url,scopeParam).then(res=>{
-          console.log('res',res.data.message)
-          if(res.data.message === 'success'){
-              that.$message.success('冲调账成功!')
-              that.tiaoAccountDialog = false
-              that.getEndpayInfoListByAccount()
-            }else{
-              that.$message.warning('后台接口错误!')
-            }
-          })
-      },
       getTransferAccountRow(row){
         // this.transferMoneyValue = ''
         this.transferAccountId = ''
         this.transferTabel = []
         console.log('rowww',row)
         this.transferTabel.push(row)
-      },
-      callback(){
-        console.log(this.transferData_left,'callback1')
-        console.log(this.transferData_right,'callback2')
       },
       //获取ar账户列表
       getArOption(){
@@ -4875,23 +4825,14 @@ export default {
               this.preBillLinkParam.is_check_room = item.is_check_room //赋值 是否查房
             }
           }
-          // this.getRoomType()
-          // console.log('roomTypeList后续判断',this.roomTypeList)
-          // console.log('111',this.preBillLinkParam)
-          // console.log('preBillLinkParam.combine_room_list',this.preBillLinkParam.combine_room_list)
-          // console.log('this.endPayListParam.balance',this.endPayListParam.balance)
-          //当未结账的时候==>即帐未平的时候
-          // if(this.endPayListParam.balance != 0){
-          //   this.handleJieAccount() //先结账
-          // }else{
-            //判断是否需要查房 0为不查房否则需要查房
-            if(this.preBillLinkParam.is_check_room === 0){
-              console.log('00')
-              this.pingAccount()
-            }else{
-              this.personDialog=true
-              this.getEmployeeInfo()//获取人员信息
-            }
+          //判断是否需要查房 0为不查房否则需要查房
+          if(this.preBillLinkParam.is_check_room === 0){
+            console.log('00')
+            this.pingAccount()
+          }else{
+            this.personDialog=true
+            this.getEmployeeInfo()//获取人员信息
+          }
           // }
         }, 500);
       },
@@ -4988,12 +4929,6 @@ export default {
           }
           }).catch(error=>{
         })
-        // setInterval(() => {
-
-        // }, 1000);
-        // setTimeout(() => {
-        //   this.refundHouse = true
-        // }, 1000);
       },
       //查房,避免再次新建查房任务===>检测机制
       getRoomInfoOther(param){
@@ -5208,31 +5143,6 @@ export default {
         //   this.$message.warning('请选择或者输入必要数据!')
         // }
       },
-      //结账==>付款==>废弃
-      jie_payCharge(){
-         let that = this
-        let url= that.api.api_9022_9519+ '/v1/' + `finance/pay_detail/pay_money_pms`
-        // let url= `http://192.168.5.96:9519/v1/finance/pay_detail/pay_by_charges`
-        let scopeParam = {
-          account_id: this.preBillLinkParam.account_id, //主账id
-          pay_amount: this.jieParam.jie_payValue,
-          code_pay_for_id: this.jieParam.jie_payReasonValue,
-          code_income_type_id: this.jieParam.jie_incomeValue,   //入账类型代码id
-          gen_time: moment(new Date()).format('YYYY-MM-DD HH:mm:ss'),
-          cashier_id:	9,
-          pay_mode_id: this.jieParam.jie_payModeValue,
-        }
-        that.$axios.post(url,scopeParam).then(res=>{
-          console.log('aa',res.data.message)
-          if(res.data.message != 'success'){
-            this.$message.warning('调用后台接口失败')
-          }else{
-            this.$message.success('操作成功!')
-            that.queryData()//根据账户查询消费明细
-          }
-          }).catch(error=>{
-        })
-      },
       //加收房费(半天全天等)
       confirmFee(param){
         // this.getPayReason()
@@ -5306,29 +5216,6 @@ export default {
         // this.previewEnterBill.money = 0.01
       },
       /**
-       * 添加入住人
-       */
-      confirmAddPeople(){
-        let that = this
-        // let url =
-        console.log('preBillLinkParam.master_guest==部分还是全部',this.master_guest_value)
-        if(that.master_guest_value){
-          // let url= that.api.api_bill_9202 + '/v1/' + `checkin/add_master_guest_list/`
-          let url= that.api.api_newBill_9204 + '/v2/' + `checkin/add_master_guest/`
-          // let url= `http://192.168.2.224:9005/v1/checkin/add_master_guest_list/`
-          that.$axios.post(url, that.master_guest_value).then(res=>{
-            // that.enterPersonVisible=false;
-            if(res.data.message === 'success'){
-              that.enterPersonVisible=false;
-              that.$message.success('添加成功!')
-            }
-            }).catch(error=>{
-          })
-        }else{
-          that.$message.success('请添加入住人!')
-        }
-      },
-      /**
        * 计算
        */
       /**
@@ -5370,6 +5257,7 @@ export default {
         })
       },
       handleEnterPeople(){
+        this.cloneMasterGuest = _.cloneDeep(this.preBillLinkParam.master_guest)
         console.log('入住。。',this.preBillLinkParam.master_guest)
         this.disableLength = this.preBillLinkParam.master_guest.length
         console.log('入住..。。',this.disableLength)
@@ -5382,81 +5270,6 @@ export default {
         this.after_leave_time_1 = new Date(this.preBillLinkParam.arr_time)
         this.after_leave_time_2 = new Date(this.preBillLinkParam.leave_time)
       },
-      /**
-       * 根据账务id得到账务明细 ===>粗略废弃
-       */
-      getpayListByAccount(){
-        let array = []
-        array.push(this.preBillLinkParam.account_id)
-          let that = this
-          let url= that.api.api_9022_9519+ '/v1/' + `finance/charge_detail/list_by_account`
-          let param = {
-            account_ids: array
-          }
-          param.account_ids = JSON.stringify(param.account_ids)
-          let scopeParam = param
-          that.$axios.post(url,scopeParam).then(res=>{
-            this.accoutInfoList = res.data.data.list
-            let charge_count = 0
-            // let pay_count = 0
-            for(var item of this.accoutInfoList){
-              this.charge_count = item.charge_amount + charge_count
-              // this.pay_count = item.pay_count + pay_count
-            }
-          }).catch(error=>{
-        })
-      },
-      /**
-       * 根据账户id查询消费及对应支付记录=>详细  /v1/finance/account/get_info/
-       */
-      // queryData(interParam){
-      //   if(interParam){
-      //     this.changePageCoreRecordData()
-      //   }
-      //   console.log('only_consume_flag',this.only_consume_flag)
-      //   console.log('charge_date',this.charge_date)
-      //   let startTime = null
-      //   let endTime = null
-      //   if(this.charge_date != null && this.charge_date != ''){
-      //     startTime =  moment(this.charge_date[0]).format('YYYY-MM-DD')
-      //     endTime = moment(this.charge_date[1]).format('YYYY-MM-DD')
-      //   }
-      //   let testInt = Number.isInteger(interParam) //判断处理传入页码 分页
-      //   // let array = []
-      //   // array.push(this.preBillLinkParam.account_id)
-      //     let array = []
-      //     array = JSON.stringify(array)
-      //     let that = this
-      //     // let url= that.api.api_9022_9519+ '/v1/' + `finance/charge_detail/get_by_account_ids `
-      //     let url= that.api.api_9022_9519+ '/v1/' + `finance/charge_detail/get_by_account_id_pms`
-      //     console.log('this.checkList进入',this.checkList)
-      //     let scopeParam = {
-      //       account_id: that.preBillLinkParam.account_id,
-      //       subjects: JSON.stringify(this.checkList), //	科目id的数组
-      //       in_or_out: '',
-      //       code_income_type_ids: null,
-      //       begin_date: startTime,//开始时间
-      //       end_date: endTime,//结束时间
-      //       page_num: testInt === true ? interParam : interParam = 1,//分页
-      //       page_size: that.page_size
-      //     }
-      //     that.$axios.post(url,scopeParam).then(res=>{
-      //       // console.log('res.data',res.data)
-      //       that.tableData = res.data.list
-      //       // console.log('that.tableData========',that.tableData)
-      //       // console.log('that.preview_enter_flag',that.preview_enter_flag)
-      //       // if(that.only_consume_flag === 1){
-      //       //   that.accountMaxInfoListCopy = _.cloneDeep(that.tableData)
-      //       // }
-      //       // this.only_consume_flag = 0
-      //       that.getEndpayInfoListByAccount()
-      //       that.total = res.data.totoal_count
-      //       that.total_consumption_value = that.tableData[0].account_id.total_consumption
-      //       that.need_pay_value = that.tableData[0].account_id.need_pay
-      //       that.setSelectRow()
-      //     }).catch(error=>{
-      //     })
-      // },
       /**
        * 只查入预收消费明细
        */
@@ -5493,6 +5306,22 @@ export default {
             that.accountMaxInfoList2 = res.data.data.list
           }).catch(error=>{
           })
+      },
+      /**
+       * @desc 更新账务提醒
+       */
+      updateAccountRemark(){
+        let that = this
+        let id =  this.preBillLinkParam.account_id
+        let url = that.api.api_newPrice_9107+ '/v1/' + `accounts/update_account_base_remark/` + id + '/'
+        let scopeParam = {
+          remark: that.endPayListParam.remark
+        }
+        that.$axios.post(url,scopeParam).then(res=>{
+          console.log('res',res)
+        }).catch(error=>{
+          this.$message.error(error)
+        })
       },
        /**
        *高级权限=>查看账户最终消费情况  /v1/finance/account/get_info/
@@ -5535,12 +5364,6 @@ export default {
             }).catch(error=>{
             })
       },
-      /**已废弃 */
-      // chooseInfo(item){
-      //   this.tabValue = item.room_number
-      //   console.log('点击',item.room_number)
-      //   this.finRoomByNumber(item) //不一定适用方法
-      // },
       selectCheckedAll: function() {
         console.log('checkboxList=====>',this.checkboxList)
         if (this.flag_checked) {//实现反选
@@ -5552,35 +5375,16 @@ export default {
             });
         }
       },
-      //清空重置对象或数组的数据
-      flushData(){
-        this.preBillParam.houseTypeInfoList = [{
-            houseTypeValue: '',//房间类型
-            roomCount: '',//房间数量
-            roomPrice: '', //总价钱
-            dynamic_roomNumber: [],
-            mayCount: '2',
-        }],
-        this.preBillParam.check_guest = [{
-            enterRoom: '',
-            name: '',
-            sex : '',
-            id_code : '',
-            id_no : '',
-            telephone : '',
-            street_add : ''
-        }]
-      },
         datedifference(sDate1, sDate2) {    //sDate1和sDate2是2006-12-18格式
-            var dateSpan,
-            tempDate,
-            iDays;
-            sDate1 = Date.parse(sDate1);
-            sDate2 = Date.parse(sDate2);
-            dateSpan = sDate2 - sDate1;
-            dateSpan = Math.abs(dateSpan);
-            iDays = Math.floor(dateSpan / (24 * 3600 * 1000));
-            return iDays
+          var dateSpan,
+          tempDate,
+          iDays;
+          sDate1 = Date.parse(sDate1);
+          sDate2 = Date.parse(sDate2);
+          dateSpan = sDate2 - sDate1;
+          dateSpan = Math.abs(dateSpan);
+          iDays = Math.floor(dateSpan / (24 * 3600 * 1000));
+          return iDays
         },
         validatePayData(){
           return(
@@ -5590,166 +5394,9 @@ export default {
             // util.validateBlank(this.previewEnterBill.payReasonValue,'付(退)款原因是必填项',this)
           )
         },
-        //验证预定数据
-        validatePreviewData(){
-            //判断选择房型为空时
-            for(var item of this.preBillParam.houseTypeInfoList){
-            if(item.houseTypeValue === ''|| item.houseTypeValue === null){
-                this.$message.warning('请选择房型!')
-                return false
-            }
-            }
-            //有入住人的时候
-            if(this.is_addlive === true){
-                for(var item of this.preBillParam.check_guest){
-                    util.validateBlank(item.telephone,'联系电话是必填项',this)&&
-                    util.validateTelNumber(item.telephone,'请输入正确手机格式',this)&&
-                    util.validateBlank(item.id_no,'身份证是必填项',this)&&
-                    util.validateCardNumber(item.id_no,'请输入正确身份证格式',this)
-                }
-            }
-        },
-        //预定=》获取早餐list
-        getBreakfastList(){
-            let that = this
-            // let url = that.UrLHeader_2 + 'room/get_roomnumber_list_tree/'
-            // let url = that.UrLHeader + 'room/get_roomnumber_list/'
-            let url = that.api.api_newPrice_9107 + '/v1/' + 'room/rate_code/get_breakfast_list/'
-            // let url = `http://47.98.113.173:9101/v1/room/rate_code/get_breakfast_list/`
-            that.$axios({
-            method : 'get',
-            url : url,
-            }).then(res=>{
-            if(res.data.message === 'success'){
-                that.breakfastAllList = res.data.data.results
-            }else{
-                // that.$message.error('获取早餐列表失败!')
-            }
-            }).catch(error=>{
-            })
-        },
         getConsumeData(msg){
-            this.preBillParam.consumeInfoList = msg
-            console.log(msg,'msg')//获取消费子组件传来的值
-        },
-        //预定单 早餐=》添加早餐项
-        addbreakfastItem(item,param){
-          if(param === '买'){
-          let breakfastInfoValue={
-              descript: item.price,//早餐描述=》类型
-              date: '按天',//周期
-              isBuy: '买',//买/赠
-              rangeTime: item.starting_days + '-' + item.closing_days,//有效期
-              number: '',
-              price: item.price,
-              count: '',
-          }
-          //暂时
-          if(this.preBillParam.breakfastInfoList.length>0){
-              return false
-          }else{
-              this.preBillParam.breakfastInfoList.push(breakfastInfoValue)
-          }
-          }else{
-          let breakfastInfoValue={
-              descript: item.price,//早餐描述=》类型
-              date: '按天',//周期
-              isBuy: '赠',//买/赠
-              rangeTime: item.starting_days + '-' + item.closing_days,//有效期
-              number: '',
-              price: item.price,
-              count: '',
-              }
-          //暂时
-          if(this.preBillParam.breakfastInfoList.length>0){
-              return false
-          }else{
-              this.preBillParam.breakfastInfoList.push(breakfastInfoValue)
-          }
-          }
-        },
-        //删除早餐项
-        deleteBreakfastInfo(row){
-          let index = _.findIndex(this.breakfastAllList,function(o) { return o.id == row.id}) //扎到索引
-          this.preBillParam.breakfastInfoList.splice(index,1)//删除指定索引
-        },
-        //处理备注数据 第一次进去传个空[]进去
-        resolveRemarkList(){
-          if(this.preBillParam.remarkList.length === 1 && this.preBillParam.remarkList[0].remarkContent === ''){
-          this.preBillParam.remarkList = []
-          console.log('this.preBillParam.remarkList',this.preBillParam.remarkList)
-          }
-        },
-        //预订单编辑详情备注
-        handleRemarkInfo(row){
-          this.remarkTitle = '编辑备注'
-          this.addAndUpdate = false //标记
-          this.remarkContent_value = row.content
-          this.remark_id = row.id
-        },
-        //联房=》删除备注
-        deleteRemarkInfo(row){
-          console.log('row',row)
-          let that = this
-          let id =  row.id
-          let url = that.api.api_9022_9519+ '/v1/' + `finance/account_tip/remove/` + id
-          that.$axios.post(url).then(res=>{
-            console.log('resssdelete',res.data)
-            if(res.data.message==='success'){
-              that.getRemarkInfo()
-            }
-          }).catch(error=>{
-          })
-        },
-        //获取预订单房型右边弹出内容
-        getHouseTypeNextValue(item,index, param){
-            item.houseTypeValue = param
-            switch (param) {
-            case '大床房':
-                this.houseType_HeadValue = '标准正价[大床房]'
-                this.houseType_priceValue_1= '￥100'
-                this.houseType_priceValue_2= '￥100'
-                break;
-            case '标准双床房':
-                this.houseType_HeadValue = '标准正价[标准双床房]'
-                this.houseType_priceValue_1= '￥100'
-                this.houseType_priceValue_2= '￥80-￥95'
-                break;
-            case '特惠双床房':
-                this.houseType_HeadValue = '标准正价[特惠双床房]'
-                this.houseType_priceValue_1= '￥100'
-                this.houseType_priceValue_2= '￥80-￥95'
-                break;
-            case '特惠大床房':
-                this.houseType_HeadValue = '标准正价[特惠大床房]'
-                this.houseType_priceValue_1= '￥100'
-                this.houseType_priceValue_2= '￥80-￥95'
-                break;
-            case '复式商务房':
-                this.houseType_HeadValue = '标准正价[复式商务房]'
-                this.houseType_priceValue_1= '￥100'
-                this.houseType_priceValue_2= '￥80-￥95'
-                break;
-            case '商务大床房':
-                this.houseType_HeadValue = '标准正价[商务大床房]'
-                this.houseType_priceValue_1= '￥169'
-                this.houseType_priceValue_2= '￥135-￥161'
-                break;
-            case '全新商务房B':
-                this.houseType_HeadValue = '标准正价[全新商务房B]'
-                this.houseType_priceValue_1= '￥169'
-                this.houseType_priceValue_2= '￥135-￥161'
-                break;
-            default:
-                break;
-            }
-        },
-        //预订单获取对应房类型
-        getHouseTypePrice(item,index){
-          // item.houseTypeValue = value
-          item.roomPrice = this.houseType_priceValue_1 //赋值给首日价
-          // this.preBillParam.houseTypeInfoList[index].houseTypeValue = value//替换
-          // console.log('this.preBillParam.houseTypeInfoList',this.preBillParam.houseTypeInfoList)
+          // this.preBillParam.consumeInfoList = msg  //不对
+          console.log(msg,'msg')//获取消费子组件传来的值
         },
         //选房号dialog=》提交得到相应房号confirm
         changeRoom(){
@@ -5823,7 +5470,15 @@ export default {
           this.showDeleteButton_2 = true
         },
        //删除选择框=>当只剩下一个的时候不能在删除
-        deleteSelect_2(index){
+        deleteSelect_2(item,index){
+          console.log('this.preBillLinkParam.master_guest',this.preBillLinkParam.master_guest)
+          console.log('删除',item)
+          let index_2 = this.cloneMasterGuest.findIndex(param=>param.id_no == item.id_no)
+          //原来的数组，就不能进行删除操作
+          if(index_2 > -1){
+            this.$message.warning('原有入住人禁止更改删除!')
+            return false
+          }
           if(this.preBillLinkParam.master_guest.length>1){
             if(this.preBillLinkParam.master_guest.length ===2){
               this.showDeleteButton_2 = false
@@ -5833,35 +5488,6 @@ export default {
             this.showDeleteButton_2 = false
             return
           }
-        },
-        //增加选择框新建入住单里
-        addSelect(){
-          let houseTypeValue = {
-            houseTypeValue: '',//房间类型
-            roomCount: '',//房间数量
-            roomPrice: '', //总价钱
-            dynamic_roomNumber: [],
-            mayCount: '2',
-          }
-          this.preBillParam.houseTypeInfoList.push(houseTypeValue)
-          console.log(this.preBillParam.houseTypeInfoList,'this.preBillParam.houseTypeInfoList')
-          this.showDeleteButton = true
-        },
-        //删除选择框=>当只剩下一个的时候不能在删除
-        deleteSelect(index){
-            if(this.preBillParam.houseTypeInfoList.length>1){
-            if(this.preBillParam.houseTypeInfoList.length ===2){
-                this.showDeleteButton = false
-            }
-            this.preBillParam.houseTypeInfoList.splice(index, 1)
-            }else{
-            this.showDeleteButton = false
-            return
-            }
-        },
-        //关闭tag
-        handleClose(item,tag) {
-            item.dynamic_roomNumber.splice(item.dynamic_roomNumber.indexOf(tag), 1);
         },
         //单=》右边全选房号dialogtabel 并控制不可选房间号
         handleselectAll(selection){
@@ -5882,10 +5508,53 @@ export default {
           //   }
           // }
         },
-        changeNo(){
-          this.switchNumberDialog = true;
-          this.getTagByRoom()
-          this.getLiveRoom(this.preBillLinkParam.room_type_name)
+        //封装查退款是否成功
+        check_refund(payment_id) {
+          console.log('payment_id',payment_id)
+          let that = this;
+          clearInterval(that.circulation)
+          let url = that.api.api_newPrice_9107 + '/v1/accounts/verify/'
+          that.$axios({
+            url: url,
+            method: "post",
+            data: {
+              id: payment_id
+            }
+          })
+            .then(res => {
+              console.log(res);
+              if (res.data.message == 'success') {
+                if(res.data.data.info == true){
+                  clearInterval(that.circulation)
+                  that.timer=0;
+                  that.$message.success('退款成功!')
+                  that.queryData()//根据账户查询消费明细
+                  that.refunAccountDialog = false
+                }else if(res.data.data.info == false){
+                  that.whether(payment_id);
+                  if (that.timer >= 60) {
+                    clearInterval(that.circulation);
+                    if (res.data.data.is_success === true) {
+                      that.queryData()//根据账户查询消费明细
+                      that.$message.success('退款成功!')
+                      that.refunAccountDialog = false
+                    } else {
+                    }
+                    return;
+                  }
+                }else{
+                  this.$message.warning(res.data.data.info)
+                }
+              }
+              else {
+                that.error_pay_flag = false
+                this.$message.warning('接口调用失败!')
+              }
+            })
+            .catch(error => {
+              // this.$message.warning('订单(付款码)输入错误或者接口请求失败!')
+              console.log(error);
+            });
         },
         //封装查支付是否成功
         check_paid(payment_id) {
@@ -5953,7 +5622,8 @@ export default {
           {
             that.timer++;
             console.log(that.timer++);
-            that.check_paid(payment_id);
+            //判断支付还是退款的循环验证
+            this.refundFlag ? this.check_refund(payment_id) : that.check_paid(payment_id);
             if (that.timer >= 60) {
               clearInterval(that.circulation);
               console.log(that.timer);
@@ -5962,29 +5632,10 @@ export default {
             }
           }, 2000);
         },
-        //封装扫描二维码后触发的定时器
-        timing(url,payment_id){
-          let that = this;
-          // that.timer=0;
-          that.timer_src=setInterval(function()   //开启循环：
-          {
-            that.timer++;
-            console.log(that.timer++);
-            that.check_paid(url,payment_id);
-            if(that.timer >=60){
-              clearInterval(that.timer_src);
-              console.log(that.timer);
-              return;
-              //判断res
-
-            }
-          },2000);
-        },
         /** 成功页面或者失败页面的确定按钮*/
         succeed_failed(){
           let that = this;
           that.dialog_succeed=false;//成功或者失败的页面
-          that.dialog_alipay = false;//扫码支付的页面
           that.dialog_img = false
           that.preview_enterBillDialog = false //入预收关闭 另加add
           that.jieAccountDialog = false
@@ -5998,60 +5649,52 @@ export default {
             util.hintInfo(this,"warning", "付钱失败")
           }
         },
-        //获取最终房间号
-        getLiveRoom(param){
+        getRoomNo(){
           let that = this
+          let start 
+          let end
+          if(this.rowParam.arr_time && this.rowParam.leave_time){
+            start = moment(this.rowParam.arr_time).format('YYYY-MM-DD')
+            end = moment(this.rowParam.leave_time).format('YYYY-MM-DD')
+          }
           let url= that.api.api_newPrice_9107 + '/v1/' + `room/room_status/can_live_room_list/`
-          console.log('房间类型',this.preBillLinkParam)
           let scopeParam = {
-            room_type: param,
-            start_time: this.preBillLinkParam.arr_time,
-            end_time: moment(this.preBillLinkParam.leave_time).format('YYYY-MM-DD 14:00:00')
+            room_type: this.roomParam.newType,
+            start_time: start,
+            end_time: end
           }
           that.$axios.post(url,scopeParam).then(res=>{
-            let array
-            array = res.data.data.data
-              //组装带标签的数组
-              for(var item of array){
-                for(var itemm of that.roomTagList){
-                  if(item.room_no == itemm.room_no){
-                    item.tagName = itemm.feature_name
-                  }
-                }
-              }
-              that.roomNo_data_list = array  //选房号tabel数组
+            that.roomNoList = res.data.data.data  //选房号tabel数组
           }).catch(error=>{
 
           })
-        },
-        //获取房间号
-        getCanLiveRoom(){
-          let that = this
-          // that.getRoomType()
-          // let url= that.api.api_newPrice_9107 + '/v1/' + `room/room_status/can_live_room_list/`
-          // console.log('房间类型',this.preBillLinkParam)
-          // let scopeParam = {
-          //   // room_type: param,
-          //   start_time: this.preBillLinkParam.arr_time,
-          //   end_time: moment(this.preBillLinkParam.leave_time).format('YYYY-MM-DD 14:00:00')
-          // }
-          // that.$axios.post(url,scopeParam).then(res=>{
-          //   let array
-          //   array = res.data.data.data
-          //     //组装带标签的数组
-          //     for(var item of array){
-          //       for(var itemm of that.roomTagList){
-          //         if(item.room_no == itemm.room_no){
-          //           item.tagName = itemm.feature_name
-          //         }
-          //       }
-          //     }
-          //     console.log('1dasdsroomTypeList',this.roomTypeList)
-          //     that.roomNo_data_list = array  //选房号tabel数组
-          // }).catch(error=>{
+      },
+        //获取最终房间号
+        // getLiveRoom(param){
+        //   let that = this
+        //   let url= that.api.api_newPrice_9107 + '/v1/' + `room/room_status/can_live_room_list/`
+        //   console.log('房间类型',this.preBillLinkParam)
+        //   let scopeParam = {
+        //     room_type: param,
+        //     start_time: this.preBillLinkParam.arr_time,
+        //     end_time: moment(this.preBillLinkParam.leave_time).format('YYYY-MM-DD 14:00:00')
+        //   }
+        //   that.$axios.post(url,scopeParam).then(res=>{
+        //     let array
+        //     array = res.data.data.data
+        //       //组装带标签的数组
+        //       // for(var item of array){
+        //       //   for(var itemm of that.roomTagList){
+        //       //     if(item.room_no == itemm.room_no){
+        //       //       item.tagName = itemm.feature_name
+        //       //     }
+        //       //   }
+        //       // }
+        //       that.roomNo_data_list = array  //选房号tabel数组
+        //   }).catch(error=>{
 
-          // })
-        },
+        //   })
+        // },
         //得到房间所对应的标签
         getTagByRoom(){
           console.log('enter tag')
@@ -6064,24 +5707,6 @@ export default {
                   that.message.error('获取数据失败，请重试')
               }
           }).catch((error)=>{
-          })
-        },
-        /**
-         * 付款支付方式接口
-         */
-        getPayMode(){
-          let that = this
-          let url= that.api.api_9022_9519+ '/v1/' + `finance/pay_mode/info_list?page_size=999`
-          that.$axios({
-            method : 'get',
-            url : url,
-          }).then(res=>{
-            that.payModeList = res.data.data.list
-            // this.payModeList.push({
-            //   id: 0,
-            //   name: '现金'
-            // })
-          }).catch(error=>{
           })
         },
         //入账代码
@@ -6140,20 +5765,6 @@ export default {
             url : url,
           }).then(res=>{
             that.cashRegisterList = res.data.data.results
-          }).catch(error=>{
-          })
-        },
-        /**
-         * 调账原因
-         */
-        getTiaoReason(){
-          let that = this
-          let url= that.api.api_9022_9519+ '/v1/' + `finance/arrange_account_reason/info_list`
-          that.$axios({
-            method : 'get',
-            url : url,
-          }).then(res=>{
-            that.tiaoReasonList = res.data.data.list
           }).catch(error=>{
           })
         },
@@ -6300,6 +5911,9 @@ export default {
         padding-left: 10px;
       }
     }
+  }
+  .panduan{
+    width: 14vw
   }
   /**小票打印 */
   .little_bill{
@@ -6477,6 +6091,16 @@ export default {
   }
   .pop_state button:nth-child(2) {
     margin-right: 5px
+  }
+  .cardInfoClass{
+    overflow: auto;
+    height: 350px;
+    text-align: left;
+    margin: 20px 0px 0px 5vw;
+    line-height: 40px;
+    li span{
+      margin-left:20px
+    }
   }
   //预授权class
   .authorizationClass{

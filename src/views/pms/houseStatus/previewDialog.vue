@@ -1161,7 +1161,7 @@ export default {
                 if(this.preBillParam.reserve_base.code_src === 'HY'){
                   this.rateCodeValue = row.rate_code
                   this.infoShow = row.card_name
-                  this.clearMaseterBase()
+                  // this.clearMaseterBase()
                 }else if(this.preBillParam.reserve_base.code_market == 'XYGS' || this.preBillParam.reserve_base.rsv_type === 3 || 4){
                   this.rateCodeValue = row.rate_code
                   this.infoShow = row.name
@@ -1841,36 +1841,26 @@ export default {
         let flag_Day = moment().format('YYYY-MM-DD')
           let flag_startDay = `${flag_Day} 00:00:00`
           let flag_endDay = `${flag_Day} 14:00:00` 
-          console.log('flag_startDay',flag_startDay)
-          console.log('flag_endDay',flag_endDay)
-          console.log(day,'天数')
           if((sDate1<flag_endDay && sDate1>flag_startDay) && (sDate2<flag_endDay && sDate2>flag_startDay)){
-            console.log('进入1')
              day = 0
             return day
           }else if((sDate1<flag_endDay && sDate1>flag_startDay) && (sDate2>flag_endDay)){
-            console.log('进入2')
             if(day === 0){
               day = 1
             }else if(day == 1){
               day = day
-              console.log('day...1',day)
             }else{
               day = day
             }
-            console.log('day...2',day)
             return day
           }else{
-            console.log('进入3')
             if(day === 0){
               day = 1
             }else if(day == 1){
               day = day
-              console.log('day...1',day)
             }else{
               day = day
             }
-            console.log('day...2',day)
             return day
           }
           // var dateSpan,

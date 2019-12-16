@@ -26,6 +26,7 @@ import Invoicing from '@/views/pms/invoicing/invoicing'
 import Shifting from '@/views/pms/shifting/shifting'
 import Reports from '@/views/pms/reports/reports'
 import Nightaudit from '@/views/pms/nightaudit/nightaudit'
+import Team from '@/views/pms/team/team'
 /**
  * 点击内控店控进入的路由
  */
@@ -372,6 +373,31 @@ let router = new Router({
           path: '/nightaudit',
           component: Nightaudit,
           name: '夜审',
+          menuShow: true
+        }]
+      }]
+    },
+    /**
+     * 团队路由
+     */
+    {
+      path: '/team',
+      type: 'home',
+      name: 'team_page',
+      redirect: 'team',
+      component: Home,
+      menuShow: true,
+      children: [{
+        path: '/team',
+        component: RightContent,
+        name: 'team_update',
+        leaf: true,
+        iconCls: 'iconfont icon-home',
+        menuShow: true,
+        children: [{
+          path: '/team',
+          component: Team,
+          name: '团队',
           menuShow: true
         }]
       }]

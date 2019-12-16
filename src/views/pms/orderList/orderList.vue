@@ -1,6 +1,6 @@
 <template>
   <!--订单-->
-  <div class="global-style">
+  <div class="global-style" :style="{height: availHeight, overflow:'auto'}">
     <div class="order-see">
       <i class="el-icon-document" style="font-size: 16px;margin-left: 10px"></i><label>订单查看</label>
       <!-- <img src="@/assets/images/pms/orderList/addinfo.png" class="add-info" @click="setMaskShow" /> -->
@@ -64,7 +64,7 @@
             </div>
           </div>
           <div class="order-source">
-            <div style="float: left;height: 90px;overflow: auto">
+            <div style="float: left;height: 110px;overflow: auto">
               <label>订单来源</label>
               <button class="common-btn">不限</button>
             </div>
@@ -408,8 +408,8 @@
         <!-- <el-table-column prop="retaintime" label="保留时间">
         </el-table-column> -->
         <el-table-column label="是否钟点房">
-          <template slot-scope="scope" v-if="scope.row.reserve_base">
-            <span v-if="scope.row.reserve_base[0].rsv_lable === 1">是</span>
+          <template slot-scope="scope">
+            <span v-if="scope.row.master_lable == '1'">是</span>
             <span v-else>否</span>
           </template>
         </el-table-column>
@@ -441,7 +441,7 @@
             <el-button v-if="rsc_peo_flag && scope.row.reserve_base && scope.row.reserve_base[0].rsv_status_lable ===2" type="text" class="tabel_right" size="small">部分入住</el-button>
             <el-button v-if="rsc_peo_flag && scope.row.reserve_base && scope.row.reserve_base[0].rsv_status_lable ===3" type="text" class="tabel_right" size="small">已结账</el-button>
             <el-button v-if="rsc_peo_flag && scope.row.reserve_base && scope.row.reserve_base[0].rsv_status_lable ===0" type="danger" class="tabel_right"  @click="getQr_code(scope.row)" size="small">二维码</el-button>
-            <el-button v-if="rsc_peo_flag && scope.row.reserve_base && scope.row.reserve_base[0].rsv_status_lable ===0" type="danger" class="tabel_right"  @click="deleteReserve(scope.row)" size="small">删除</el-button>
+            <!-- <el-button v-if="rsc_peo_flag && scope.row.reserve_base && scope.row.reserve_base[0].rsv_status_lable ===0" type="danger" class="tabel_right"  @click="deleteReserve(scope.row)" size="small">删除</el-button> -->
             <!-- <el-button @click="handleClick(tableData2[scope.$index].id)" size="small">编辑</el-button> -->
             <!-- <el-button type="danger" @click="deleteClick(scope.$index, scope.row,tableData_orderlist)" style="float: right;margin-right: 20px" size="small">删除</el-button> -->
           </template>
@@ -607,6 +607,7 @@
     name: "orderList",
     data() {
       return {
+        availHeight: '',
         remark_flag: 0,
         isDiscount: false,
         unusualList: [],//异常类型数组
@@ -808,6 +809,7 @@
      * 页面加载的时候直接拿到在住单的数据
      */
     created: function() {
+      this.availHeight = (screen.availHeight -180) +'px';
       let that = this;
       /**
        * @search_live 进行第一次的无条件查询
@@ -1116,7 +1118,7 @@
             // that.preBillParam.reserve_guest = that.preInfoParam.reserve_guest
             if(that.preInfoParam.reserve_guest.length != 0){
               console.log('if')
-              that.preBillParam.reserve_guest = []
+              // that.preBillParam.reserve_guest = [] ///=====>这个可以吗
               //关键一步，登记有身份证号要清空<===================mark
               for(var item of  that.preInfoParam.reserve_guest){
                 item.id_no = ''
@@ -1995,7 +1997,7 @@
     }
 
     .common-font {
-      margin-top: 20px;
+      margin-top: 36px;
       margin-left: 10px;
       font-size: small;
       color: #777777;

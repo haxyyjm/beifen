@@ -1,9 +1,12 @@
 <template>
   <!--夜审-->
-  <div class="warp-night">
+  <div class="warp-night" :style="{ height: availHeight, overflow: 'auto' }">
     <el-container>
+      <!--入住单-->
       <link-house-dialog :show.sync= linkHouseFornVisible :parentInfoParam='linInfoParam'></link-house-dialog>
-      <el-aside  width="500px" :style="{ height: availHeight }" style="background-color: #FFFFFF,"  class="left">
+       <!-- 预定单转入住单 -->
+      <preview-to-enterDialog :show.sync= previewToEnterVisible :parentInfoParam='preEnterInfoParam'></preview-to-enterDialog>
+      <el-aside  width="500px" style="background-color: #FFFFFF,"  class="left">
         <el-table size="mini" :row-class-name="tableRowClassName" @row-click="checkNightAuditAll" :data="nightData" :header-cell-style="{background:'#68819E', color: '#FFFFFF'}" style="width: 100%;margin-top: 10px">
           <el-table-column prop="nightItem" width="260" label="夜审项目"></el-table-column>
           <el-table-column prop="number" label="数量">
@@ -87,7 +90,7 @@
                 <el-table-column prop="arr_time" label="到达时间"></el-table-column>
                 <el-table-column prop="leave_time" label="离开时间"></el-table-column>
               </el-table>
-              <el-table size="mini" @row-dblclick="rowClick" height="550px" v-show="noArrive" :data="noArriveData" :header-cell-style="{background:'#CCCCCCFF', color: '#333333'}" style="width: 100%">
+              <el-table size="mini" @row-dblclick="rowClick_preview" height="550px" v-show="noArrive" :data="noArriveData" :header-cell-style="{background:'#CCCCCCFF', color: '#333333'}" style="width: 100%">
                 <el-table-column type="index" width="90"  label="序号"></el-table-column>
                 <el-table-column prop="rsv_person_name" label="预定人"></el-table-column>
                 <el-table-column prop="rate_code" label="房价码"></el-table-column>
@@ -210,7 +213,16 @@
                       <span v-else>团队</span>
                     </template>
                 </el-table-column>
-                <el-table-column prop="fix_rate" label="房价"></el-table-column>
+                <el-table-column  label="房价">
+                  <template slot-scope="scope">
+                    <span v-for="(item,index) of scope.row.master_rt_rate" :key="index">
+                      <span v-if="hotelInfo.biz_date == item.price_date">
+                        {{item.room_price + '元'}}
+                      </span>
+                      <span v-else>暂无</span>
+                    </span>
+                  </template>
+                </el-table-column>
                 <el-table-column prop="arr_time" label="到达时间"></el-table-column>
                 <el-table-column prop="leave_time" label="离开时间"></el-table-column>
               </el-table>
@@ -377,6 +389,7 @@
 </template>
 <script>
 import linkHouseDialog from '../houseStatus/linkHouseDialog'
+import previewToEnterDialog from '../houseStatus/previewToEnterDialog'
 import moment from 'moment'
 import util from '../../../common/util.js'
 import QRCode from 'qrcodejs2'
@@ -384,6 +397,111 @@ import _ from 'lodash'
   export default {
     data: function(){
       return {
+        reserve_guest:{
+          hotelInfo: {},
+          liveCount: 0,//可选数
+          room_number: null,//房间号
+          id_code: '01',//证件类型
+          id_no: '',//证件号码
+          name: '', //姓名
+          sex: '0',//性别
+          telephone: '',//手机号
+          street_add: '',//街道地址
+          // code: '123',
+          // code_name: '77777',
+          // descript: null,
+          // descript_en: null,
+          
+          // list_order: 1,
+          last_name: null,
+          first_name: null,
+          name2: null,
+          name_combi: null,
+          is_save: false,
+          language: '',
+          title: null,
+          salutation: null,
+          race: null,
+          religion: null,
+          career: '',
+          nation: null,
+          visa_no: null,
+          visa_grant: null,
+          enter_port: null,
+          where_from: null,
+          where_to: null,
+          salary: null,
+          education: null,
+          marital: null,
+          company_na: '',
+          pic_photo: null,
+          pic_sign: null,
+          remark: '',
+          is_anonymo: false,
+          weixin: '',
+          mobile: null,
+          email: '',
+          country_id: null,
+          division_id: null,
+          state_id: null,
+          city_id: null,
+          zipcode: null,
+          reserve_base_id: '',
+        },
+        preBillParam: {
+          reserve_guest: [{
+          liveCount: 0,//可选数
+          room_number: null,//房间号
+          id_code: '01',//证件类型
+          id_no: '',//证件号码
+          name: '', //姓名
+          sex: '0',//性别
+          telephone: '',//手机号
+          street_add: '',//街道地址
+          // code: '123',
+          // code_name: '77777',
+          // descript: null,
+          // descript_en: null,
+          
+          // list_order: 1,
+          last_name: null,
+          first_name: null,
+          name2: null,
+          name_combi: null,
+          is_save: false,
+          language: '',
+          title: null,
+          salutation: null,
+          race: null,
+          religion: null,
+          career: '',
+          nation: null,
+          visa_no: null,
+          visa_grant: null,
+          enter_port: null,
+          where_from: null,
+          where_to: null,
+          salary: null,
+          education: null,
+          marital: null,
+          company_na: '',
+          pic_photo: null,
+          pic_sign: null,
+          remark: '',
+          is_anonymo: false,
+          weixin: '',
+          mobile: null,
+          email: '',
+          country_id: null,
+          division_id: null,
+          state_id: null,
+          city_id: null,
+          zipcode: null,
+          reserve_base_id: '',
+          }]
+        },//prop值
+        previewToEnterVisible: false,
+        preEnterInfoParam: {},
         linInfoParam: {},
         linkHouseFornVisible: false,//联房
         trading_unit: '',
@@ -556,17 +674,17 @@ import _ from 'lodash'
         //   src: '通过',
         // },
         {
-          index: 13,
+          index: 12,
           nightItem: '即将到期维修/锁房列表',
           number: 0,
           src: '',
         },{
-          index: 14,
+          index: 13,
           nightItem: '到期预授权撤销列表',
           number: 0,
           src: '',
         },{
-          index: 15,
+          index: 14,
           nightItem: '房租预审',
           number: 0,
           // src: '',
@@ -588,7 +706,8 @@ import _ from 'lodash'
     },
     components: {
       QRCode,
-      'link-house-dialog': linkHouseDialog 
+      'link-house-dialog': linkHouseDialog,
+      'preview-to-enterDialog': previewToEnterDialog,
     },
     // 注册一个局部的自定义指令 v-focus
     directives: {
@@ -647,7 +766,7 @@ import _ from 'lodash'
       }
     },
     mounted (){
-      this.availHeight = (screen.availHeight -10)  +'px';
+      this.availHeight = (screen.availHeight -180)  +'px';
     },
     methods: {
       startNight(){
@@ -697,6 +816,62 @@ import _ from 'lodash'
           }).catch(()=>{
             this.$message.info('已取消入账!')
         })}
+      },
+      /**
+       * 跳转到预定转入住
+       */
+    rowClick_preview(row){
+      this.getPreInfoByRoom(row.order_no)
+    },
+    getPreInfoByRoom(param){
+        console.log('param1111111111111111',param)
+        let scopeParams = {
+          order_no: param,
+          search_type: "2" //根据预订单号查询预订单=== value值为2
+        }
+        let that = this
+        let url = that.api.api_newBill_9204 + '/v2/' + `booking/get_reserve_method/`
+        // let url = that.api.api_bill_9202 + '/v2/' + `booking/get_order_reserve_info/`
+        that.$axios.post(url,scopeParams).then(res=>{
+          if(res.data.message === 'success'){
+            that.preInfoParam = res.data.data.results[0]
+            //处理数据然后传给子组件
+            that.preBillParam.reserve_rate = that.preInfoParam.reserve_rate
+            if(that.preInfoParam.reserve_guest.length != 0){
+              // that.preBillParam.reserve_guest = []
+              //关键一步，登记有身份证号要清空<===================mark
+              for(var item of  that.preInfoParam.reserve_guest){
+                item.id_no = ''
+              }
+              that.preBillParam.reserve_guest = [].concat(that.preInfoParam.reserve_guest)  
+            }else{
+              that.preBillParam.reserve_guest = []
+              that.preBillParam.reserve_guest.push(that.reserve_guest)
+            }
+            this.preBillParam.reserve_base = that.preInfoParam.reserve_base
+            that.handleChildParam(that.preBillParam)
+            console.log('that.preBillParamthat.preBillParam',that.preBillParam)
+            that.preEnterInfoParam = _.cloneDeep(that.preBillParam) //预定转入住详情
+            that.previewToEnterVisible = true
+          }else{
+            that.$message.error('获取预订单详情失败!')
+          }
+        }).catch(error=>{
+          console.log(error)
+        })
+      },
+      handleChildParam(param){
+        for(var item of param.reserve_rate){
+          item.can_live_num = ''
+          item.room_type_value = ''
+          item.dynamic_roomNumber = item.room_number != '' ? item.room_number.split(',') : []
+          item.roomCount = ''
+          item.roomPrice = ''
+        }
+        console.log('param.reserve_guest',param.reserve_guest)
+        // for(var item of param.reserve_guest){
+        //   item.liveCount = 0
+        // }
       },
       rowClick(row){
         console.log('row',row)
@@ -1498,13 +1673,15 @@ import _ from 'lodash'
           )
         },
       tableRowClassName({row, rowIndex}) {
-        try {
-          if (row.index === this.index_flag) {
-            return 'warning-row';
+        if(row && row.index){
+          try {
+            if (row.index === this.index_flag) {
+              return 'warning-row';
+            }
+            return '';
+          } catch (error) {
+            console.log(error)          
           }
-          return '';
-        } catch (error) {
-          console.log('error')          
         }
       },
       //上一步或下一步
@@ -1769,10 +1946,8 @@ import _ from 'lodash'
         that.$axios.post(url).then(res=>{
           console.log('res入账',res.data)
           if(res.data.message === 'success'){
-            that.$message.warning('夜审入账成功')
-            // this.$router.push('/login')//跳转到登陆界面
-            console.log('.......')
-            // that.addNight_record()//添加一条夜审记录
+            that.$message.success('夜审入账成功')
+            this.$router.push('/login')//跳转到登陆界面
           }
         })
 
@@ -1806,6 +1981,8 @@ import _ from 'lodash'
       },
       //当日新增无地址宾客档案列表
       getNight_noAddress(row){
+        row.src = '通过'
+        return
         let that = this
         let url = that.api.api_9022_9519+ '/v1/' + `report/account/guests_without_address`
         that.$axios.post(url).then(res=>{
@@ -1821,6 +1998,8 @@ import _ from 'lodash'
       },
       //应到未到有效账务宾客列表 ===不废弃
       getNight_noPay(row){
+        row.src = '通过'
+        return
         let that = this
         let url = that.api.api_9022_9519+ '/v1/' + `report/account/no_whole_reached_and_paid`
         that.$axios.post(url).then(res=>{
@@ -2004,6 +2183,8 @@ import _ from 'lodash'
       },
       //证件号码重复登记主单
       getNight_cardRepeat(row){
+        row.src = '通过'
+        return
         let that = this
         let url = that.api.api_9022_9519+ '/v1/' + `report/account/guests_duplicate_id_no`
         that.$axios.post(url).then(res=>{
@@ -2032,6 +2213,7 @@ import _ from 'lodash'
               }
             }
         }).then(res=>{
+          that.getHotel_info()
           console.log('res.data',res.data)
           row.number = res.data.data.results.length
           // row.src = row.number == 0 ? '通过' : '异常'
@@ -2039,6 +2221,19 @@ import _ from 'lodash'
             // this.$message.warning('存在异常数据!')
           // }
           that.enterPreviewData = res.data.data.results
+        }).catch(error=>{
+          this.$message.error(error)
+        })
+      },
+      /**
+       * 获取酒店信息
+       */
+      getHotel_info(){
+        let that = this
+        let url = that.api.api_newPrice_9107+ '/v1/' + `report/hotel_info/`
+        that.$axios.get(url).then(res=>{
+          that.hotelInfo = res.data.data.results[0]
+          console.log(res.data.data.results[0])
         })
       },
       //即将到期维修和锁定房
@@ -2137,6 +2332,7 @@ import _ from 'lodash'
       },
       //以hotel_id获取支付方式的接口
       get_list_by_hotel(){
+        return
         let that = this
         // let url =  that.api.api_9022_9519+ '/v1/' + 'finance/pay_mode/get_list_by_hotel?page_size=999'
         let url =  that.api.api_9022_9519+ '/v1/' + 'finance/pay_mode/info_list?page_size=999'

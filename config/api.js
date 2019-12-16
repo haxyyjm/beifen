@@ -17,6 +17,8 @@ const api_9503 = process.env.api_9503;  //森哥的所有线下接口
 const api_8094 = process.env.api_8094;  //支付宝的支付线下接口
 const api_8082 = process.env.api_8082;
 const api_9204 = process.env.api_9204;//dyl新版
+const api_8000 = process.env.api_8000;//rj新版
+
 
 /**
  * 线上接口
@@ -37,6 +39,7 @@ const api_9530 = process.env.api_9530;    //森哥的所有线上接口
 const api_pay = process.env.api_pay;  //支付宝的支付线下接口
 const api_icon = process.env.api_icon;  //支付宝的支付线下接口
 const api_newBill = process.env.api_newBill;  //dyl 新
+const api_newPrice = process.env.api_newPrice;  //rj 新
 
 
 export default {
@@ -57,6 +60,7 @@ export default {
    api_pay_8094 : api_pay,
    api_icon_8082 : api_icon,
    api_newBill_9204: api_newBill
+   api_newPrice_9107: api_newPrice
    */
 
   /**
@@ -75,5 +79,7 @@ export default {
    api_9530_9503 : api_9503,
    api_pay_8094 : api_8094,
    api_icon_8082: api_8082,
-   api_newBill_9204: api_9204
+   api_newBill_9204: api_9204,
+   api_newPrice_9107: api_newPrice//此时调线上的
+
 }

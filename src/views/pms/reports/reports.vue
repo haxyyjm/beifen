@@ -1,7 +1,7 @@
 <template>
   <!--设置-->
-  <div class="Reports">
-    <el-col class="pull-left"  style="background-color: #EAEDF1; width: 250px;" :style="{height: availHeight, overflow:'auto'}">
+  <div class="Reports" :style="{height: availHeight, overflow:'auto'}">
+    <el-col class="pull-left"  style="background-color: #EAEDF1; width: 250px;">
       <div style="height: 66px; font-size: 22px; color: #222222; margin-left: 36px; line-height: 66px"  >
         报表分类
       </div>
@@ -220,12 +220,12 @@
   export default {
     data() {
       return {
-        availHeight: '500px',
+        availHeight: '',
         activeIndex: '1'
       }
     },
     created(){
-       this.availHeight = screen.availHeight +'px';
+       this.availHeight = (screen.availHeight -180) +'px';
     },
     methods: {
       handleOpen(key, keyPath) {

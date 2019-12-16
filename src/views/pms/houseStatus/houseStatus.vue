@@ -1,9 +1,9 @@
 <template>
   <!--房态-->
-  <div class="firstIndex">
+  <div class="firstIndex" :style="{ height: availHeight, overflow: 'auto' }">
     <el-container>
       <!--左侧-->
-      <el-aside  class="left" :style="{ height: availHeight }"  style="width: 234px;margin-top: 10px; overflow: auto" >
+      <el-aside  class="left"  style="width: 234px;margin-top: 10px; overflow: auto" >
         <el-tabs v-model="activeName2" type="border-card" @tab-click="handleClick">
           <el-tab-pane label="房态筛选" name="first">
             <div>
@@ -333,16 +333,14 @@
                     <el-row>
                       <button class="setbtn" @click="sendPreview(item);flushData()">预定</button>
                       <button class="setbtn" @click="sendEnter(item);flushData()">入住</button>
-                      <!-- <el-button type="info">预定</el-button>
-                      <el-button type="info" size="mini">入住</el-button> -->
                     </el-row>
                     <el-row style="margin-top: 10px">
                       <button class="setbtn" @click="setDirty(item);">置脏</button>
                       <button class="setbtn" @click="handleSetRepair(item); repairDialog=true">置维修</button>
                     </el-row>
                     <el-row style="margin-top: 10px">
-                      <!-- <button class="setbtn" @click="setOpenDoor(item); openDoorDialog=true">请求开门</button> -->
-                      <!-- <button class="setbtn" @click="handleSetLock(item,index); lockDialog = true">锁房</button> -->
+                      <button class="setbtn" >入团</button>
+                      <button class="setbtn" >出团</button>
                     </el-row>
                   </div>
                 </div>
@@ -354,9 +352,9 @@
                       <!-- <ul style="font-size: 12px;margin: 2px 0px 0px 5px" v-for="(item,index) of item.room_guest.split(',')" :key = index>
                         <li>{{item}}</li>
                       </ul> -->
-                      <div v-if="linInfoParam && linInfoParam.master_guest">
-                        <ul style="font-size: 12px;margin: 2px 0px 0px 5px" v-for="(item,index) of linInfoParam.master_guest" :key = index>
-                          <li>{{item.name}}</li>
+                      <div>
+                        <ul style="font-size: 12px;margin: 2px 0px 0px 5px">
+                          <li>{{item.room_guest}}</li>
                         </ul>
                       </div>
                     </div>
@@ -366,8 +364,8 @@
                         <button class="setbtn" @click="openEndAccount(item)">结账</button>
                       </el-row>
                       <el-row style="margin-top: 10px; display: flex;  justify-content: flex-end">
-                        <!-- <button class="setbtn">换房型</button> -->
-                        <!-- <button class="setbtn" @click="setOpenDoor(item); openDoorDialog=true">请求开门</button> -->
+                        <button class="setbtn" >入团</button>
+                        <button class="setbtn" >出团</button>
                         <button class="setbtn" @click="openChangeRoomNumber(item)">换房</button>
                       </el-row>
                       <el-row style="margin-top: 10px;  display: flex;  justify-content: flex-end">
@@ -381,24 +379,30 @@
                   <el-row style="margin-top: 5px; color: #666"><hr/></el-row>
                   <div  class="pop_bottom">
                     <div style="margin-top: 5px;color: #8e8e8e; width: 60%;height: 100%">
-                      <el-row v-if="linInfoParam && linInfoParam.arr_time">{{linInfoParam.arr_time}}</el-row>
-                      <el-row v-if="linInfoParam">{{linInfoParam.leave_time}}</el-row>
+                      <el-row>{{item.arr_time}}</el-row>
+                      <el-row v-if="linInfoParam">{{item.leave_time}}</el-row>
                       <div v-if="linInfoParam && linInfoParam.combine_room_list && linInfoParam.combine_room_list.length > 1" style="color: #5bbbf5">
                         <span>关联：</span>
                         <span v-for="(item,index) of linInfoParam.combine_room_list" :key="index">
                           {{item[0]}}、
                         </span>
                       </div>
+                      <div v-if="linInfoParam && linInfoParam.exchange_room && linInfoParam.exchange_room.length > 0" style="color: #5bbbf5">
+                        <span>换房：</span>
+                        <span>
+                          {{linInfoParam.exchange_room[0].old_room}}
+                        </span>
+                      </div>
                       <!-- <div v-if="linInfoParam" style="overflow: hidden; white-space: nowrap; text-overflow: ellipsis;width:100%;">备注: {{linInfoParam.remark_id_list}} </div> -->
-                      <div v-if="linInfoParam && linInfoParam.remark_id_list">备注: {{linInfoParam.remark_id_list}} </div>
+                      <div v-if="item.remark">备注: {{item.remark}} </div>
                       <div v-else>备注: 无 </div>
                     </div>
                     <div>
-                      <el-row style="margin-top: 5px">消费金额:{{popverParam.general_consumption}}</el-row>
+                      <el-row style="margin-top: 5px">消费金额:<span style="color: red">{{item.total_consumption + '元'}}</span></el-row>
                       <!--没含预授权-->
-                      <el-row>预收金额:{{popverParam.pay_amount}}</el-row>
-                      <el-row v-if="popverParam.balance > 0 ">应退金额:{{Math.abs(popverParam.balance)}}</el-row>
-                      <el-row v-else>应收金额:{{Math.abs(popverParam.balance)}}</el-row>
+                      <el-row>预收金额:<span style="color: red">{{item.pay_amount + '元'}}</span></el-row>
+                      <el-row v-if="item.balance > 0 ">应退金额::<span style="color: red">{{Math.abs(item.balance) + '元'}}</span></el-row>
+                      <el-row v-if="item.balance <= 0">应收金额:<span style="color: red">{{Math.abs(item.balance) + '元'}}</span></el-row>
                       <!-- <el-row>余额:{{popverParam.balance}}</el-row> -->
                     </div>
                   </div>
@@ -429,8 +433,8 @@
                         <button class="setbtn" @click="openEndAccount(item)">结账</button>
                       </el-row>
                       <el-row style="margin-top: 10px; display: flex;  justify-content: flex-end">
-                        <!-- <button class="setbtn">换房型</button> -->
-                        <!-- <button class="setbtn" @click="setOpenDoor(item); openDoorDialog=true">请求开门</button> -->
+                        <button class="setbtn" >入团</button>
+                        <button class="setbtn" >出团</button>
                         <button class="setbtn" @click="openChangeRoomNumber(item)">换房</button>
                       </el-row>
                       <el-row style="margin-top: 10px;  display: flex;  justify-content: flex-end">
@@ -443,21 +447,33 @@
                   </div>
                   <el-row style="margin-top: 5px; color: #666"><hr/></el-row>
                     <div  class="pop_bottom">
-                      <div style="margin-top: 5px;color: #8e8e8e;">
-                        <el-row v-if="linInfoParam && linInfoParam.arr_time">{{linInfoParam.arr_time}}</el-row>
-                        <el-row v-if="linInfoParam">{{linInfoParam.leave_time}}</el-row>
-                        <div v-if="linInfoParam && linInfoParam.combine_room_list" style="color: #5bbbf5">
-                        <span>关联：</span>
-                        <span v-for="(item,index) of linInfoParam.combine_room_list" :key="index">
-                          {{item[0]}}、
-                        </span>
+                      <div style="margin-top: 5px;color: #8e8e8e; width: 60%;height: 100%">
+                        <el-row>{{item.arr_time}}</el-row>
+                        <el-row v-if="linInfoParam">{{item.leave_time}}</el-row>
+                        <div v-if="linInfoParam && linInfoParam.combine_room_list && linInfoParam.combine_room_list.length > 1" style="color: #5bbbf5">
+                          <span>关联：</span>
+                          <span v-for="(item,index) of linInfoParam.combine_room_list" :key="index">
+                            {{item[0]}}、
+                          </span>
                         </div>
+                        <div v-if="linInfoParam && linInfoParam.exchange_room && linInfoParam.exchange_room.length > 0" style="color: #5bbbf5">
+                          <span>换房：</span>
+                          <span>
+                            {{linInfoParam.exchange_room[0].old_room}}
+                          </span>
+                        </div>
+                        <!-- <div v-if="linInfoParam" style="overflow: hidden; white-space: nowrap; text-overflow: ellipsis;width:100%;">备注: {{linInfoParam.remark_id_list}} </div> -->
+                        <div v-if="item.remark">备注: {{item.remark}} </div>
+                        <div v-else>备注: 无 </div>
                       </div>
                       <div>
-                        <el-row style="margin-top: 5px">消费金额:</el-row>
-                        <el-row>预收金额:</el-row>
-                        <el-row>应收金额:</el-row>
-                      </div>
+                        <el-row style="margin-top: 5px">消费金额:<span style="color: red">{{item.total_consumption + '元'}}</span></el-row>
+                        <!--没含预授权-->
+                        <el-row>预收金额:<span style="color: red">{{item.pay_amount + '元'}}</span></el-row>
+                        <el-row v-if="item.balance > 0 ">应退金额::<span style="color: red">{{Math.abs(item.balance) + '元'}}</span></el-row>
+                        <el-row v-if="item.balance <= 0">应收金额:<span style="color: red">{{Math.abs(item.balance) + '元'}}</span></el-row>
+                        <!-- <el-row>余额:{{popverParam.balance}}</el-row> -->
+                    </div>
                   </div>
                 </div>
                 <!-- 浮动框的v-if====> 脏房-->
@@ -509,16 +525,15 @@
                 </div>
               </div>
               <!-- 小方块即房间的v-if===>start 净房-->
-              <div v-if="item.room_state === 'VC'"  slot="reference"  @mouseover="hoverIndex = index;mouseOver()" @mouseout="hoverIndex = -1;mouseOut()"    :class="{popoverActive: activeClassName == index && isActive, lockCss: activeClassName == index && lockCss_active, hoverActive: true}"   @dblclick="sendEnter(item);flushData()"  class="boxActive">
+              <div v-if="item.room_state === 'VC'"  slot="reference"  @mouseover="hoverIndex = index;mouseOver()" @mouseout="hoverIndex = -1;mouseOut()"    :class="{popoverActive: activeClassName == index && isActive, lockCss: activeClassName == index && lockCss_active, hoverActive: true}"   @dblclick="item.room_state_extra[7] == '1' ? sendPreviewEnter(item) : sendPreview(item);flushData()"  class="boxActive">
                 <!--单个房间(小方块)第一行-->
                 <div  style="display: flex; justify-content: space-between;">
                     <span style="font-size: 14px">{{item.room_type_name}}</span>
-                    <!-- <span>11</span> -->
                     <span style="font-weight: bold; font-size: 16px">{{item.room_no}}</span>
                 </div>
                 <div style="text-align: center;line-height: 35px;height: 35px">
-                  <span>
-                    <!-- {{item.expandAttribute.name}} -->
+                  <span class="text-ellipsis" v-if="item.room_guest">
+                    <span>{{item.room_guest}}</span>
                   </span>
                 </div>
                   <div :class="{iconEnd: item.room_state_extra.length != 0 ? true : false}">
@@ -534,7 +549,7 @@
                 </div>
               </div>
             <!-- card入住房 住净-->
-             <div v-if="item.room_state === 'OC'"  @mouseover="hoverIndex = index;popoverClick(item,index)"   slot="reference" :class="{popoverActive: activeClassName == index && isActive,lockCss: activeClassName == index && lockCss_active, hoverActive: true}"   @dblclick="openOrderInfo(item)"  class="boxActive_6">
+             <div v-if="item.room_state === 'OC'"  @mouseover="hoverIndex = index;"   slot="reference" :class="{popoverActive: activeClassName == index && isActive,lockCss: activeClassName == index && lockCss_active, hoverActive: true}"   @dblclick="openOrderInfo(item)"  class="boxActive_6">
                 <!--单个房间(小方块)第一行-->
                 <div  style="display: flex; justify-content: space-between;">
                     <span style="font-size: 14px">{{item.room_type_name}}</span>
@@ -559,7 +574,7 @@
                 </div>
             </div>
                <!-- card入住房 住脏-->
-             <div v-if="item.room_state === 'OD'"  @mouseover="hoverIndex = index;popoverClick(item,index)"  slot="reference" :class="{popoverActive: activeClassName == index && isActive,lockCss: activeClassName == index && lockCss_active, hoverActive: true}"   @dblclick="openOrderInfo(item)"  class="boxActive_2">
+             <div v-if="item.room_state === 'OD'"  @mouseover="hoverIndex = index;"  slot="reference" :class="{popoverActive: activeClassName == index && isActive,lockCss: activeClassName == index && lockCss_active, hoverActive: true}"   @dblclick="openOrderInfo(item)"  class="boxActive_2">
                 <!--单个房间(小方块)第一行-->
                 <div  style="display: flex; justify-content: space-between;">
                     <span style="font-size: 14px">{{item.room_type_name}}</span>
@@ -600,7 +615,7 @@
                 </div>
               </div>
               <!-- card锁定房间 -->
-             <div v-if="item.room_state === 'OS'"  @mouseover="hoverIndex = index;mouseOver()"   @click="popoverClick(item,index)" slot="reference" :class="{popoverActive: activeClassName == index && isActive,  hoverActive: true}"    class="boxActive_5">
+             <div v-if="item.room_state === 'OS'"  @mouseover="hoverIndex = index;mouseOver()" slot="reference" :class="{popoverActive: activeClassName == index && isActive,  hoverActive: true}"    class="boxActive_5">
                 <!--单个房间(小方块)第一行-->
                 <div  style="display: flex; justify-content: space-between;">
                     <span style="font-size: 14px">{{item.room_type_name}}</span>
@@ -786,9 +801,9 @@
           <!--新建入住单dialog-->
           <enter-dialog :show.sync= enterFormVisible :parentParam='enterBillParam' v-on:listenToFlushEnter="flushByEnter"></enter-dialog>
           <!--预定单详情dialog-->
-          <preview-info-dialog :show.sync= preInfoFormVisible :parentInfoParam='preInfoParam' v-on:listenToPreview="getPreviewFromChild"></preview-info-dialog>
+          <!-- <preview-info-dialog :show.sync= preInfoFormVisible :parentInfoParam='preInfoParam' v-on:listenToPreview="getPreviewFromChild"></preview-info-dialog> -->
           <!-- 预定单转入住单 -->
-          <preview-to-enterDialog :show.sync= previewToEnterVisible :parentInfoParam='preEnterInfoParam' v-on:listenToPreview="getPreviewFromChild"></preview-to-enterDialog>
+          <preview-to-enterDialog :show.sync= previewToEnterVisible v-on:listenToFlushPreviewEnter="flushByPreviewEnter" :parentInfoParam='preEnterInfoParam'></preview-to-enterDialog>
           <!--联房列表dialog-->
           <link-house-dialog :show.sync= linkHouseFornVisible :parentInfoParam='linInfoParam' v-on:listenToFlushLink="flushByLink"></link-house-dialog>
       </el-main>
@@ -955,60 +970,108 @@
         enterBillParam: {},//新建入住单时的大对象
         preEnterInfoParam: {},
         linInfoParam: {},
-        //预订单大对象
-        preBillParam: {
-          rt_rate:{
-            rmnum: '',//房间号
-          },
-          reserve_base:{
-            rsv_type : '',//预定类型
-            rsv_lable: '',
-            rsv_person_name : '',//预定人姓名
-            telephone_master: '',//预定人电话
-            arr_time: '',//预抵时间
-            leave_time: [ new Date(), new Date(new Date().getTime() + 24*60*60*1000)],//离开时间
-            is_fix_rate: '', //传的 false和 true
-            is_secrete : '',
-            is_secret_rate : '',
-            allowed_AR : '',
-          },
-          //早餐
-          breakfastInfoList: [],
-          settingInfo: {},//设置
-          //预定=》消费
-          consumeInfoList: [{
-            name: '',
-            number: '',
-            price: '',
-            count: ''
-          }],
-          billInfo: {},//发票
-          remarkList: [{
-            remarkContent: '',
-            remarkType: '',
-            status: '',
-            time: '',
-            operationPeople: '',
-          }],//备注
-          //预定=》直接入住的时候入住人list
-          check_guest: [{
-            enterRoom: '',
-            name: '',
-            sex : '',
-            id_code : '',
-            id_no : '',
-            telephone : '',
-            street_add : ''
-          }],
-          //选择房型list=》动态多选框
-          houseTypeInfoList: [{
-            houseTypeValue: '',//房间类型
-            roomCount: '',//房间数量
-            roomPrice: '', //单价价钱
-            dynamic_roomNumber: ['111', '222', '333','444', '555','666', '777'],//动态房间号=》应是一个数组
-            mayCount: '2', //可预订数
-          }],
+        reserve_guest:{
+          liveCount: 0,//可选数
+          room_number: null,//房间号
+          id_code: '01',//证件类型
+          id_no: '',//证件号码
+          name: '', //姓名
+          sex: '0',//性别
+          telephone: '',//手机号
+          street_add: '',//街道地址
+          // code: '123',
+          // code_name: '77777',
+          // descript: null,
+          // descript_en: null,
+          
+          // list_order: 1,
+          last_name: null,
+          first_name: null,
+          name2: null,
+          name_combi: null,
+          is_save: false,
+          language: '',
+          title: null,
+          salutation: null,
+          race: null,
+          religion: null,
+          career: '',
+          nation: null,
+          visa_no: null,
+          visa_grant: null,
+          enter_port: null,
+          where_from: null,
+          where_to: null,
+          salary: null,
+          education: null,
+          marital: null,
+          company_na: '',
+          pic_photo: null,
+          pic_sign: null,
+          remark: '',
+          is_anonymo: false,
+          weixin: '',
+          mobile: null,
+          email: '',
+          country_id: null,
+          division_id: null,
+          state_id: null,
+          city_id: null,
+          zipcode: null,
+          reserve_base_id: '',
         },
+        preBillParam: {
+          reserve_guest: [{
+          liveCount: 0,//可选数
+          room_number: null,//房间号
+          id_code: '01',//证件类型
+          id_no: '',//证件号码
+          name: '', //姓名
+          sex: '0',//性别
+          telephone: '',//手机号
+          street_add: '',//街道地址
+          // code: '123',
+          // code_name: '77777',
+          // descript: null,
+          // descript_en: null,
+          
+          // list_order: 1,
+          last_name: null,
+          first_name: null,
+          name2: null,
+          name_combi: null,
+          is_save: false,
+          language: '',
+          title: null,
+          salutation: null,
+          race: null,
+          religion: null,
+          career: '',
+          nation: null,
+          visa_no: null,
+          visa_grant: null,
+          enter_port: null,
+          where_from: null,
+          where_to: null,
+          salary: null,
+          education: null,
+          marital: null,
+          company_na: '',
+          pic_photo: null,
+          pic_sign: null,
+          remark: '',
+          is_anonymo: false,
+          weixin: '',
+          mobile: null,
+          email: '',
+          country_id: null,
+          division_id: null,
+          state_id: null,
+          city_id: null,
+          zipcode: null,
+          reserve_base_id: '',
+          }]
+        },//prop值
         showPoint: false,//预定=>多余部分
         activeNames: ['1'],
         consumeData: [],//预定=》消费数组
@@ -1249,13 +1312,14 @@
     created(){
       this.getCardList() //获取入住信息
       this.getFloor()//获取楼层
+      this.initWebSocket();
       // this.getRoomType()
       // this.enterFormVisible = true
     },
     mounted (){
       // this.getCardList()
       // this.getCardAllList()
-      this.availHeight = (screen.availHeight -10)  +'px';
+      this.availHeight = (screen.availHeight -180)  +'px';
       // this.houseSituation_date = new Date()
     },
     computed:{
@@ -1277,6 +1341,45 @@
       }
 		},
     methods: {
+      initWebSocket(){//初始化weosocket(必须)
+       console.log('websock')
+        const wsuri = "ws://192.168.3.105:8000/ws/chat_message/";    //请根据实际项目需要进行修改
+        this.websock = new WebSocket(wsuri);      //新建一个webstock对象
+        // this.websock.onclose = this.websocketclose();
+        // this.websock.onmessage = this.websocketonmessage(); 
+        // this.websock.onopen = this.websocketonopen(event);     //打开连接 
+        this.websock.onopen = function(event) {
+          console.log("WebSocket is open now.",event);
+        };
+        // this.websock.onerror = this.websocketonerror();
+      },
+      websocketonopen(data){//websocket连接后发送数据(send发送)
+        let param = '互动参数'
+        console.log('data-websocket',data)
+        console.log('发送打开')
+        this.websocketsend(param);
+      },
+      websocketsend(Data){//数据发送
+        console.log('发送',Data)
+        console.log(this.websock.readyState,'状态2')
+         if (this.websock.readyState===1) {
+           this.websock.send(Data);
+          }else{
+            //do something
+            console.log('error==>还没连接成功!')
+          }
+      },
+      websocketonerror(){//连接建立失败重连
+        this.initWebSocket();
+      },
+      websocketonmessage(e){ //数据接收
+      console.log('返回的数据',e)
+        // this.redata = JSON.parse(e.data).data;
+        // console.log(this.redata);
+      },
+      websocketclose(e){  //关闭
+        console.log('断开连接',e);
+      },
       //批量操作==控制样式=====>注意:暂时用数组自带的is_halt来控制样式是否显示
       cardClick(item,index){
         // this.isPress = false
@@ -1380,13 +1483,14 @@
         }).then(res=>{
           if(res.data.message === 'success'){
             let roomList = res.data.data.results
+            let count = res.data.data.room_state_count
             //计算不同房态的房间数量
-            that.VCNumber = roomList.filter(item=>item.room_state==='VC').length
-            that.VDNumber = roomList.filter(item=>item.room_state==='VD').length
-            that.ODNumber = roomList.filter(item=>item.room_state==='OD').length
-            that.OONumber = roomList.filter(item=>item.room_state==='OO').length
-            that.OCNumber = roomList.filter(item=>item.room_state==='OC').length
-            that.OSNumber = roomList.filter(item=>item.room_state==='OS').length
+            that.VCNumber = count['VC']
+            that.VDNumber = count['VD']
+            that.ODNumber = count['OD']
+            that.OONumber = count['OO']
+            that.OCNumber = count['OC']
+            that.OSNumber = 0
             that.allNumber = that.VCNumber + that.VDNumber + that.ODNumber + that.OONumber + that.OCNumber + that.OSNumber
           }else{
             that.$message.error('获取房态列表失败!')
@@ -1512,12 +1616,14 @@
           if(res.data.message === 'success'){
             that.cardList = res.data.data.results
             let roomList = res.data.data.results
-            that.VCNumber = roomList.filter(item=>item.room_state==='VC').length
-            that.VDNumber = roomList.filter(item=>item.room_state==='VD').length
-            that.ODNumber = roomList.filter(item=>item.room_state==='OD').length
-            that.OONumber = roomList.filter(item=>item.room_state==='OO').length
-            that.OCNumber = roomList.filter(item=>item.room_state==='OC').length
-            that.OSNumber = roomList.filter(item=>item.room_state==='OS').length
+            let count = res.data.data.room_state_count
+            //计算不同房态的房间数量
+            that.VCNumber = count['VC']
+            that.VDNumber = count['VD']
+            that.ODNumber = count['OD']
+            that.OONumber = count['OO']
+            that.OCNumber = count['OC']
+            that.OSNumber = 0
             that.allNumber = that.VCNumber + that.VDNumber + that.ODNumber + that.OONumber + that.OCNumber + that.OSNumber
             //以上为分割 [...map.values]其中map.values得到的数据可组装为数组
             var map = new Map();
@@ -1562,36 +1668,15 @@
         //     break;
         // }
       },
+      /**双击显示预定转入住单 */
+      sendPreviewEnter(item){
+        console.log('item.....',item)
+        this.getPreInfoByRoom(item.reserve_no)
+      },
       //点击房间(小方块)预定的时候 传递值给子组件
       sendPreview(item){
-        // this.getRoomOccupyInfo(item) //获取该房间占用类型
         setTimeout(() => {
-          // if(this.roomOccupyList.length>0){
-          //   //此时预定=>未占用
-          //   if(this.roomOccupyList[0].room_occupy === 'NNZ'){
-          //     this.previewFormVisible = true
-          //     //以下 暂时简单写通用 以后优化代码
-          //     for(var itemm of this.roomTypeList){
-          //       if(itemm.code === item.room_type_name){
-          //         item.room_type_name_value = itemm.room_type_name
-          //       }
-          //     }
-          //     this.previewBillParam = {
-          //       roomType: item.room_type_name_value,
-          //       roomNo: item.room_no,
-          //       room_type_name: item.room_type_name
-          //     }
-          //   }
-          //   else{
-          //     //预定占用
-          //     if(this.roomOccupyList[0].room_occupy === 'YDZ'){
-          //       //获取预定后的详情===>预定转入住
-          //       this.getPreInfoByRoom(item.room_no)
-          //       this.preInfoFormVisible = true
-          //     }
-          //   }
-          // }else
-          // {
+              console.log('item==方块',item)
               this.previewFormVisible = true
               this.previewBillParam = {
                 roomType_code:item.room_type_name,
@@ -1599,51 +1684,20 @@
                 roomNo: item.room_no,
                 room_type_name: item.room_type_name
               }
-          // }
         }, 600);
-          // this.getPreInfoByRoom(item.room_no)
-          // this.preInfoFormVisible = true
       },
 
       //点击房间(小方块)入住的时候
       sendEnter(item){
-        // this.getRoomOccupyInfo(item)
         setTimeout(() => {
-          // if(this.roomOccupyList.length>0){
-          //   //此时入住=>未占用
-          //   if(this.roomOccupyList[0].room_occupy === 'NNZ'){
-          //     this.enterFormVisible = true
-          //     for(var itemm of this.roomTypeList){
-          //       if(itemm.code === item.room_type_name){
-          //         item.room_type_name_value = itemm.room_type_name
-          //       }
-          //     }
-          //     this.enterBillParam = {
-          //       roomType: item.room_type_name_value,
-          //       roomNo: item.room_no,
-          //       room_type_name: item.room_type_name
-          //     }
-          //   }else if(this.roomOccupyList[0].room_occupy === 'YDZ'){
-          //     this.getPreInfoByRoom(item.room_no)
-          //     this.previewToEnterVisible = true
-          //   }else if(this.roomOccupyList[0].room_occupy === 'OCZ'){
-          //     //入住占用
-          //       //获取入住后的详情===>入住==>打开联防列表
-          //       // this.getPreInfoByRoom(item.room_no)
-          //       // this.preInfoFormVisible = true
-          //   }
-          // }else{
-              this.enterFormVisible = true
-              this.enterBillParam = {
-                roomType_code:item.room_type_name,
-                roomType: item.room_type,
-                roomNo: item.room_no,
-                room_type_name: item.room_type_name
-              // }
+            this.enterFormVisible = true
+            this.enterBillParam = {
+            roomType_code:item.room_type_name,
+            roomType: item.room_type,
+            roomNo: item.room_no,
+            room_type_name: item.room_type_name
           }
         }, 600);
-        // this.getPreInfoByRoom(item.room_no)
-        // this.previewToEnterVisible = true
       },
       /**
        * 房间占用状态
@@ -1682,36 +1736,43 @@
         },
       //获取预定后的详情==>预定单详情
       getPreInfoByRoom(param){
-        // param = '8325' //暂时赋值
+        console.log('param1111111111111111',param)
         let scopeParams = {
-          room_number: param
+          order_no: param,
+          search_type: "2" //根据预订单号查询预订单=== value值为2
         }
         let that = this
-        // let url = `http://192.168.2.224:9005/v1/booking/get_all_reserve_info/`
-        let url = that.api.api_bill_9202 + '/v1/' + `booking/get_all_reserve_info/`
-        that.$axios({
-           method : 'get',
-            url : url,
-            params: scopeParams
-        }).then(res=>{
+        let url = that.api.api_newBill_9204 + '/v2/' + `booking/get_reserve_method/`
+        // let url = that.api.api_bill_9202 + '/v2/' + `booking/get_order_reserve_info/`
+        that.$axios.post(url,scopeParams).then(res=>{
+          console.log('res进入',res.data.data)
           if(res.data.message === 'success'){
             that.preInfoParam = res.data.data.results[0]
             //处理数据然后传给子组件
-            this.preBillParam.rt_rate = this.preInfoParam.rt_rate
-            this.preBillParam.reserve_guest = this.preInfoParam.reserve_guest
-            this.handleParentParam(this.preInfoParam)
-            this.handleChildParam(this.preBillParam)
-            // this.preBillParam.rt_rate = this.concatData(this.preBillParam.rt_rate)
-            this.preBillParam.reserve_base.leave_time = [moment(this.preBillParam.reserve_base.arr_time).format('YYYY-MM-DD HH:mm:ss'),moment(this.preBillParam.reserve_base.leave_time).format('YYYY-MM-DD HH:mm:ss')]
-            this.preBillParam.reserve_base.arr_time = ''
-            this.preInfoParam = this.preBillParam
-            console.log('this.preInfoParam父级',this.preInfoParam)
-            this.preEnterInfoParam = _.cloneDeep(this.preInfoParam) //预定转入住详情
-            this.preEnterInfoParam.parentRoomNumber = param
+            that.preBillParam.reserve_rate = that.preInfoParam.reserve_rate
+            if(that.preInfoParam.reserve_guest.length != 0){
+              // that.preBillParam.reserve_guest = []
+              //关键一步，登记有身份证号要清空<===================mark
+              for(var item of  that.preInfoParam.reserve_guest){
+                item.id_no = ''
+              }
+              that.preBillParam.reserve_guest = [].concat(that.preInfoParam.reserve_guest)  
+            }else{
+              that.preBillParam.reserve_guest = []
+              that.preBillParam.reserve_guest.push(that.reserve_guest)
+            }
+            this.preBillParam.reserve_base = that.preInfoParam.reserve_base
+            that.handleChildParam(that.preBillParam)
+            console.log('that.preBillParamthat.preBillParam',that.preBillParam)
+            that.preEnterInfoParam = _.cloneDeep(that.preBillParam) //预定转入住详情
+            that.previewToEnterVisible = true
+            console.log('res进444入',res.data.data)
+             console.log('that.previewToEnterVisible',that.previewToEnterVisible)
           }else{
             that.$message.error('获取预订单详情失败!')
           }
         }).catch(error=>{
+          console.log(error)
         })
       },
       //有入住得时候(双击)
@@ -1730,10 +1791,8 @@
         }
         let that = this
         // this.linInfoParam = {}//置空 防止后台取出数据紊乱造成进一步错误
-        // let url = `http://192.168.2.224:9005/v1/checkin/all_master_info/`
-        // let url = that.api.api_bill_9202 + '/v1/' + `checkin/all_master_info/`
+        // let url = `http://192.168.2.165:9005/v2/checkin/all_master_info/`
         let url = that.api.api_newBill_9204 + '/v2/' + `checkin/all_master_info/`
-        // let url = that.api.api_bill_9202 + '/v1/' + `checkin/all_master_info_order/`
         that.$axios({
            method : 'get',
             url : url,
@@ -1876,17 +1935,18 @@
         }
         return array
         },
-       handleChildParam(param){
-        for(var item of param.rt_rate){
+      handleChildParam(param){
+        for(var item of param.reserve_rate){
           item.can_live_num = ''
           item.room_type_value = ''
           item.dynamic_roomNumber = item.room_number != '' ? item.room_number.split(',') : []
           item.roomCount = ''
           item.roomPrice = ''
         }
-        for(var item of param.reserve_guest){
-          item.liveCount = 0
-        }
+        console.log('param.reserve_guest',param.reserve_guest)
+        // for(var item of param.reserve_guest){
+        //   item.liveCount = 0
+        // }
       },
       handleParentParam(param){
         // this.preBillParam.rt_rate.can_live_num = ''
@@ -1986,6 +2046,10 @@
           util.validateBlank(this.preBillParam.reserve_base.telephone_master,'联系电话是必填项',this)&&
           util.validateTelNumber(this.preBillParam.reserve_base.telephone_master,'请输入正确手机格式',this)
         )
+      },
+      //预定转入住以及关闭dialog后
+      flushByPreviewEnter(){
+        this.getCardList()
       },
       //预定后
       flushByPreview(data){

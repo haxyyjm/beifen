@@ -1974,24 +1974,6 @@ export default {
               console.log(error);
             });
         },
-        //封装扫描二维码后触发的定时器
-        timing(){
-          let that = this;
-          // that.timer=0;
-          that.timer_src=setInterval(function()   //开启循环：
-          {
-            that.timer++;
-            console.log(that.timer++);
-            that.check_paid();
-            if(that.timer >=60){
-              clearInterval(that.timer_src);
-              console.log(that.timer);
-              return;
-              //判断res
-
-            }
-          },1000);
-        },
          /** 成功页面或者失败页面的确定按钮*/
         succeed_failed(){
           let that = this;
@@ -2622,10 +2604,10 @@ export default {
                 if(this.preBillParam.master_base[0].code_src === 'HY'){
                   console.log('row....会员。。。jinru',row)
                   this.rateCodeValue = row.rate_code
-                  this.clearMaseterBase()
+                  // this.clearMaseterBase()
                   console.log('选择房型一行========',this.preBillParam.master_base)
                   this.infoShow = row.card_name
-                }else if(this.preBillParam.master_base[0].code_market  == 'XYGS' || this.preBillParam.master_base[0].master_type === 3 || 4){
+                }else if(this.preBillParam.master_base[0].code_market  == 'XYGS'){
                   this.rateCodeValue = row.rate_code
                   this.infoShow = row.name
                 }else{
@@ -3496,6 +3478,7 @@ export default {
           this.remarkNewList.map((item) => { 
             obj[item.roomNo] = item.remark
           });
+          scopeParam.master_base[0].master_type = scopeParam.master_base[0].master_lable //这里因为混乱原理直接在这里赋值啦
           scopeParam.remarkList = obj
           console.log('scopeparam222',scopeParam)
           setTimeout(() => {
@@ -3708,40 +3691,29 @@ export default {
           var s1 = date1.getTime(),s2 = date2.getTime();
           var total = (s2 - s1)/1000;
           var day = parseInt(total / (24*60*60));//计算整数天数
-          console.log('sDate1',sDate1,'sDate2',sDate2)
           let flag_Day = moment().format('YYYY-MM-DD')
           let flag_startDay = `${flag_Day} 00:00:00`
           let flag_endDay = `${flag_Day} 14:00:00` 
-          console.log('flag_startDay',flag_startDay)
-          console.log('flag_endDay',flag_endDay)
-          console.log(day,'天数')
           if((sDate1<flag_endDay && sDate1>flag_startDay) && (sDate2<flag_endDay && sDate2>flag_startDay)){
-            console.log('进入1')
              day = 0
             return day
           }else if((sDate1<flag_endDay && sDate1>flag_startDay) && (sDate2>flag_endDay)){
-            console.log('进入2')
             if(day === 0){
               day = 1
             }else if(day == 1){
               day = day
-              console.log('day...1',day)
             }else{
               day = day
             }
-            console.log('day...2',day)
             return day
           }else{
-            console.log('进入3')
             if(day === 0){
               day = 1
             }else if(day == 1){
               day = day
-              console.log('day...1',day)
             }else{
               day = day
             }
-            console.log('day...2',day)
             return day
           }
           // var dateSpan,
@@ -3850,18 +3822,8 @@ export default {
           // }else if (this.preBillParam.master_base[0].master_type != 0 && this.preBillParam.master_base[0].master_type != 1){
           //   this.clearMaseterBase()
           // }
-          if(this.preBillParam.master_base[0].code_src == 'HY' || this.preBillParam.master_base[0].code_market  == 'XYGS'){
-            this.clearMaseterBase()
-          }
-          else if(this.preBillParam.master_base[0].code_market  == 'ZY'){
-            this.clearMaseterBase()
-            // this.rateCodeValue = ''
-            console.log('this.preBillParam.master_base',this.preBillParam.master_base)
-          }
-          else{
             // this.clearMaseterBase()
-            this.rateCodeValue = 'BAR'
-          }
+          this.rateCodeValue = 'BAR'
           this.infoShow = ''//置空操作
         },
         //重新选房价码的时候，重新选房价

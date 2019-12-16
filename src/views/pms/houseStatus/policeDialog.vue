@@ -1,4 +1,3 @@
-
 <template>
     <div>
         <el-dialog class="houseTypeClass" width="50%" append-to-body   title="上传公安" @close="$emit('update:show', false);policeParamInfo.liveStatus = 0" :show="show" :visible.sync="policeComponentDialog" :modal="false">
@@ -124,7 +123,7 @@
                 console.log('policeComponentDialog',this.policeComponentDialog)
                 console.log('policeParamInfo=======子组件',this.policeParamInfo)
                 this.policeParamInfo = _.cloneDeep(this.policeParam)
-                this.policeParamInfo.liveStatus = 0
+                // this.policeParamInfo.liveStatus = 0
                 console.log('this.policeParam===',this.policeParam)
             },
         },
@@ -171,7 +170,7 @@
                 media.getMedia('150','150','video_2')
             },
             //拍照上传
-            takePhoto(param){
+            takePhoto(){
                 let that = this
                 //获得Canvas对象
                 let video = document.getElementById("video_2");
@@ -206,16 +205,16 @@
                         // that.imageUrl = 'https://image.eloadspider.com/' +  res.data.url
                         that.imageUrl = res.data.complete
                         that.$message.success('上传图片成功!')
-                        console.log('。。。。',this.policeParamInfo.reserve_guest)
-                        //暂时这样判断
-                        for(var item of that.policeParamInfo.reserve_guest){
-                            if(!item.pic_sign && !item.pic_photo){
-                                item.pic_sign = that.imageUrl  //拍摄照片传入
-                                item.pic_photo = that.policeParamInfo.card_imgUrl //该入住人得证件照
-                                break
-                            }
-                        }
-                        console.log('。。。。ddudididididididi',this.policeParamInfo.reserve_guest)
+                        // console.log('。。。。',this.policeParamInfo.reserve_guest)
+                        // //暂时这样判断
+                        // for(var item of that.policeParamInfo.reserve_guest){
+                        //     if(!item.pic_sign && !item.pic_photo){
+                        //         item.pic_sign = that.imageUrl  //拍摄照片传入
+                        //         item.pic_photo = that.policeParamInfo.card_imgUrl //该入住人得证件照
+                        //         break
+                        //     }
+                        // }
+                        // console.log('。。。。ddudididididididi',this.policeParamInfo.reserve_guest)
                     }
                     }).catch((err)=>{
                         console.info(err);
@@ -287,7 +286,7 @@
                             profile_photo: this.policeParamInfo.card_imgUrl//身份证照片
                         }
                         if(scopeParam_enter.room_number){
-                            this.card_number = scopeParam_enter.card_number
+                            this.card_number = scopeParam_enter.card_number //从无到有的入住人
                             this.card_type = scopeParam_enter.card_type
                             url = url_enter
                             scopeParam = scopeParam_enter
@@ -295,7 +294,10 @@
                             this.$message.warning('请选择房间号!')
                         }
                     }else{
-                        console.log('this.cardTypethis.cardType',this.cardType)
+                        console.log('this.policeParam',this.policeParam)
+                        console.log('this.policeParam.enterCardnumber',this.policeParam.enterCardnumber)
+                        console.log('进入同住人页面')
+                        console.log('this.card_number',this.card_number)
                         //同住人对象
                         let scopeParam_same = {
                             // hotel_id: hotel_id,
@@ -305,12 +307,12 @@
                             // room_number:  '1001',
                             // card_number: '342427199509182519',//证件号码
                             // original_card_number: '411323199309163430',//入住人证件号码
-                            original_card_number: this.card_number,//入住人证件号码//相反操作
+                            original_card_number: this.policeParam.enterCardnumber ?  this.policeParam.enterCardnumber : this.card_number,//入住人证件号码//相反操作======>标记这个最大区别
                             card_number: this.policeParamInfo.cardNo,//同住人证件号码//相反操作
                             // card_type:  '身份证',//证件类型
                             // original_card_type: '身份证',//入住人证件类型
-                            original_card_type: this.cardType ? this.cardType : '身份证',//入住人证件类型
-                            card_type:  this.policeParamInfo.cardType,//同住人证件类型
+                            original_card_type: '身份证',//入住人证件类型
+                            card_type:  '身份证',//同住人证件类型
                             user_name: this.policeParamInfo.name,
                             sex: this.policeParamInfo.sex + '性',
                             birthday: this.policeParamInfo.birthday,
@@ -328,7 +330,7 @@
                         }
                     }
                     console.log('url',url)
-                    console.log('scopeParamscopeParam同住人',scopeParam)
+                    console.log('scopeParamscopeParam同住人==入住人',scopeParam)
                     that.sendToParent()
                     that.$axios.post(url,scopeParam).then(res=>{
                     console.log('res',res)

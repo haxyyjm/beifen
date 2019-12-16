@@ -1,20 +1,20 @@
 <template>
 <!--主页-->
-  <div class="font-five">
+  <div class="font-five" :style="{ height: availHeight, overflow: 'auto' }">
     <!--上部分-->
     <div style="padding: 0 1%;height: 300px">
       <div style="width: 28%;float: left;height: 300px">
         <div style="height: 50px;line-height: 50px">
           <!--<i class="el-icon-document" style="font-size: 16px"></i>-->
-          <button class="font-light_future" @click="dialogVisible_future = true">实时房情</button>
+          <button class="font-light_future" @click="dialogVisible_future = true;get_time_room_status()">实时房情</button>
         </div>
         <div class="font-w"
              style="height: 50px;border:1px solid #ebeef5;line-height: 50px;padding: 0 8px;font-size: 16px">
-          <div style="width: 33.3%;float: left">PevPar:dadd</div>
-          <div style="width: 33.3%;float: left">入住率:20%</div>
-          <div style="width: 33.3%;float: left">钟点房数:233</div>
+          <div style="width: 33.3%;float: left">RevPar：<span style="color: green">{{RevPar}}</span></div>
+          <div style="width: 33.3%;float: left">入住率：<span style="color: orange">{{check_percent}}</span></div>
+          <div style="width: 33.3%;float: left">预计收益：<span style="color: green">{{predict_earn}}</span></div>
         </div>
-        <div style="height: 50px;line-height: 50px">
+        <!--<div style="height: 50px;line-height: 50px">
           <i class="el-icon-document" style="font-size: 16px"></i>
           <span class="font-light">未来房情</span>
           <el-table
@@ -28,7 +28,7 @@
               </el-table-column>
             </template>
           </el-table>
-        </div>
+        </div>-->
         <!--未来房情的日历-->
         <div>
           <!--还没有写-->
@@ -37,7 +37,7 @@
 
       <!--上右边部分-->
       <div style="width: 71.6%;float: right;height: 300px">
-        <div style="height: 50px;height: 50px;width: 85%">
+        <div style="height: 50px;width: 85%">
           <!--<div style="width:20%;float: left;height: 100%">
             <div style="height: 50px;line-height: 50px">
               <i class="el-icon-document" style="font-size: 16px"></i>
@@ -61,39 +61,58 @@
               </div>
             </div>
           </div>
+          <div style="width:30%;float: left;height: 50px;line-height: 50px">
+            <div class="demo-input-suffix">
+              <!--<div style="width: 25%;float: left;text-align: center">
+                <span class="font-four">来店时间:</span>
+              </div>-->
+              <div style="width: 74%;float: left">
+                <el-select v-model="rate_code" size="mini" @change="get_room_type_rate_code_info('code')" @focus="get_room_code()" placeholder="BAR">
+                  <el-option
+                    v-for="item in rate_codes"
+                    :key="item.code"
+                    :label="item.code"
+                    :value="item.code">
+                  </el-option>
+                </el-select>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div style="border: 1px solid #ebeef5">
           <template>
             <el-table
               size="mini"
+              border
               :cell-style="{textAlign:'center'}"
-              :header-cell-style="{background:'#F4F4F4',textAlign:'center'}"
+              :header-cell-style="{background:'#CCCCCCFF',textAlign:'center',color: '#222222FF'}"
               :data="common_table_info"
               height="250"
-              style="width: 100%;">
+              style="width: 100%">
               <el-table-column
                 prop="room_type"
                 label="可预定数/当日价"
                 width="150">
               </el-table-column>
-              <template v-for="(col,index) in base_title">
-                <el-table-column :prop=col.prop :label=col.label>
-                </el-table-column>
-              </template>
+              <el-table-column  v-for="(col,index) in base_title" :prop=col.prop :label=col.label :key="index">
+                <template slot-scope="scope">
+                  <span style="color: #0FB135FF">{{scope.row[scope.column.property].split('/')[0] + '间'}}</span>
+                  {{'/'}} 
+                  <span style="color: #D20C0CFF">{{'￥' + scope.row[scope.column.property].split('/')[1]}}</span>
+                </template>
+              </el-table-column>
             </el-table>
           </template>
-
         </div>
-
       </div>
     </div>
     <!--下部分-->
     <div style="padding: 20px 1%;height: auto;width: 100%" >
       <!--这是上面的切换部分tabs 数据是写的for循环取出来的-->
-      <el-tabs tab-position="top" @tab-click="handleClick">
+      <el-tabs type="card" tab-position="top" @tab-click="handleClick">
         <el-tab-pane v-for='(lab,index) in labelData'  :key="index"
-                     :label="lab.name + ((lab.num ? '(' :'') +lab.num+(lab.num ? ')':''))"><!--这是一个三目运算，当lab.num 有就显示括号和数据没有就不显示-->
+                     :label="lab.name + (('[' ) +lab.num+(']'))">
           <!--每一个tabs下的表及数据-->
           <div style="border: 1px solid #ebeef5">
             <template>
@@ -124,22 +143,29 @@
                   </template>
                 </el-table-column>
               </el-table>-->
-              <el-table :cell-style="{textAlign:'center'}" :data="tableData_orderlist" style="width: 100%" size="mini" height="350px" :header-cell-style="{background:'#303A41',color:'white',textAlign:'center'}" stripe>
-                <el-table-column prop="order_no" fixed width="160" label="预定编号">
+              <el-table  border :default-sort = "{prop: 'arr_time', order: 'descending'}" :cell-style="{textAlign:'center'}" :data="tableData_orderlist" style="width: 100%" size="mini" height="350px" :header-cell-style="{background:'#303A41',color:'white',textAlign:'center'}" stripe>
+                <el-table-column type="index" width="50" label="序号">
                 </el-table-column>
-                <el-table-column prop="reserve_guest" label="预订人" :key="Math.random()" width="160" v-if="rsc_peo_flag">
+                <!-- <el-table-column prop="reserve_guest" label="预订人" :key="Math.random()" width="160">
                   <template slot-scope="scope">
                     <span v-for="(col,index) in scope.row.reserve_guest">{{col.name}}、</span>
                   </template>
-                </el-table-column>
-                <el-table-column prop="master_guest" label="入住人" :key="Math.random()" width="160" v-if="!rsc_peo_flag">
+                </el-table-column> -->
+                <el-table-column prop="master_guest_list" label="在住人" :key="Math.random()" width="160" v-if="!rsc_peo_flag">
                   <template slot-scope="scope">
-                    <span v-for="(col,index) in scope.row.master_guest">{{col.name}}、</span>
+                    <span >{{scope.row.master_guest_list.name}}、</span>
                   </template>
                 </el-table-column>
-                <el-table-column prop="room_type" label="在住房间类型" :key="Math.random()" v-if="room_type_flag">
+                <el-table-column prop="from_name" label="团队名">
                 </el-table-column>
-                <el-table-column prop="rt_rate" width="140" label="预定房间类型" :key="Math.random()" v-if="room_type_array_flag" type="expand">
+                <el-table-column  label="是否联房" :key="Math.random()" v-if="room_type_flag">
+                    <template slot-scope="scope">
+                      <span>{{scope.row.link_id == false ? '否' : '是'}}</span>
+                  </template>
+                </el-table-column>
+                <el-table-column prop="room_type" label="房型" :key="Math.random()" v-if="room_type_flag">
+                </el-table-column>
+                <el-table-column prop="rt_rate" width="140" label="预定房间类型" :key="Math.random()" v-if="room_type_array_flag">
                   <template slot-scope="scope">
                     <span>房间类型：</span><span v-for="(col,index) in scope.row.rt_rate">{{col.room_type}}、</span>
                   </template>
@@ -151,25 +177,35 @@
                     <span v-for="(col,index) in scope.row.rt_rate">{{col.room_number}}、</span>
                   </template>
                 </el-table-column>
-                <el-table-column prop="master_guest" width="140" label="在住人联系电话" :key="Math.random()" v-if="!rsc_peo_flag" type="expand">
+                <el-table-column prop="master_guest_list" width="140" label="联系电话" :key="Math.random()" v-if="!rsc_peo_flag">
                   <template slot-scope="scope">
-                    <span v-for="(col,index) in scope.row.master_guest">{{col.telephone}}、</span>
+                    <span >{{scope.row.master_guest_list.telephone}}、</span>
                   </template>
                 </el-table-column>
-                <el-table-column prop="reserve_guest" width="240" label="预定人联系电话" :key="Math.random()" v-if="rsc_peo_flag">
+                <el-table-column prop="rsv_person_name" label="预定人" :key="Math.random()" v-if="rsc_peo_flag">
+                </el-table-column>
+                <el-table-column prop="telephone_master"  label="联系电话" :key="Math.random()" v-if="rsc_peo_flag">
+                </el-table-column>
+                <el-table-column sortable prop="arr_time" label="入住时间" width="140px">
+                </el-table-column>
+                <el-table-column prop="leave_time" label="离店时间" width="140px">
+                </el-table-column>
+                <el-table-column prop="rate_code" label="房价码">
+                </el-table-column>
+                <el-table-column prop="room_status" label="房态">
+                </el-table-column>
+                <el-table-column prop="room_price" label="房价">
                   <template slot-scope="scope">
-                    <span v-for="(col,index) in scope.row.reserve_guest">{{col.telephone}}、</span>
+                    <span style="color: #f3565d"> 
+                      {{scope.row.room_price + '元'}}
+                    </span>
                   </template>
                 </el-table-column>
-                <el-table-column prop="arr_time" label="预抵时间" width="140px">
+                <el-table-column prop="account.balance" label="余额">
                 </el-table-column>
-                <el-table-column prop="leave_time" label="预离时间" width="140px">
+                <el-table-column prop="account.usable_pre_authorized" label="信用">
                 </el-table-column>
-                <el-table-column prop="retaintime" label="保留时间">
-                </el-table-column>
-                <el-table-column prop="" label="是否钟点房">
-                </el-table-column>
-                <el-table-column prop="modify_user_id" label="操作人">
+                <el-table-column prop="create_user_name" label="销售员">
                 </el-table-column>
                 <!--<el-table-column prop="master_status_lable" label="单状态">
                   <template slot-scope="scope">
@@ -181,92 +217,138 @@
                     <span v-else>未知</span>
                   </template>
                 </el-table-column>-->
-                <el-table-column prop="remark" label="备注">
-                </el-table-column>
-                <el-table-column prop="operation" label="操作" width="250px" fixed="right">
+                <!-- <el-table-column prop="remark" label="备注">
+                </el-table-column> -->
+                <!--<el-table-column prop="operation" label="" width="250px" fixed="right">
                   <template slot-scope="scope">
-                    <!-- <el-button @click="handleClick(tableData2[scope.$index].id)" size="small">入住</el-button> -->
-                    <!-- <el-button @click="handleClick(tableData2[scope.$index].id)" size="small">编辑</el-button> -->
-                    <el-button type="danger" @click="deleteClick(scope.$index, scope.row,tableData_orderlist)" size="small">删除</el-button>
+                    &lt;!&ndash; <el-button @click="handleClick(tableData2[scope.$index].id)" size="small">入住</el-button> &ndash;&gt;
+                    &lt;!&ndash; <el-button @click="handleClick(tableData2[scope.$index].id)" size="small">编辑</el-button> &ndash;&gt;
+                    &lt;!&ndash;<el-button type="danger" @click="deleteClick(scope.$index, scope.row,tableData_orderlist)" size="small">删除</el-button>&ndash;&gt;
                   </template>
-                </el-table-column>
+                </el-table-column>-->
               </el-table>
             </template>
           </div>
         </el-tab-pane>
       </el-tabs>
-      <el-pagination @current-change="handleCurrentChange_list" :current-page="currentPage" :page-size="page_size" layout="total, prev, pager, next, jumper" :total="total">
+      <el-pagination @current-change="currentChange" 
+        :current-page="currentPage"
+        :page-size="page_size"
+        layout="total, prev, pager, next, jumper" :total="total">
       </el-pagination>
     </div>
 
     <!--底部页面-->
-    <div class="main-bottom-top">
+    <!--<div class="main-bottom-top">
       <i class="el-icon-document" style="font-size: 16px;margin-left: 10px"></i>
       <label style="margin-left: 5px;color: #cccccc">排房列表</label>
       <label style="margin-left: 10px">当前合计：</label><label></label>
       <label>订金：</label><label></label>
-    </div>
-    <el-dialog title="实时房情" :visible.sync="dialogVisible_future"  :close-on-click-modal='false' width="60%">
+    </div>-->
+    <el-dialog title="实时房情" :visible.sync="dialogVisible_future" top="1vh" :close-on-click-modal='false' width="60%">
       <el-row :gutter="20">
-        <el-col :span="12"><div>
+        <el-col :span="8"><div>
           <el-row style="height: 300px">
              <h3>汇总情况</h3><br/>
             <el-table
               size="mini"
-              :data="tableData_collect"
+              :data="room_count"
               border
+              max-height="230"
               style="width: 100%">
+              <el-table-column property="name" label="描述"></el-table-column>
+              <el-table-column property="num" label="数目"></el-table-column>
             </el-table>
           </el-row><br/>
           <el-row style="height: 300px">
-             <h3>业务流转</h3><br/>
+             <h3>来源房情</h3><br/>
             <el-table
               size="mini"
-              :data="tableData_business"
+              :data="src_return"
               border
+              max-height="230"
               style="width: 100%">
+              <el-table-column property="src_decript" label="来源"></el-table-column>
+              <el-table-column property="room_number" label="房数"></el-table-column>
+              <el-table-column property="room_price" label="房价"></el-table-column>
             </el-table>
           </el-row>
         </div></el-col>
-        <el-col :span="12"><div>
+        <el-col :span="8"><div>
           <el-row style="height: 300px">
             <h3>客房中心</h3><br/>
             <el-table
               size="mini"
-              :data="tableData_guest"
+              :data="room_status"
               border
+              max-height="230"
               style="width: 100%">
+              <el-table-column property="name" label="描述"></el-table-column>
+              <el-table-column property="num" label="在住"></el-table-column>
             </el-table>
           </el-row><br/>
-          <el-row style="height: 300px">
-            <el-row style="height: 250px">
-              <h3>本日预测</h3><br/>
+          <el-row style="height: 340px">
+              <h3>市场房情</h3><br/>
               <el-table
                 size="mini"
-                :data="tableData_forecast"
+                :data="market_return"
                 border
                 style="width: 100%">
+                <el-table-column property="market_decript" label="市场"></el-table-column>
+                <el-table-column property="room_number" label="房数"></el-table-column>
+                <el-table-column property="room_price" label="房价"></el-table-column>
               </el-table>
-              <span>本夜占用=当前在住-预计离店+预计到达</span><br/>
-              <span>可卖房=总房数-维修房+本夜占用</span>
-            </el-row>
-            <el-row :gutter="24">
+             <!-- <span>本夜占用=当前在住-预计离店+预计到达</span><br/>
+              <span>可卖房=总房数-维修房+本夜占用</span>-->
+          </el-row>
+            <!--<el-row :gutter="20">
                <el-col :span="12">
                  <el-date-picker
                    v-model="value1"
                    type="date"
+                   width="120"
                    size="mini"
                    placeholder="选择日期">
                  </el-date-picker>
                </el-col>
-               <el-col :span="12">
-                 <button style="height: 27px;width: 80px;color: #FFFFFF;background: #4488E9;border: none;border-radius: 3px">刷新</button>
-                 <button style="height: 27px;width: 80px;color: #FFFFFF;background: #4488E9;border: none;border-radius: 3px">打印</button>
-               </el-col>
-            </el-row>
+            </el-row>-->
+          <br/>
+        </div>
+        </el-col>
+
+        <el-col :span="8"><div>
+          <el-row style="height: 300px">
+            <h3>业务流转</h3><br/>
+            <el-table
+              size="mini"
+              :data="room_live"
+              border
+              max-height="230"
+              style="width: 100%">
+              <el-table-column property="name" label="描述"></el-table-column>
+              <el-table-column property="num" label="数目"></el-table-column>
+            </el-table>
           </el-row><br/>
+          <el-row style="height: 300px">
+            <h3>预计收益</h3><br/>
+            <el-table
+              size="mini"
+              :data="room_price"
+              border
+              max-height="230"
+              style="width: 100%">
+              <el-table-column property="name" label="描述"></el-table-column>
+              <el-table-column property="price" label="值"></el-table-column>
+            </el-table>
+          </el-row>
         </div></el-col>
+        <el-row :gutter="20">
+          <el-col :span="12">
+          <!--<button style="height: 27px;width: 80px;color: #FFFFFF;background: #4488E9;border: none;border-radius: 3px">打印</button>-->
+          </el-col>
+        </el-row>
       </el-row>
+
     </el-dialog>
     <!--最底部-->
     <!--<div style="margin-top: 10px;margin-left: 10px;margin-bottom: 10px">
@@ -296,22 +378,36 @@
 </template>
 
 <script>
+  import moment from 'moment'
     export default {
       data() {
         return {
+          isCurrent: '1',//判断标志
+          availHeight: '',
+          interval : '',//定时器
+          url_codebase : this.api.api_price_9101,//获取codebase的接口
+          rate_codes : [],//拿到的是房价码数组
+          rate_code : 'BAR',//拿到的是房价码
           //所有下拉框的数据，写的时候记得不一样的下拉框数据分开定义变量
           value1 : '',//今日预测的日期
           options: [],
-          tab_pane_flag : 0,//用来判断当前的分页是哪一种
+          tab_pane_flag : '0',//用来判断当前的分页是哪一种
           value:'',
           startTime: '', //该时间是用来重置当前的起始时间的
-          tableData_collect : [],//汇总情况
-          tableData_business : [],//业务流转
-          tableData_guest : [],//客房中心
+          flagTime : '',//结束时间
+          room_count : [],//汇总情况
+          room_live : [],//业务流转
+          room_status : [],//客房中心
           tableData_forecast : [],//本日预测
+          market_return : [],//市场房情
+          src_return : [],//来源房情
+          room_price : [],//预计收益
+          RevPar : '',//RevPar
+          check_percent : '',//入住率
+          predict_earn : '',//预计收益
           //结束时间
           endTime:'',
-          dialogVisible_future : false,//未来房情dialog
+          dialogVisible_future : false,//实时房情dialog
           base_title:[],//动态修改表头
           base_title_future : [],//动态修改未来房情的表头
           common_table_info : [],//可预订的房间的表展示
@@ -321,13 +417,13 @@
           room_type_flag: true, //房间类型为显示的  这时候是在住单 应离未离 异常单的情况
           room_type_array_flag: false, //房间类型为应到未到 所有预定的情况
           rsc_peo_flag: false,
-          // url: 'http://bill.crowncrystalhotel.com',
-          url: 'http://47.98.113.173:9202',
+          // url: this.api.api_newBill_9204,
+          url: this.api.api_newPrice_9107,
           /**
            * 分页
            */
           currentPage: 1, //当前页码
-          page_size: 10, //每页显示数量
+          page_size: 5, //每页显示数量
           total: 0, //总数
           //右上表格数据
           tableData: [],
@@ -335,31 +431,38 @@
           labelData:[{
             id:0,
             name:"在住单",
-            num:""
-          },{
-            id:1,
-            name:"应到未到",
-            num:""
-          },{
-            id:2,
-            name:"应离未离",
-            num:""
-          },{
-            id:3,
-            name:"所有预订",
-            num:""
+            num:"0"
           },{
             id:4,
             name:"异常单",
-            num:""
+            num:"0"
           },{
             id:5,
             name:"团队",
-            num:""
+            num:"0"
           },{
             id:6,
             name:"钟点房",
-            num:""
+            num:"0"
+          },
+          {
+            id:2,
+            name:"应离未离",
+            num:"0"
+          },
+          {
+            id:1,
+            name:"应到未到",
+            num:"0"
+          },
+          {
+            id:3,
+            name:"所有预订",
+            num:"0"
+          },{
+            id:7,
+            name:"今日将到",
+            num:"0"
           }],
           //房间号输入框的定义
           input1:"",
@@ -379,55 +482,144 @@
         /**
          * @get_roomtype_rate_code_info 未来七天的可预订数
          */
-        that.get_room_type_rate_code_info();
+        that.get_room_type_rate_code_info('flag_time');
+        that.get_time_room_status();
+
+      },
+      mounted (){
+        this.availHeight = (screen.availHeight -220)  +'px';
       },
       methods:{
+        currentChange(val) {
+          // 改变页的时候调用一次
+          this.currentPage = val;
+          console.log('val',val)
+          console.log('this.currentPage',this.currentPage)
+          console.log('this.tab_pane_flag',this.tab_pane_flag)
+          this.isCurrent = '1'
+          this.handleClick(this.tab_pane_flag,this.isCurrent);
+        },
+        //下拉框页数改变的时候调用===>此时不需要
+        sizeChange(val) {
+          // 改变每页显示条数的时候调用一次
+          this.page_size = val;
+          this.handleClick(this.tab_pane_flag);
+        },
+        /**
+         * @ get_time_room_status 实时房情
+         */
+        get_time_room_status(){
+          let that = this;
+          let url =  that.api.api_price_9101 + '/v1/room/room_status/real_time_situation/';
+          that.$axios({
+               method : 'get',
+               url : url
+          }).then((res)=>{
+               //console.info(res);
+               that.room_count = res.data.data.room_count;
+               that.room_live = res.data.data.room_live;
+               that.room_status = res.data.data.room_status;
+               that.room_price = res.data.data.room_price;
+               //that.RevPar = res.data.data.room_price;
+               for(let i of res.data.data.room_price){
+                  if(i.name === 'RevPar'){
+                    if(i.price){
+                      that.RevPar = i.price.toFixed(2);
+                    }else{
+                      that.RevPar = 0;
+                    }
+                  }else if(i.name === '预计收入'){
+                      that.predict_earn = i.price;
+                  }
+               }
+               for(let i of res.data.data.room_count){
+                 var count;
+                 var check_in_num;
+                 if(i.name === '房间数'){
+                     count = i.num;
+                 }else if(i.name === '入住房间数'){
+                     check_in_num = i.num
+                 }
+                 if(count>=0 && check_in_num>=0){
+                     that.check_percent = count >= 0 ? parseFloat(((check_in_num/count).toFixed(2) * 100).toPrecision(12))+"%" : 0; //(check_in_num/count).toFixed(2);
+                     //parseFloat(((check_in_num/count).toFixed(2) * 100).toPrecision(12))+"%";
+                 }else{
+                   //nothing...
+                 }
+               }
+               that.src_return = res.data.data.expected_return.src_return;
+               that.market_return = res.data.data.expected_return.market_return;
+          }).catch((err)=>{
+               console.error(err);
+          });
+        },
+        /**
+         * @get_room_code 获取房价码
+         */
+        get_room_code(){
+          let that = this;
+          let url = that.url_codebase+ '/v1/room/rate_code/get_rate_code_list/';
+          that.$axios({
+               method : 'get',
+               url : url,
+          }).then((res)=>{
+               console.info(res);
+               that.rate_codes = res.data.data.results;
+          }).catch((err)=>{
+               console.error(err);
+          })
+        },
         /**
          *  @get_roomtype_rate_code_info 获取未来七天的房型的所有房价码信息
          *  @rate_code BAR 因为这里的房价码是不确定的，没有供选择的信息，所以目前是挂牌价
          */
-        get_room_type_rate_code_info(){
-
+        get_room_type_rate_code_info(flag){
           let that = this;
-          let rooms_list = [];
-          let url = 'http://47.98.113.173:8091/v1/room/get_roomtype_list_tree/';
-          that.$axios({
-            method : 'get',
-            url : url,
-            params : {
-              rate_code : 'BAR'
-            }
-          }).then((res)=>{
-            localStorage.setItem('authorization',res.data.new_authorization);
-            that.room_type_list = res.data.data;
-            for(let i in that.room_type_list){
-              rooms_list.push(that.room_type_list[i].code);
-            }
-            console.info(rooms_list);
+            //console.info(that.rate_code);
+            //console.info(that.startTime);
             /**
              *  成功以后将表格的数据渲染出来
              *  拿到的是未来七天的房价码
              */
             that.$axios({
               method : 'post',
-              url : 'http://47.98.113.173:9101/v1/rate_code/get_rate_code/',
+              url : that.api.api_price_9101 + '/v1/room/rate_code/get_rate_code/',
               data : {
-                rate_code : 'BAR',
-                begin_date : that.getTime(),
+                rate_code : that.rate_code,
+                begin_date : flag === 'flag_time' ? that.getTime() : that.cut_time_seven(),
                 end_date : that.getTime_seven(),
-                room_type_list : rooms_list,
+                //room_type_list : rooms_list,
                 code_type : 1
               }
             }).then((res)=>{
-              localStorage.setItem('authorization',res.data.new_authorization);
-              that.common_table_info = res.data.data.room_type_price;
-              console.info(that.common_table_info);
+              //console.info(that.startTime);
+              let common_table_info = [];
+              /**
+               * 这里需要将拿到的对象转为数组，进行赋值，这样才不会类型错误
+               */
+              for(let i in res.data.data.price){
+                common_table_info.push(res.data.data.price[i]);
+              }
+              that.common_table_info = common_table_info;
             }).catch((err)=>{
-              console.error(err);
+               console.error(err);
             })
-          }).catch((err)=>{
-            console.error(err);
-          });
+        },
+        /**
+         * @cut_time_seven 重置当前选择的时间
+         */
+        cut_time_seven(){
+          let that = this;
+          let value_day = '';
+          that.startTime ? value_day = that.startTime : value_day = new Date();
+          let target_day_milliseconds = value_day.getTime() - 1000 * 60 * 60 * 24 * 7;
+          value_day.setTime(target_day_milliseconds);
+          let year = value_day.getFullYear(); //获取年
+          let month = value_day.getMonth()+1;//获取月
+          let day = value_day.getDate(); //获取当日
+          let time = year+"-"+month+"-"+day; //
+          console.info(that.startTime);
+          return time;
         },
           /**
           * @getTime 获取当前日期
@@ -454,7 +646,8 @@
           let year = value_day.getFullYear(); //获取年
           let month = value_day.getMonth()+1;//获取月
           let day = value_day.getDate(); //获取当日
-          let time = year+"-"+month+"-"+day; //组合时间
+          let time = year+"-"+month+"-"+day; //
+          //console.info(that.startTime);
           return time;
         },
         /**
@@ -462,12 +655,12 @@
          */
         set_time(){
           let that = this;
-          console.info(that.startTime);
+          //console.info(that.startTime);
           that.change_days();
           /**
            * 如果用户更改了时间，直接给后端发送当前用户选择的时间和往后七天的房价码
            */
-          that.get_room_type_rate_code_info();
+          that.get_room_type_rate_code_info('flag_time');
         },
         /**
          * @change_days 改变table的表头数量
@@ -497,7 +690,7 @@
             that.base_title.push(param);
             that.base_title_future.push(params);
           }
-          console.info(that.base_title);
+          //console.info(that.base_title);
         },
         /**
          * @getDay 获取日期
@@ -569,38 +762,78 @@
          * 点击事件的tab
          * @param tab
          */
-        handleClick(tab) {
+        handleClick(tab,isCurrent) {
           let that = this;
-          that.tab_pane_flag = tab.index;
-          console.log(tab.index);
-          if(tab.index === '0') {
+          // that.tab_pane_flag = tab.index;
+          typeof tab == 'string' ? that.tab_pane_flag : that.tab_pane_flag = tab.index;
+          let indexNumber = typeof tab == 'string' ? tab :  tab.index
+          console.log(indexNumber,'indexNumber');
+          that.tableData_orderlist = [] //置空防止数据污染
+          if(typeof isCurrent != 'string'){
+            that.page_size = 5;
+            that.currentPage = 1;
+          }else{
+            that.page_size = that.page_size;
+            that.currentPage = that.currentPage;
+          }
+          console.log('这里')
+          if(indexNumber=== '0') {
+            console.log('进入')
             that.room_type_flag = true;
             that.room_type_array_flag = false;
             that.rsc_peo_flag = false;
             that.search_live();
-          } else if(tab.index === '1') {
-            that.rsc_peo_flag = true;
-            that.room_type_flag = false;
-            that.room_type_array_flag = true;
-            that.search_should_to();
-          } else if(tab.index === '2') {
+          }else if(indexNumber == '1'){
+            /**
+             * 异常单
+            */
+            that.room_type_flag = true;
+            that.room_type_array_flag = false;
+            that.rsc_peo_flag = false;
+            // that.search_abnormal_list(); 暂时错误不调取
+          } else if(indexNumber == '2'){
+            /**
+             * 团队
+            */
+            that.room_type_flag = true;
+            that.room_type_array_flag = false;
+            that.rsc_peo_flag = false;
+            that.search_team_list();
+          } else if(indexNumber == '3'){
+            /**
+             * 钟点房
+            */
+            that.room_type_flag = true;
+            that.room_type_array_flag = false;
+            that.rsc_peo_flag = false;
+            that.search_hour_list(); 
+          } 
+          //应离未离
+          else if(indexNumber === '4') {
             that.room_type_flag = true;
             that.room_type_array_flag = false;
             that.rsc_peo_flag = false;
             that.search_should_leave();
-          } else if(tab.index === '3') {
+          } 
+          //应到未到
+          else if(indexNumber === '5') {
+            that.rsc_peo_flag = true;
+            that.room_type_flag = false;
+            that.room_type_array_flag = true;
+            that.search_arrive_to();
+          }
+          //所有预定 
+          else if(indexNumber === '6') {
             that.rsc_peo_flag = true;
             that.room_type_flag = false;
             that.room_type_array_flag = true;
             that.search_all_res();
-          } else {
-            /**
-             * 异常单
-             */
-            that.room_type_flag = true;
-            that.room_type_array_flag = false;
-            that.rsc_peo_flag = false;
-            that.search_abnormal_list();
+          //今日将到
+          }else{
+            that.rsc_peo_flag = true;
+            that.room_type_flag = false;
+            that.room_type_array_flag = true;
+            that.search_todata_arrive();
           }
         },
         /**
@@ -608,54 +841,49 @@
          */
         search_live() {
           let that = this;
-          let url = that.url + '/v1/checkin/all_master_list/';
+          let url = that.url + `/v1/ordering/master_base_list/?page_size=${that.page_size}&page=${that.currentPage}`;
           that.$axios({
-            method: 'post',
+            method: 'get',
             url: url,
-            data: {
-              guest_list: {
-                master_from_lable: [],
-                room_type: that.check_list_room,
-                code_market_id: that.code_market_ids,
-                code_src_id: that.src_codes
-              }
-            }
           }).then((res) => {
             console.info(res);
-            localStorage.setItem('authorization',res.data.new_authorization);
             that.tableData_orderlist = res.data.data.results;
             that.total = res.data.data.count;
-            that.labelData[0].num = that.total;
+            that.getNum(res.data.data.count_dict)
+            // that.labelData[0].num = that.total ? that.total : 0;
           }).catch((err) => {
             console.error(err);
           })
         },
         /**
-         * @search_should_to  应到未到
+         * @desc 获取数量
          */
-        search_should_to() {
+        getNum(param){
+          this.labelData[0].num = param.master_base_count
+          this.labelData[1].num = param.abnormal_count
+          this.labelData[2].num = param.team_count
+          this.labelData[3].num = param.hour_count
+          this.labelData[4].num = param.should_leave_count
+          this.labelData[5].num = param.should_not_arrive
+          this.labelData[6].num = param.reserve_base_count
+          this.labelData[7].num = param.today_reserve_count
+        },
+        /**
+         * @search_arrive_to  应到未到
+         */
+        search_arrive_to() {
           let that = this;
-          let url = that.url + '/v1/booking/get_not_arrive_list/';
+          let nowTime = moment().format('YYYY-MM-DD HH:mm:ss')
+          let url = that.url + `/v1/ordering/reserve_base_list/?arr_time__lte=${nowTime}&page_size=${that.page_size}&page=${that.currentPage}`;
           that.$axios({
-            method: 'post',
+            method: 'get',
             url: url,
-            data: {
-              reserve_base: {
-                code_market_id: that.check_list_room,
-                code_src_id: that.src_codes
-              },
-              reserve_guest: {},
-              rt_rate: {
-                room_type: that.check_list_room,
-                room_class: []
-              }
-            }
           }).then((res) => {
             console.info(res);
-            localStorage.setItem('authorization',res.data.new_authorization);
             that.tableData_orderlist = res.data.data.results;
             that.total = res.data.data.count;
-            that.labelData[1].num = that.total;
+            that.getNum(res.data.data.count_dict)
+            // that.labelData[0].num = that.total ? that.total : 0;
           }).catch((err) => {
             console.error(err);
           })
@@ -665,24 +893,40 @@
          */
         search_should_leave() {
           let that = this;
-          let url = that.url + '/v1/checkin/get_leave_list/';
+          let nowTime = moment().format('YYYY-MM-DD HH:mm:ss')
+          console.log('nowTime',nowTime)
+          let url = that.url + `/v1/ordering/master_base_list/?leave_time__lt=${nowTime}&page_size=${that.page_size}&page=${that.currentPage}`;
           that.$axios({
-            method: 'post',
+            method: 'get',
             url: url,
-            data: {
-              guest_list: {
-                master_from_lable: [],
-                room_type: that.check_list_room,
-                code_market_id: that.code_market_ids,
-                code_src_id: that.src_codes
-              }
-            }
           }).then((res) => {
             console.info(res);
-            //localStorage.setItem('authorization',res.data.new_authorization);
             that.tableData_orderlist = res.data.data.results;
             that.total = res.data.data.count;
-            that.labelData[2].num = that.total;
+            that.getNum(res.data.data.count_dict)
+            // that.labelData[0].num = that.total ? that.total : 0;
+          }).catch((err) => {
+            console.error(err);
+          })
+        },
+        /**
+         * @desc 今日将到
+         */
+        search_todata_arrive(){
+          let that = this;
+          let today = moment().format('YYYY-MM-DD')
+          let nextday = moment().add(1, 'days').format('YYYY-MM-DD')
+          let time_arrage = today + ',' + nextday
+          let url = that.url + `/v1/ordering/reserve_base_list/?arr_time__range=${time_arrage}&page_size=${that.page_size}&page=${that.currentPage}`;
+          that.$axios({
+            method: 'get',
+            url: url,
+          }).then((res) => {
+            console.info(res);
+            that.tableData_orderlist = res.data.data.results;
+            that.total = res.data.data.count;
+            that.getNum(res.data.data.count_dict)
+            // that.labelData[0].num = that.total ? that.total : 0;
           }).catch((err) => {
             console.error(err);
           })
@@ -692,27 +936,54 @@
          */
         search_all_res() {
           let that = this;
-          let url = that.url + '/v1/booking/get_all_reserve_list/';
+          let url = that.url + `/v1/ordering/reserve_base_list/?page_size=${that.page_size}&page=${that.currentPage}`;
           that.$axios({
-            method: 'post',
+            method: 'get',
             url: url,
-            data: {
-              reserve_base: {
-                code_market_id: that.check_list_room,
-                code_src_id: that.src_codes
-              },
-              reserve_guest: {},
-              rt_rate: {
-                room_type: that.check_list_room,
-                room_class: []
-              }
-            }
           }).then((res) => {
             console.info(res);
-            //localStorage.setItem('authorization',res.data.new_authorization);
             that.tableData_orderlist = res.data.data.results;
             that.total = res.data.data.count;
-            that.labelData[3].num = that.total;
+            that.getNum(res.data.data.count_dict)
+            // that.labelData[0].num = that.total ? that.total : 0;
+          }).catch((err) => {
+            console.error(err);
+          })
+        },
+        /**
+         * 钟点房
+         */
+        search_hour_list(){
+          let that = this;
+          let url = that.url + `/v1/ordering/master_base_list/?master_type=1&page_size=${that.page_size}&page=${that.currentPage}`;
+          that.$axios({
+            method: 'get',
+            url: url,
+          }).then((res) => {
+            console.info(res);
+            that.tableData_orderlist = res.data.data.results;
+            that.total = res.data.data.count;
+            that.getNum(res.data.data.count_dict)
+            // that.labelData[0].num = that.total ? that.total : 0;
+          }).catch((err) => {
+            console.error(err);
+          })
+        },
+        /**
+         * 团队或协议单位
+         */
+        search_team_list(){
+          let that = this;
+          let url = that.url + `/v1/ordering/master_base_list/?from_type__in=0,1&page_size=${that.page_size}&page=${that.currentPage}`;
+          that.$axios({
+            method: 'get',
+            url: url,
+          }).then((res) => {
+            console.info(res);
+            that.tableData_orderlist = res.data.data.results;
+            that.total = res.data.data.count;
+            that.getNum(res.data.data.count_dict)
+            // that.labelData[0].num = that.total ? that.total : 0;
           }).catch((err) => {
             console.error(err);
           })
@@ -722,7 +993,7 @@
          */
         search_abnormal_list() {
           let that = this;
-          let url = that.url + '/v1/checkin/exception_list/';
+          let url = that.url + '/v2/checkin/exception_list/';
           that.$axios({
             method: 'post',
             url: url,
@@ -736,79 +1007,12 @@
             }
           }).then((res) => {
             console.info(res);
-            //localStorage.setItem('authorization',res.data.new_authorization);
             that.tableData_orderlist = res.data.data.results;
             that.total = res.data.data.count;
-            that.labelData[4].num = that.total;
+            that.labelData[4].num = that.total ? that.total : 0;
           }).catch((err) => {
             console.error(err);
           })
-        },
-        /**
-         * @handleCurrentChange_list 分页
-         */
-        handleCurrentChange_list(currentPage) {
-          let that = this;
-          let url = '';
-          if(that.tab_pane_flag){
-            switch (that.tab_pane_flag) {
-              case '0' : url = that.url + '/v1/checkin/all_master_list/?page=' + currentPage;
-                break;
-              case '1' : url = that.url + '/v1/booking/get_not_arrive_list/?page=' + currentPage;
-                break;
-              case '2' : url = that.url + '/v1/checkin/get_leave_list/?page=' + currentPage;
-                break;
-              case '3' : url = that.url + '/v1/booking/get_all_reserve_list/?page=' + currentPage;
-                break;
-              case '4' : url = that.url + '/v1/checkin/exception_list/?page=' + currentPage;
-                break;
-              default : break;
-            }
-          }
-          if(that.tab_pane_flag === '3' || that.tab_pane_flag === '1'){
-            that.$axios({
-              method: 'post',
-              url: url,
-              data: {
-                reserve_base: {
-                  code_market_id: that.room_types,
-                  code_src_id: that.src_codes
-                },
-                reserve_guest: {},
-                rt_rate: {
-                  room_type: that.room_types,
-                  room_class: []
-                }
-              }
-            }).then((res) => {
-              console.info(res);
-              //localStorage.setItem('authorization',res.data.new_authorization);
-              that.tableData_orderlist = res.data.data.results;
-              that.total = res.data.data.count;
-            }).catch((err) => {
-              console.error(err);
-            })
-          }else{
-            that.$axios({
-              method: 'post',
-              url: url,
-              data: {
-                guest_list: {
-                  master_from_lable: [],
-                  room_type: that.room_types,
-                  code_market_id: that.code_market_ids,
-                  code_src_id: that.src_codes
-                }
-              }
-            }).then((res) => {
-              console.info(res);
-              //localStorage.setItem('authorization',res.data.new_authorization);
-              that.tableData_orderlist = res.data.data.results;
-              that.total = res.data.data.count;
-            }).catch((err) => {
-              console.error(err);
-            })
-          }
         },
         /**
          * 删除的操作
@@ -840,7 +1044,6 @@
               order_no: row.order_no
             }
           }).then(function(res) {
-            //localStorage.setItem('authorization',res.data.new_authorization);
             TableData.splice(index, 1);
             that.hintInfo('success', '删除成功！');
           }).catch(function(err) {
@@ -870,29 +1073,28 @@
             this.$message.error('出错了！');
           }
         },
-        //操作中改的点击事件
-        changeClick(info){
-          console.log(info)
+        /**
+         * 更改样式的函数
+         */
+        tableRowClassName(row,rowindex){
+          if (rowindex%2 === 0) {
+            return 'warning-row';
+          } else{
+            return 'success-row';
+          }
         },
-        //操作中排的点击事件
-        rowClick(info){
-
-        },
-        //操作中入的点击事件
-        inClick(info){
-
-        },
-        //操作中拆的点击事件
-        exClick(info){
-
-        },
-        //操作合改的点击事件
-        joinClick(info){
-
-        },
-        //操作中转的点击事件
-        turnClick(info){
-
+      },
+      /**
+       * @dialogVisible_future 监听dialog实时房情的变化
+       */
+      watch : {
+        dialogVisible_future(val){
+          console.log(val);
+          if(val===true){
+            this.interval = setInterval(this.get_time_room_status,3000);
+          }else {
+            clearInterval(this.interval);
+          }
         },
       }
     }
@@ -934,5 +1136,12 @@
 }
 .el-table .bg-row {
   background: #EEEEEE;
+}
+.el-table .warning-row {
+  background: oldlace;
+}
+
+.el-table .success-row {
+  background: #f0f9eb;
 }
 </style>

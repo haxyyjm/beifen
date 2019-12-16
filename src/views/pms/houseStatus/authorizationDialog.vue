@@ -253,8 +253,9 @@
           //批量查看预授权list(一个accountId下面)
           findAuthorizationList(){
             let that = this
+            let id = localStorage.getItem('mainAccountId')//缓存中获取
             // let url = this.api.api_9022_9519 + '/v1/' + 'finance/pre_authorized_detail/list_by_account_ids'
-            let url= that.api.api_newPrice_9107+ '/v1/' + `accounts/get_pre_authorized_detail_list/?page_size=100&page=1`
+            let url= that.api.api_newPrice_9107+ '/v1/' + `accounts/get_pre_authorized_detail_list/?page_size=100&page=1&account=${id}`
             that.$axios.get(url).then((res)=>{
                 if(res.data.message =='success'){
                   that.authorizationList = res.data.data.results
