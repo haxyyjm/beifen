@@ -1209,6 +1209,8 @@
         let url = that.api.api_newPrice_9107+ '/v1/' + `report/hotel_info/`
         that.$axios.get(url).then(res=>{
           that.hotelInfo = res.data.data.results[0]
+          this.$store.state.biz_date = this.hotelInfo.biz_date
+          this.$store.state.date_delta = this.hotelInfo.date_delta
           console.log(res.data.data.results[0])
         }).catch(error=>{
           that.$message.error(error)

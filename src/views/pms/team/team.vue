@@ -379,7 +379,7 @@
                   <el-table-column prop="from_name" label="代码"></el-table-column>
                   <el-table-column prop="from_name" label="描述"></el-table-column>
                   <el-table-column prop="from_name" label="金额"></el-table-column>
-                  <el-table-column prop="from_name" label="记录"></el-table-column>
+                  <el-table-column fixed="right" prop="from_name" label="记录"></el-table-column>
                 </el-table>
                 <div class="left-end">
                   <span>合计: 233320</span>
@@ -438,7 +438,7 @@
                 <div>
                   <ul>
                     <li class="pingxing">
-                      <span>信用:</span>
+                      <span style="color: #4488E9;text-decoration:underline;">信用:</span>
                       <el-input size="mini"></el-input>
                     </li>
                     <li class="pingxing">
@@ -608,7 +608,7 @@ export default {
 </script>
 <style lang="less" scoped>
 .wrap {
-  width: calc(100% - 60px);
+  width: calc(100% - 58px);
   .container-top,
   .container-top-second
     {
@@ -644,15 +644,17 @@ export default {
     }
     .pingxing.singleColor {
       color: #4488e9ff;
+      text-decoration:underline;
     }
     // .div:nth-child(3){
     //     flex: 1
     // }
   }
   .container-banner.clear{
+    display: flex;
+    justify-content: space-between;
     border: none;
     height: 200px;
-    width: calc(100% - 460px); //这里特殊处理
   }
   .container-center {
     .caozuo {
@@ -700,10 +702,11 @@ export default {
       }
     }
     .right{
-      flex: 1;
+      width: calc(100% - 460px);
+      // flex: 1; //这个不能在里面写，不然会出现问题(不同分辨率下)
       margin-left: 10px;
       .right-body{
-        width: calc(100% - 460px); //这里特殊处理
+        width: 100%;
       }
       .right-bottom ul{
         display: flex;

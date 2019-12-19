@@ -831,6 +831,7 @@
     name: 'firstIndex',
     data(){
       return {
+        hotelInfo: {},
         clickOrHover: 'hover',
         newCardList: [],
         cardList_t: [[{
@@ -1311,14 +1312,15 @@
     },
     created(){
       this.getCardList() //获取入住信息
-      this.getFloor()//获取楼层
-      this.initWebSocket();
+      this.getHotel_info()//
+      // this.getFloor()//获取楼层
       // this.getRoomType()
       // this.enterFormVisible = true
     },
     mounted (){
       // this.getCardList()
       // this.getCardAllList()
+      // this.initWebSocket();
       this.availHeight = (screen.availHeight -180)  +'px';
       // this.houseSituation_date = new Date()
     },
@@ -1341,41 +1343,65 @@
       }
 		},
     methods: {
+      /**
+       * 获取酒店信息
+       */
+      getHotel_info(){
+        let that = this
+        let url = that.api.api_newPrice_9107+ '/v1/' + `report/hotel_info/`
+        that.$axios.get(url).then(res=>{
+          that.hotelInfo = res.data.data.results[0]
+          this.$store.state.biz_date = this.hotelInfo.biz_date
+          this.$store.state.date_delta = this.hotelInfo.date_delta
+          console.log(res.data.data.results[0])
+        }).catch(error=>{
+          that.$message.error(error)
+        })
+      },
       initWebSocket(){//初始化weosocket(必须)
-       console.log('websock')
-        const wsuri = "ws://192.168.3.105:8000/ws/chat_message/";    //请根据实际项目需要进行修改
+      console.log('111',localStorage.getItem('authorization'))
+        const wsuri = "ws://47.98.113.173:9115/ws/room/room_map_list/";    //请根据实际项目需要进行修改
         this.websock = new WebSocket(wsuri);      //新建一个webstock对象
         // this.websock.onclose = this.websocketclose();
         // this.websock.onmessage = this.websocketonmessage(); 
-        // this.websock.onopen = this.websocketonopen(event);     //打开连接 
-        this.websock.onopen = function(event) {
-          console.log("WebSocket is open now.",event);
-        };
+        // this.websock.onopen = this.websocketonopen();     //打开连接 
+        this.websock.onopen = this.open
+        this.websock.onmessage = this.websocketonmessage
+        // this.websock.onopen = function(event) {
+        //   console.log("WebSocket is open now.",event);
+        // };
         // this.websock.onerror = this.websocketonerror();
       },
-      websocketonopen(data){//websocket连接后发送数据(send发送)
-        let param = '互动参数'
-        console.log('data-websocket',data)
-        console.log('发送打开')
-        this.websocketsend(param);
+      open: function () {
+        console.log("socket连接成功")
+        console.log('this.websock.readyState',this.websock.readyState)
+        if (this.websock.readyState == 1) {
+          console.log('进入send')
+          this.websock.send('hax');
+        }else{
+          console.log('error==>还没连接成功!')
+        }
       },
-      websocketsend(Data){//数据发送
-        console.log('发送',Data)
-        console.log(this.websock.readyState,'状态2')
-         if (this.websock.readyState===1) {
-           this.websock.send(Data);
-          }else{
-            //do something
-            console.log('error==>还没连接成功!')
-          }
+      websocketonopen(){//websocket连接后发送数据(send发送)
+        let param = '互动参数'
+        console.log('data-websocket',param)
+        console.log('发送打开')
+        // this.websocketsend(param);
+        console.log('this.websock22',this.websock)
+        if (this.websock.readyState == 1) {
+          console.log('param',param) 
+          this.websock.send(param);
+        }else{
+          //do something
+          console.log('error==>还没连接成功!')
+        }
       },
       websocketonerror(){//连接建立失败重连
         this.initWebSocket();
       },
-      websocketonmessage(e){ //数据接收
-      console.log('返回的数据',e)
-        // this.redata = JSON.parse(e.data).data;
-        // console.log(this.redata);
+      websocketonmessage(msg){ //数据接收
+        console.log('msg.data',msg.data)
+        console.log('value',JSON.parse(msg.data))
       },
       websocketclose(e){  //关闭
         console.log('断开连接',e);

@@ -3,6 +3,10 @@
   <div class="font-five" :style="{ height: availHeight, overflow: 'auto' }">
     <!--上部分-->
     <div style="padding: 0 1%;height: 300px">
+      <!--入住单-->
+      <link-house-dialog :show.sync= linkHouseFornVisible :parentInfoParam='linInfoParam'></link-house-dialog>
+       <!-- 预定单转入住单 -->
+      <preview-to-enterDialog :show.sync= previewToEnterVisible :parentInfoParam='preEnterInfoParam'></preview-to-enterDialog>
       <div style="width: 28%;float: left;height: 300px">
         <div style="height: 50px;line-height: 50px">
           <!--<i class="el-icon-document" style="font-size: 16px"></i>-->
@@ -110,40 +114,13 @@
     <!--下部分-->
     <div style="padding: 20px 1%;height: auto;width: 100%" >
       <!--这是上面的切换部分tabs 数据是写的for循环取出来的-->
-      <el-tabs type="card" tab-position="top" @tab-click="handleClick">
+      <el-tabs type="card"  v-model="activeName" tab-position="top" @tab-click="handleClick">
         <el-tab-pane v-for='(lab,index) in labelData'  :key="index"
                      :label="lab.name + (('[' ) +lab.num+(']'))">
           <!--每一个tabs下的表及数据-->
           <div style="border: 1px solid #ebeef5">
             <template>
-              <!--<el-table
-                size="mini"
-                :data="tableData2"
-                style="width: 100%"
-                :cell-style="{textAlign:'center'}"
-                :header-cell-style="{background:'#F4F4F4',textAlign:'center'}"
-                :row-class-name="tableRowClassName">
-                <el-table-column
-                  fixed="right"
-                  label="操作"
-                  width="100">
-                  &lt;!&ndash;这部分是操作下的内容&ndash;&gt;
-                  <template slot-scope="scope">
-                    <div>
-                      <el-button @click="changeClick(scope.row)" type="text" size="small">改</el-button>
-                      <el-button @click="rowClick(scope.row)" type="text" size="small">排</el-button>
-                      <el-button @click="inClick(scope.row)" type="text" size="small">入</el-button>
-                    </div>
-
-                    <div>
-                      <el-button @click="exClick(scope.row)" type="text" size="small">拆</el-button>
-                      <el-button @click="joinClick(scope.row)" type="text" size="small">合</el-button>
-                      <el-button @click="turnClick(scope.row)" type="text" size="small">转</el-button>
-                    </div>
-                  </template>
-                </el-table-column>
-              </el-table>-->
-              <el-table  border :default-sort = "{prop: 'arr_time', order: 'descending'}" :cell-style="{textAlign:'center'}" :data="tableData_orderlist" style="width: 100%" size="mini" height="350px" :header-cell-style="{background:'#303A41',color:'white',textAlign:'center'}" stripe>
+              <el-table  @row-dblclick="rowClick"  border :default-sort = "{prop: 'arr_time', order: 'descending'}" :cell-style="{textAlign:'center'}" :data="tableData_orderlist" style="width: 100%" size="mini" height="350px" :header-cell-style="{background:'#303A41',color:'white',textAlign:'center'}" stripe>
                 <el-table-column type="index" width="50" label="序号">
                 </el-table-column>
                 <!-- <el-table-column prop="reserve_guest" label="预订人" :key="Math.random()" width="160">
@@ -194,11 +171,14 @@
                 </el-table-column>
                 <el-table-column prop="room_status" label="房态">
                 </el-table-column>
-                <el-table-column prop="room_price" label="房价">
+                <el-table-column  label="房价">
                   <template slot-scope="scope">
-                    <span style="color: #f3565d"> 
-                      {{scope.row.room_price + '元'}}
-                    </span>
+                    <el-tooltip effect="light" placement="bottom">
+                      <div slot="content">{{scope.row.room_price_dict}}</div>
+                      <span style="color: #f3565d"> 
+                        {{scope.row.room_price + '元'}}
+                      </span>
+                    </el-tooltip>
                   </template>
                 </el-table-column>
                 <el-table-column prop="account.balance" label="余额">
@@ -378,10 +358,120 @@
 </template>
 
 <script>
+  import linkHouseDialog from '../houseStatus/linkHouseDialog'
+  import previewToEnterDialog from '../houseStatus/previewToEnterDialog'
   import moment from 'moment'
     export default {
       data() {
         return {
+          reserve_guest:{
+            hotelInfo: {},
+            liveCount: 0,//可选数
+            room_number: null,//房间号
+            id_code: '01',//证件类型
+            id_no: '',//证件号码
+            name: '', //姓名
+            sex: '0',//性别
+            telephone: '',//手机号
+            street_add: '',//街道地址
+            // code: '123',
+            // code_name: '77777',
+            // descript: null,
+            // descript_en: null,
+            
+            // list_order: 1,
+            last_name: null,
+            first_name: null,
+            name2: null,
+            name_combi: null,
+            is_save: false,
+            language: '',
+            title: null,
+            salutation: null,
+            race: null,
+            religion: null,
+            career: '',
+            nation: null,
+            visa_no: null,
+            visa_grant: null,
+            enter_port: null,
+            where_from: null,
+            where_to: null,
+            salary: null,
+            education: null,
+            marital: null,
+            company_na: '',
+            pic_photo: null,
+            pic_sign: null,
+            remark: '',
+            is_anonymo: false,
+            weixin: '',
+            mobile: null,
+            email: '',
+            country_id: null,
+            division_id: null,
+            state_id: null,
+            city_id: null,
+            zipcode: null,
+            reserve_base_id: '',
+          },
+          preBillParam: {
+            reserve_guest: [{
+            liveCount: 0,//可选数
+            room_number: null,//房间号
+            id_code: '01',//证件类型
+            id_no: '',//证件号码
+            name: '', //姓名
+            sex: '0',//性别
+            telephone: '',//手机号
+            street_add: '',//街道地址
+            // code: '123',
+            // code_name: '77777',
+            // descript: null,
+            // descript_en: null,
+            
+            // list_order: 1,
+            last_name: null,
+            first_name: null,
+            name2: null,
+            name_combi: null,
+            is_save: false,
+            language: '',
+            title: null,
+            salutation: null,
+            race: null,
+            religion: null,
+            career: '',
+            nation: null,
+            visa_no: null,
+            visa_grant: null,
+            enter_port: null,
+            where_from: null,
+            where_to: null,
+            salary: null,
+            education: null,
+            marital: null,
+            company_na: '',
+            pic_photo: null,
+            pic_sign: null,
+            remark: '',
+            is_anonymo: false,
+            weixin: '',
+            mobile: null,
+            email: '',
+            country_id: null,
+            division_id: null,
+            state_id: null,
+            city_id: null,
+            zipcode: null,
+            reserve_base_id: '',
+            }]
+          },//prop值
+          preEnterInfoParam: {},
+          linInfoParam: {},
+          linkHouseFornVisible: false,//联房
+          previewToEnterVisible: false,
+          activeName: '',
           isCurrent: '1',//判断标志
           availHeight: '',
           interval : '',//定时器
@@ -423,7 +513,7 @@
            * 分页
            */
           currentPage: 1, //当前页码
-          page_size: 5, //每页显示数量
+          page_size: 8, //每页显示数量
           total: 0, //总数
           //右上表格数据
           tableData: [],
@@ -468,6 +558,10 @@
           input1:"",
         }
       },
+      components: {
+        'link-house-dialog': linkHouseDialog,
+        'preview-to-enterDialog': previewToEnterDialog,
+      },
       created(){
         //第一次进来时tabs下的表格数据,默认是第一个tabs下的表格数据（自己随意造的数据）
         let that = this;
@@ -490,6 +584,96 @@
         this.availHeight = (screen.availHeight -220)  +'px';
       },
       methods:{
+        /**
+         * @desc 当点击不通过tabel的时候跳转的页面
+         */
+        rowClick(row){
+          console.log('row',row)
+          console.log('activeName',this.activeName)
+          if(this.activeName == 0 || this.activeName == 4){
+            this.getEnterInfoByRoom(row.order_no)
+          }else if(this.activeName == 5 || this.activeName == 6 || this.activeName == 7){
+            this.getPreInfoByRoom(row.order_no)
+          }
+        },
+        //===>联房列表打开
+        getEnterInfoByRoom(param){
+          let scopeParams = {
+            // room_number: param
+            order_no: param
+          }
+          let that = this
+          // let url = `http://192.168.2.224:9005/v2/checkin/all_master_info/`
+          // let url = that.api.api_bill_9202 + `/v2/checkin/all_master_info/`
+          let url = that.api.api_newBill_9204 + `/v2/checkin/all_master_info/`
+          that.$axios({
+            method : 'get',
+              url : url,
+              params: scopeParams
+          }).then(res=>{
+            if(res.data.message === 'success'){
+              that.linInfoParam = res.data.data.results[0]
+              if(that.linInfoParam != undefined){
+                  that.linkHouseFornVisible = true //联房列表打开
+              }else{
+                that.$message.warning('获取后台数据失败!')
+              }
+            }else{
+              that.$message.error('获取入住单详情失败!')
+            }
+          }).catch(error=>{
+            console.log(error)
+          })
+        },
+        getPreInfoByRoom(param){
+          console.log('param1111111111111111',param)
+          let scopeParams = {
+            order_no: param,
+            search_type: "2" //根据预订单号查询预订单=== value值为2
+          }
+          let that = this
+          let url = that.api.api_newBill_9204 + '/v2/' + `booking/get_reserve_method/`
+          // let url = that.api.api_bill_9202 + '/v2/' + `booking/get_order_reserve_info/`
+          that.$axios.post(url,scopeParams).then(res=>{
+            if(res.data.message === 'success'){
+              that.preInfoParam = res.data.data.results[0]
+              //处理数据然后传给子组件
+              that.preBillParam.reserve_rate = that.preInfoParam.reserve_rate
+              if(that.preInfoParam.reserve_guest.length != 0){
+                // that.preBillParam.reserve_guest = []
+                //关键一步，登记有身份证号要清空<===================mark
+                for(var item of  that.preInfoParam.reserve_guest){
+                  item.id_no = ''
+                }
+                that.preBillParam.reserve_guest = [].concat(that.preInfoParam.reserve_guest)  
+              }else{
+                that.preBillParam.reserve_guest = []
+                that.preBillParam.reserve_guest.push(that.reserve_guest)
+              }
+              this.preBillParam.reserve_base = that.preInfoParam.reserve_base
+              that.handleChildParam(that.preBillParam)
+              console.log('that.preBillParamthat.preBillParam',that.preBillParam)
+              that.preEnterInfoParam = _.cloneDeep(that.preBillParam) //预定转入住详情
+              that.previewToEnterVisible = true
+            }else{
+              that.$message.error('获取预订单详情失败!')
+            }
+          }).catch(error=>{
+            console.log(error)
+          })
+        },
+        handleChildParam(param){
+          for(var item of param.reserve_rate){
+            item.can_live_num = ''
+            item.room_type_value = ''
+            item.dynamic_roomNumber = item.room_number != '' ? item.room_number.split(',') : []
+            item.roomCount = ''
+            item.roomPrice = ''
+          }
+          // for(var item of param.reserve_guest){
+          //   item.liveCount = 0
+          // }
+        },
         currentChange(val) {
           // 改变页的时候调用一次
           this.currentPage = val;
@@ -768,9 +952,10 @@
           typeof tab == 'string' ? that.tab_pane_flag : that.tab_pane_flag = tab.index;
           let indexNumber = typeof tab == 'string' ? tab :  tab.index
           console.log(indexNumber,'indexNumber');
+          this.activeName = indexNumber //进一步赋值判断双击的时候显示的详情
           that.tableData_orderlist = [] //置空防止数据污染
           if(typeof isCurrent != 'string'){
-            that.page_size = 5;
+            that.page_size = 8;
             that.currentPage = 1;
           }else{
             that.page_size = that.page_size;

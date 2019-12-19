@@ -55,13 +55,33 @@
                     <!-- 预抵时间:<el-date-picker style="width: 10vw" v-model="preBillParam.master_base.arr_time" type="date" placeholder="选择日期"> -->
                     <!-- </el-date-picker>&nbsp;&nbsp; -->
                     <span style="margin-left: -10px">入离时间:</span>
-                    <el-date-picker :disabled="preBillParam.master_base[0].master_lable === 1 ? true : false" style="width: 28vw" :picker-options="rangeDate"  :clearable ="false"
+                    <el-date-picker
+                      disabled
+                      v-model="new_startTime"
+                      type="datetime"
+                      placeholder="选择日期时间"
+                      value-format="yyyy-MM-dd HH:mm:ss"
+                      >
+                    </el-date-picker>
+                    -
+                    <el-date-picker
+                      :disabled="preBillParam.master_base[0].master_lable == 1 ? true : false"
+                      v-model="new_endTime"
+                      @change="haveChangeTime"
+                      type="datetime"
+                      value-format="yyyy-MM-dd HH:mm:ss"
+                      placeholder="选择离店时间"
+                      :picker-options="rangeDate"
+                      :clearable ="false"
+                    >
+                    </el-date-picker>
+                    <!-- <el-date-picker :disabled="preBillParam.master_base[0].master_lable === 1 ? true : false" style="width: 28vw" :picker-options="rangeDate"  :clearable ="false"
                         @change="haveChangeTime"
                         v-model="preBillParam.master_base[0].leave_time" 
-                        :default-time="[startDate_kaishi, '14:00:00']"
+                        :default-time="[startDate_kaishi, startDate_jiesu]"
                         type="datetimerange" range-separator="~" start-placeholder="开始日期" end-placeholder="结束日期" placeholder="选择日期">
-                    </el-date-picker>
-                    <span v-if="preBillParam.master_base[0].master_lable === 0">共 <span style="width: 80px">{{countDateRange}}</span> 晚</span>
+                    </el-date-picker> -->
+                    <span v-if="preBillParam.master_base[0].master_lable == 0 || preBillParam.master_base[0].master_lable == 2">共 <span style="width: 80px">{{countDateRange}}</span> 晚</span>
                     <!-- 保留至:<el-date-picker style="width: 10vw" v-model="value2" type="date" placeholder="选择日期"></el-date-picker> -->
                     </el-col>
                   </li>
@@ -212,12 +232,12 @@
                     <span style="margin-right: 20px">
                     <!-- item.fix_rate || item.fix_rate === 0 这个判断条件可能有误 -->
                       <div v-if="String(item.fix_rate)" style="display: inline-block">
-                        首日价<el-input v-show="span_input_flag" @blur="span_input_flag = false" v-model="item.fix_rate" style="color: #f3565d;width: 60px"></el-input>
-                        <span v-show="!span_input_flag" @click="span_input_flag = true" style="color: #f3565d">{{item.fix_rate}}</span> 元/间
+                        <!-- 首日价<el-input v-show="span_input_flag" @blur="span_input_flag = false" v-model="item.fix_rate" style="color: #f3565d;width: 60px"></el-input> -->
+                        首日价<span  @click="span_input_flag = true" style="color: #f3565d">{{item.fix_rate}}</span> 元/间
                       </div>
                       <div v-else style="display: inline-block">
-                        <el-input v-show="span_input_flag" @blur="span_input_flag = false" v-model="item.fix_rate" style="color: #f3565d;width: 60px"></el-input>
-                        <span v-show="!span_input_flag" @click="span_input_flag = true" style="color: #f3565d">请选择房价</span>
+                        <!-- <el-input v-show="span_input_flag" @blur="span_input_flag = false" v-model="item.fix_rate" style="color: #f3565d;width: 60px"></el-input> -->
+                        首日价<span  @click="span_input_flag = true" style="color: #f3565d">请选择房价</span>
                       </div>
                       <el-popover
                         placement="bottom-end"
@@ -232,7 +252,7 @@
                             <span  style="color: red; margin-left: 38px">{{item}}</span>
                           </li>
                         </ul>
-                        <i v-show="preBillParam.master_base[0].master_lable != 1" slot="reference" @click="getRateInfo(item)" class="el-icon-caret-bottom" style="background-color: #5bbbf5!important"></i>
+                        <i v-if="preBillParam.master_base[0].master_lable != 1" slot="reference" @click="getRateInfo(item)" class="el-icon-caret-bottom" style="background-color: #5bbbf5!important"></i>
                       </el-popover>
                     </span>
                     <img style="cursor: pointer; display: inline-block;margin-bottom: -5px;" v-show="showDeleteButton" @click="deleteSelect(index)" src="../../../assets/images/pms/houseStatus/delete2x.png">
@@ -260,7 +280,7 @@
                       <el-option v-for="itemm in idCodeOptions" :key="itemm.value" :label="itemm.label" :value="itemm.value"></el-option>
                     </el-select>
                     <el-input  v-model.trim="item.id_no" maxlength="18" :class="{errorClass: isErrorClass}" @blur="validateId_no(item,'输入')"  placeholder="证件号码"  style="width: 12vw"></el-input>
-                    <el-input  v-model.trim="item.telephone "  placeholder="联系方式"  style="width: 9.8vw"></el-input>
+                    <el-input  v-model.trim="item.telephone " maxlength="11" placeholder="联系方式"  style="width: 9.8vw"></el-input>
                 </div>
                 <div style="display: inline-block">
                     <el-input  v-model.trim="item.street_add "  placeholder="请输入联系地址"  style="width: 40vw; margin-left: 64px; margin-top: 10px"></el-input>
@@ -912,7 +932,10 @@ export default {
             charge_details: [],
           },
           return_accountParam:{},
+          new_startTime: '',
+          new_endTime: '',
           startDate_kaishi: moment(new Date()).format('HH:mm:ss'),
+          startDate_jiesu: moment(new Date()).format('HH:mm:ss'),
           //账户param
           account_param: {
             account_type: 0,//int 默认为正常账户 	账户类型:0:正常账户 1：AR账户
@@ -1032,7 +1055,7 @@ export default {
                 account_id: null,
                 team_id: 2,
                 team_name: '2',
-                biz_date: '2018-12-01 10:10:01',
+                biz_date: '',
                 // rsv_type_id: 22,
                 order_no: '123',
                 sales_person_id: 2,
@@ -1182,6 +1205,9 @@ export default {
               },{
               label: '钟点房',
               value: 1
+            },{
+              label: '免费房',
+              value: 2
             }
             // ,{
             //   label: '夜宵房',
@@ -1215,9 +1241,11 @@ export default {
             roomOccupyList: [],
             lockCss_active: false,//锁定状态
             rangeDate:{
-            disabledDate(time){
-                return time.getTime() < Date.now() - 8.64e7
-            }
+              disabledDate(time){
+                // var times = Date.now()
+                // return time.getTime() == times;
+                return time.getTime() <= Date.now() - 8.64e7
+              }
             },
             isActive: false, // 样式true or false
             consumptionDialog: false,
@@ -1249,6 +1277,10 @@ export default {
       'pictureDialog': pictureDialog,
       QRCode
     },
+    mounted(){
+      let that = this;
+      that.setNewtime()
+    },
     watch: {
       show () {
         this.srcValue = '',
@@ -1258,6 +1290,7 @@ export default {
         this.getRoomType() //准备:循环得到匹配的房型中文名
       },
       parentParam(){
+        console.log('时间',this.preBillParam.master_base[0].leave_time)
         this.remark_roomNo = ''
         this.remarkContent_value = ''
         console.log('this.parentParam',this.parentParam)
@@ -1281,7 +1314,7 @@ export default {
           room_type: this.parentParam.room_type_name
         }
         this.getCardListInfo()//获取房子信息所有数据
-        this.getRateCode_price(item,param) //====下面没有用
+        this.getRateCode_price(item,param) //====此方法获取结束时间 下面没有用  
         this.cloneData.room_type = _.cloneDeep(param.room_type)  //开始限制数据
         this.cloneData.room_no = _.cloneDeep(this.parentParam.roomNo)
         // this.getCanLiveRoom(param.room_type) //根据房型选未占用房间===>可以在这个地方废弃
@@ -1314,28 +1347,14 @@ export default {
       }
     },
     computed:{
-      //计算===>类似监听时间控件默认时间
-      // getDateArray(){
-      //   let date = moment(new Date()).format('HH:mm:ss')
-      //   return [date, '14:00:00']
-      // },
-      //此处有bug===>不能实时，因为computed会有缓存
-      getDateArray() {
-        // let date = moment(new Date()).format('HH:mm:ss')
-        // return [date, '14:00:00']
-      },
-      // sumMoney(){
-			// 	return this.preBillParam.consumeInfoList.map(
-			// 		item=>item.number*item.price).reduce(
-			// 		(acc, cur) => (parseFloat(cur) + acc), 0)
-      //   },
-      // sumBreakfastMoney(){
-      //   return this.preBillParam.breakfastInfoList.map(
-			// 		item=>item.number*item.price).reduce(
-			// 		(acc, cur) => (parseFloat(cur) + acc), 0)
-      //   },
-      //计算入离时间差天数
+      //计算入离时间差天数  以 date_delta 为基准
+      /**
+       * @date_delta  以该值为基准,计算周期判断是0晚还是1晚
+       */
       countDateRange(){
+        this.preBillParam.master_base[0].leave_time = [this.new_startTime,this.new_endTime]
+        console.log('zhuanhuan-----1',this.preBillParam.master_base[0].leave_time)
+        console.log('store.state.date_delta 周期时间 基准量',this.$store.state.date_delta)
         try {
           let start = moment(this.preBillParam.master_base[0].leave_time[0]).format('YYYY-MM-DD HH:mm:ss')
           let end = moment(this.preBillParam.master_base[0].leave_time[1]).format('YYYY-MM-DD HH:mm:ss')
@@ -1352,6 +1371,12 @@ export default {
       // this.findHtNation()//民族获取
     },
     methods: {
+      setNewtime(){//默认显示今天
+        this.new_startTime= moment(new Date()).format('YYYY-MM-DD HH:mm:ss')
+        this.preBillParam.master_base[0].leave_time = [this.new_startTime,this.new_endTime]
+        console.log('zhuanhuan',this.preBillParam.master_base[0].leave_time)
+        // this.new_endTime= moment(new Date()).format('YYYY-MM-DD HH:mm:ss')
+      },
       //获取图片param 子传父emit
       getPictureParam(param){
         console.log('接收从子组件传来的入住人对应的入住照片!',param)
@@ -1522,17 +1547,24 @@ export default {
         let that = this
         let url = that.api.api_newPrice_9107+ '/v1/' + `room/rate_code/get_rate_code_list/`
         let scopeParam
-        if(this.preBillParam.master_base[0].master_lable != 1){
+        if(this.preBillParam.master_base[0].master_lable === 0){
           scopeParam = {
-            market: that.preBillParam.master_base[0].code_market ,
+            market: that.preBillParam.master_base[0].code_market,
             src__icontains: that.preBillParam.master_base[0].code_src,
             is_day_user: 1
           }
+        }else if(this.preBillParam.master_base[0].master_lable === 1){
+          scopeParam = {
+            market: that.preBillParam.master_base[0].code_market,
+            src__icontains: that.preBillParam.master_base[0].code_src,
+            is_day_user: 0,
+            // is_free: 1
+          }
         }else{
           scopeParam = {
-            market: that.preBillParam.master_base[0].code_market ,
+            market: that.preBillParam.master_base[0].code_market,
             src__icontains: that.preBillParam.master_base[0].code_src,
-            is_day_user: 0
+            is_free: 1
           }
         }
         that.$axios.get(url,{
@@ -2840,7 +2872,7 @@ export default {
                 master_lable: 0,
                 master_type: 1, //另加<========2019.06.11 //入住类型
                 arr_time: '',//预抵时间
-                leave_time: [ new Date(), moment(new Date()).add(+1,'days').format('YYYY-MM-DD 14:00:00')],//离开时间
+                leave_time: [ this.new_startTime, this.new_endTime],//离开时间
                 can_live_num: '',//add
                 room_type_value: '',//房型名称对应ID
                 dynamic_roomNumber: [],//动态房间号=》应是一个数组
@@ -2859,7 +2891,7 @@ export default {
                 account_id: null,
                 team_id: 2,
                 team_name: '2',
-                biz_date: '2018-12-01 10:10:01',
+                biz_date: '',
                 // rsv_type_id: 22,
                 order_no: '123',
                 sales_person_id: 2,
@@ -2959,6 +2991,9 @@ export default {
           this.span_input_flag = false
           // this.clearPhoto() //清除掉图片
           this.infoShow = ''
+          this.new_startTime =  new Date() 
+          this.new_endTime = moment(new Date()).add(+1,'days').format('YYYY-MM-DD 14:00:00')
+          // this.new_endTime = moment(new Date()).add(+1,'days').format('YYYY-MM-DD' + ' ' + that.no_hour_time) //可能以后要优化
           this.flushData()
           this.flush_reserveGurst()
           this.previewEnterBill.room_no_value = ''  //联房置空
@@ -3300,7 +3335,7 @@ export default {
         },
         //入住单=>确认入住
         confirmEnter(){
-          //。。。。。。
+          console.log('store',this.$store.state.biz_date)
           this.isLoading = true
           if(!this.validatePreviewData() || !this.validatePreData() || !this.validateEnterData()){
               // this.isErrorClass=true
@@ -3398,6 +3433,7 @@ export default {
               if(item.room_type === itemm.descript){
                 item.code_name = itemm.code
                 item.room_type_descript_en = itemm.code
+                item.biz_date = this.$store.state.biz_date
                 break
               }
             }
@@ -3550,7 +3586,8 @@ export default {
           let url = that.api.api_newPrice_9107 + '/v1/' +  `room/rate_code/get_rate_code/`
           let scopeParam ={
             rate_code: this.rateCodeValue,
-            begin_date:  moment(new Date(item.master_base[0].arr_time)).format('YYYY-MM-DD'),
+            // begin_date:  moment(new Date(item.master_base[0].arr_time)).format('YYYY-MM-DD'),
+            begin_date: this.$store.state.biz_date, //需要请求营业日期的
             end_date: moment(new Date(item.master_base[0].leave_time)).format('YYYY-MM-DD'),
             room_type_list: []
           }
@@ -3594,6 +3631,7 @@ export default {
                   for(var itemm of need_rateAllPrice_Object){
                     if(itemIndex.room_type == itemm.room_type){
                       itemIndex.price = itemm
+                      itemIndex.price_date = this.$store.state.biz_date //这个赋值==>store取营业日期
                       delete itemIndex.price.room_type
                     }
                   }
@@ -3686,45 +3724,35 @@ export default {
         datedifference(sDate1, sDate2) {    //sDate1和sDate2是2006-12-18格式
           // sDate1 = '2019-09-11 01:18:14'
           // sDate2 = '2019-09-12 14:18:14'
-          var date1 = new Date(sDate1)
-          var date2 = new Date(sDate2)
-          var s1 = date1.getTime(),s2 = date2.getTime();
-          var total = (s2 - s1)/1000;
-          var day = parseInt(total / (24*60*60));//计算整数天数
-          let flag_Day = moment().format('YYYY-MM-DD')
-          let flag_startDay = `${flag_Day} 00:00:00`
-          let flag_endDay = `${flag_Day} 14:00:00` 
-          if((sDate1<flag_endDay && sDate1>flag_startDay) && (sDate2<flag_endDay && sDate2>flag_startDay)){
-             day = 0
-            return day
-          }else if((sDate1<flag_endDay && sDate1>flag_startDay) && (sDate2>flag_endDay)){
-            if(day === 0){
-              day = 1
-            }else if(day == 1){
-              day = day
+          console.log('sDate1--start',sDate1)
+          console.log('sDate2--end',sDate2)
+          let new_date1 = moment(sDate1).format('YYYY-MM-DD')
+          let new_date2 = moment(sDate2).format('YYYY-MM-DD')
+          let new_date1_end = moment(sDate1).format('HH:mm:ss')
+          let new_date2_end = moment(sDate2).format('HH:mm:ss')
+          console.log('new_date1',new_date1,new_date1_end)
+          console.log('new_date2',new_date2,new_date2_end)
+          let base_date_delta = this.$store.state.date_delta
+          //相同天的判断情况
+          let day
+          if(new_date1 == new_date2){
+            if(new_date2_end < base_date_delta){
+              day = 0
             }else{
-              day = day
+              day = 1
             }
+            console.log('day',day)
             return day
           }else{
-            if(day === 0){
-              day = 1
-            }else if(day == 1){
-              day = day
-            }else{
-              day = day
-            }
+            console.log('不同天')
+            var date1 = new Date(sDate1)
+            var date2 = new Date(sDate2)
+            var s1 = date1.getTime(),s2 = date2.getTime();
+            var total = (s2 - s1)/1000;
+            day = parseInt(total / (24*60*60));//计算整数天数
+            day == 0 ? day = day + 1 : day
             return day
           }
-          // var dateSpan,
-          // tempDate,
-          // iDays;
-          // sDate1 = Date.parse(sDate1);
-          // sDate2 = Date.parse(sDate2);
-          // dateSpan = sDate2 - sDate1;
-          // dateSpan = Math.abs(dateSpan);
-          // iDays = Math.floor(dateSpan / (24 * 3600 * 1000));
-          // return iDays
         },
         //选择房型一行房型相关信息
         getRoomInfo(){
@@ -3769,6 +3797,7 @@ export default {
         },
         haveChangeTime(data){
           this.changeTime = true//改变了
+          this.preBillParam.master_base[0].leave_time = [this.new_startTime,this.new_endTime] //进一步赋值
           console.log('shijian改变',data)
         },
         //获取code对应房型数据
@@ -3832,15 +3861,19 @@ export default {
             item.fix_rate = ''//重新选择房价码
           }
         },
-        //通过钟点房的值筛选时间=====>自动得到时间
+        //通过钟点房的值筛选时间=====>自动得到时间==>钟点房
         getHour_time(param){
           // this.reSetData('钟点房')//重置数据 必须要放在前面
-          console.log('param',param)
+          console.log('param code 取值',param)
           this.rateCode_hour = param
-          console.log('this.rateCode_hour2222',this.rateCode_hour)
-          param = param !=null ? param.slice(0,1) : ''
-          console.log('param',param)
-          let time2 = moment().add(param,'hours').format('YYYY-MM-DD HH:mm:ss')
+          let list = [] 
+          console.log('this.rateCode_list',this.rateCode_list)
+          list = this.rateCode_list.filter(item=>item.code == param)
+          console.log('list',list)
+          let add_hours = list[0].check_out_time
+          add_hours = add_hours !=null ? add_hours.slice(1,2) : ''
+          let time2 = moment().add(add_hours,'hours').format('YYYY-MM-DD HH:mm:ss')
+          this.new_endTime = time2//赋值时间
           this.preBillParam.master_base[0].leave_time =[new Date() ,time2]
           console.log('------')
           // this.getRateCode_hourPrice()
@@ -4622,7 +4655,8 @@ export default {
           let url = that.api.api_newPrice_9107 + '/v1/' +  `room/rate_code/get_rate_code/`
           let scopeParam ={
             rate_code: this.rateCodeValue,
-            begin_date:  moment(new Date()).format('YYYY-MM-DD'),
+            // begin_date:  moment(new Date()).format('YYYY-MM-DD'),
+            begin_date: this.$store.state.biz_date, //需要请求营业日期的
             end_date: moment(new Date()).add(7,'days').format('YYYY-MM-DD'),
             room_type_list: [item.room_type_value]
           }
@@ -4660,7 +4694,8 @@ export default {
           let url = that.api.api_newPrice_9107 + '/v1/' +  `room/rate_code/get_rate_code/`
           let scopeParam ={
             rate_code: this.rateCodeValue,
-            begin_date:  moment(new Date()).format('YYYY-MM-DD'),
+            begin_date: this.$store.state.biz_date, //需要请求营业日期的
+            // begin_date:  moment(new Date()).format('YYYY-MM-DD'),
             end_date: moment(new Date()).add(1,'days').format('YYYY-MM-DD'),
             room_type_list: [this.parentParam.roomType_code]
           }
@@ -4696,7 +4731,8 @@ export default {
           // temp.push(param.room_type)
           let scopeParam ={
             rate_code: this.rateCodeValue,
-            begin_date:  moment(new Date()).format('YYYY-MM-DD'),
+            begin_date: this.$store.state.biz_date, //需要请求营业日期的
+            // begin_date:  moment(new Date()).format('YYYY-MM-DD'),
             end_date: moment(new Date()).add(1,'days').format('YYYY-MM-DD'),
             room_type_list: [param.room_type]
           }
@@ -4711,6 +4747,7 @@ export default {
             // if(this.preBillParam.master_base[0].master_lable != 1){
             if(this.changeTime === false){
               this.preBillParam.master_base[0].leave_time =[new Date() ,moment(new Date()).add(+1,'days').format('YYYY-MM-DD' + ' ' + that.no_hour_time)]
+              this.new_endTime = moment(new Date()).add(+1,'days').format('YYYY-MM-DD' + ' ' + that.no_hour_time)
             }
             // }else{
             //   this.preBillParam.master_base[0].leave_time =[new Date() ,time2]
@@ -5206,5 +5243,8 @@ export default {
   }
   .colClass>>> .el-input-number{
     width: 130px;
+  }
+  .el-icon-caret-bottom{
+    display: inline-block
   }
 </style>

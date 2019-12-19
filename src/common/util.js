@@ -445,7 +445,7 @@ export default {
    * @returns {Boolean}
    */
   validateTelNumber(telNumber, warnMessage, VueInst, successMessage) {
-    var reg = /^(1[3578][0-9]{9})$/
+    var reg = /^(1[35789][0-9]{9})$/
     if (!warnMessage) {
       return reg.test(telNumber)
     } else {

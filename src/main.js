@@ -19,6 +19,7 @@ Vue.component('Not-opened',Not_opened);
 import logonRight from './components/common/ini'
 Vue.component("logon-view",logonRight);
 import store from './store.js'
+import pmsStore from '@/views/pms/store.js'
 import 'element-ui/lib/theme-chalk/index.css'
 import '@/assets/iconfont.css'
 import '@/assets/css/style.css'
@@ -91,6 +92,7 @@ axios.interceptors.response.use((response)=>{
 new Vue({
   router,
   store,
+  pmsStore,
   el: '#app',
   render: h => h(App)
 })

@@ -74,14 +74,14 @@
                   <el-input  style="width: 65%" v-model.trim="preBillParam.reserve_base.rsv_person_name" placeholder="请输入姓名"></el-input>
               </el-col>
               <el-col :span="18" class="elColMiddle">
-                  联系电话:<el-input style="width: 300px"  v-model.trim="preBillParam.reserve_base.telephone_master " placeholder="请输入电话"></el-input>
+                  联系电话:<el-input style="width: 300px"  maxlength="11" v-model.trim="preBillParam.reserve_base.telephone_master " placeholder="请输入电话"></el-input>
               </el-col>
             </el-row>
             <el-row style="margin-top: 10px">
                 <el-col :span="13" class="elColMiddle" >
                 <span style="margin-left: -10px">预离时间:</span>
                 <el-date-picker style="width: 28vw" :picker-options="rangeDate"  :clearable ="false"
-                    :default-time="[startDate_kaishi, '14:00:00']"
+                    :default-time="[startDate_kaishi, startDate_jiesu]"
                     @change="haveChangeTime"
                     v-model="preBillParam.reserve_base.leave_time" type="datetimerange" range-separator="~" start-placeholder="开始日期" end-placeholder="结束日期" placeholder="选择日期">
                 </el-date-picker>
@@ -207,7 +207,7 @@
                       <el-option v-for="itemm in idCodeOptions" :key="itemm.value" :label="itemm.label" :value="itemm.value"></el-option>
                     </el-select>
                     <el-input  v-model.trim="item.id_no" maxlength="18" @blur="validateId_no(item,'输入')"  placeholder="证件号码"  style="width: 12vw"></el-input>
-                    <el-input  v-model.trim="item.telephone "  placeholder="联系方式"  style="width: 9.8vw"></el-input>
+                    <el-input  v-model.trim="item.telephone " maxlength="11" placeholder="联系方式"  style="width: 9.8vw"></el-input>
                 </div>
                 <div style="display: inline-block">
                     <el-input  v-model.trim="item.street_add "  placeholder="请输入联系地址"  style="width: 40vw; margin-left: 64px; margin-top: 10px"></el-input>
@@ -832,6 +832,7 @@ export default {
             // }],
           },
           startDate_kaishi: moment(new Date()).format('HH:mm:ss'),
+          startDate_jiesu: moment(new Date()).format('HH:mm:ss'),
           temp_value: '',
           showPoint: false,//预定=>多余部分
           activeNames: ['1'],
@@ -1833,48 +1834,30 @@ export default {
           return param
         },
         datedifference(sDate1, sDate2) {    //sDate1和sDate2是2006-12-18格式
-          var date1 = new Date(sDate1)
-          var date2 = new Date(sDate2)
-          var s1 = date1.getTime(),s2 = date2.getTime();
-          var total = (s2 - s1)/1000;
-          var day = parseInt(total / (24*60*60));//计算整数天数
-        let flag_Day = moment().format('YYYY-MM-DD')
-          let flag_startDay = `${flag_Day} 00:00:00`
-          let flag_endDay = `${flag_Day} 14:00:00` 
-          if((sDate1<flag_endDay && sDate1>flag_startDay) && (sDate2<flag_endDay && sDate2>flag_startDay)){
-             day = 0
-            return day
-          }else if((sDate1<flag_endDay && sDate1>flag_startDay) && (sDate2>flag_endDay)){
-            if(day === 0){
-              day = 1
-            }else if(day == 1){
-              day = day
+          let new_date1 = moment(sDate1).format('YYYY-MM-DD')
+          let new_date2 = moment(sDate2).format('YYYY-MM-DD')
+          let new_date1_end = moment(sDate1).format('HH:mm:ss')
+          let new_date2_end = moment(sDate2).format('HH:mm:ss')
+          let base_date_delta = this.$store.state.date_delta
+          let day
+          if(new_date1 == new_date2){
+            if(new_date2_end < base_date_delta){
+              day = 0
             }else{
-              day = day
+              day = 1
             }
+            console.log('day',day)
             return day
           }else{
-            if(day === 0){
-              day = 1
-            }else if(day == 1){
-              day = day
-            }else{
-              day = day
-            }
+            console.log('不同天')
+            var date1 = new Date(sDate1)
+            var date2 = new Date(sDate2)
+            var s1 = date1.getTime(),s2 = date2.getTime();
+            var total = (s2 - s1)/1000;
+            day = parseInt(total / (24*60*60));//计算整数天数
+            day == 0 ? day = day + 1 : day
             return day
           }
-          // var dateSpan,
-          // tempDate,
-          // iDays;
-          // sDate1 = Date.parse(sDate1);
-          // sDate2 = Date.parse(sDate2);
-          // console.log('sDate2',sDate2,'sDate1',sDate1)
-          // dateSpan = sDate2 - sDate1;
-          // console.log('dateSpan',dateSpan)
-          // dateSpan = Math.abs(dateSpan);
-          // iDays = Math.floor(dateSpan / (24 * 3600 * 1000));
-          // console.log('iDays',iDays)
-          // return iDays
         },
         //选择房型一行房型相关信息
         getRoomInfo(){
@@ -2939,5 +2922,8 @@ export default {
   }
   .colClass>>> .el-input-number{
     width: 130px;
+  }
+  .el-icon-caret-bottom{
+    display: inline-block
   }
 </style>

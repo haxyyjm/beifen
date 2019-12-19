@@ -3,9 +3,9 @@
   <div class="warp-night" :style="{ height: availHeight, overflow: 'auto' }">
     <el-container>
       <!--入住单-->
-      <link-house-dialog :show.sync= linkHouseFornVisible :parentInfoParam='linInfoParam'></link-house-dialog>
+      <link-house-dialog :show.sync= linkHouseFornVisible v-on:listenToFlushLink="flushByLink" :parentInfoParam='linInfoParam'></link-house-dialog>
        <!-- 预定单转入住单 -->
-      <preview-to-enterDialog :show.sync= previewToEnterVisible :parentInfoParam='preEnterInfoParam'></preview-to-enterDialog>
+      <preview-to-enterDialog v-on:listenToFlushPreviewEnter="flushByPreviewEnter" :show.sync= previewToEnterVisible :parentInfoParam='preEnterInfoParam'></preview-to-enterDialog>
       <el-aside  width="500px" style="background-color: #FFFFFF,"  class="left">
         <el-table size="mini" :row-class-name="tableRowClassName" @row-click="checkNightAuditAll" :data="nightData" :header-cell-style="{background:'#68819E', color: '#FFFFFF'}" style="width: 100%;margin-top: 10px">
           <el-table-column prop="nightItem" width="260" label="夜审项目"></el-table-column>
@@ -397,6 +397,7 @@ import _ from 'lodash'
   export default {
     data: function(){
       return {
+        rowValue: '',
         reserve_guest:{
           hotelInfo: {},
           liveCount: 0,//可选数
@@ -736,6 +737,7 @@ import _ from 'lodash'
       }
     },
     created(){
+      this.getHotel_info()
       this.check_isNight()//开始检查是否已经夜审
       // let row = {
       //     index: 0,
@@ -821,6 +823,7 @@ import _ from 'lodash'
        * 跳转到预定转入住
        */
     rowClick_preview(row){
+      this.rowValue = '应到未到'
       this.getPreInfoByRoom(row.order_no)
     },
     getPreInfoByRoom(param){
@@ -873,14 +876,56 @@ import _ from 'lodash'
         //   item.liveCount = 0
         // }
       },
+      flushByPreviewEnter(data){
+        console.log('....',this.rowValue)
+        console.log('listenToFlushPreviewEnter',data)
+        let row = {
+          index: 3,
+          nightItem: '应到未到客人列表',
+          number: 0,
+          src: '',
+        }
+        this.getNight_noArrive(row)
+      },
+      /**
+       * @desc 已经入住的进行处理
+       */
+      flushByLink(data){
+        console.log('....',this.rowValue)
+        console.log('listenToFlushLink',data)
+        if(this.rowValue == '退房未平账'){
+          let row = {
+            index: 0,
+            nightItem: "退房未平帐的主帐信息",
+            number: 0,
+            src: ""
+          }
+          this.getNight_noPing(row)
+        }else if(this.rowValue == '应离未离宾客'){
+          let row = {
+            index: 1,
+            nightItem: "应离未离宾客列表",
+            number: 0,
+            src: "",
+          }
+          this.getNight_qingAccount(row)
+        }
+
+      },
       rowClick(row){
         console.log('row',row)
-        this.getEnterInfoByRoom(row.room_number)
+        if(this.noPing){
+          this.rowValue = '退房未平账'
+        }else if(this.qingAccountData){
+          this.rowValue = '应离未离宾客'
+        }
+        this.getEnterInfoByRoom(row.order_no)
       },
         //===>联房列表打开
       getEnterInfoByRoom(param){
         let scopeParams = {
-          room_number: param
+          // room_number: param
+          order_no: param
         }
         let that = this
         // let url = `http://192.168.2.224:9005/v2/checkin/all_master_info/`
@@ -2013,6 +2058,7 @@ import _ from 'lodash'
       },
       //退房未平帐的主帐信息
       getNight_noPing(row){
+        console.log('row',row)
         // row.number= 1
         let that = this
         let url = that.api.api_newPrice_9107+ '/v1/' + `report/night_audit/check_out_but_no_closed/`
@@ -2025,6 +2071,12 @@ import _ from 'lodash'
               this.$message.warning('存在异常数据!')
             }
             that.noPingData = res.data.data.data
+            this.nightData.forEach(function (item) {
+              if(item.index == row.index){
+                item.number = row.number
+                item.src = row.src
+              }
+            })
             console.log('that.noPingData',that.noPingData)
           } catch (error) {
             console.log('error')            
@@ -2081,6 +2133,7 @@ import _ from 'lodash'
       },
       //应离未离宾客列表
       getNight_qingAccount(row){
+        console.log('rowwww',row)
         let that = this;
         // let url = that.api.api_newPrice_9107 + '/v1/checkin/get_leave_night_list/?page_size=300';
         let url = that.api.api_newPrice_9107+ '/v1/' + `report/night_audit/should_leave_without_leave/`
@@ -2088,13 +2141,22 @@ import _ from 'lodash'
           method: 'get',
           url: url,
         }).then((res) => {
-            try {
+          try {
             row.number = res.data.data.data.length
             row.src = row.number == 0 ? '通过' : '异常'
             if(row.src === '异常'){
               this.$message.warning('存在异常数据!')
             }
             that.qingAccountData = res.data.data.data
+            console.log('....row',row)
+            console.log('....nightData',this.nightData)
+            this.nightData.forEach(function (item) {
+              if(item.index == row.index){
+                item.number = row.number
+                item.src = row.src
+              }
+            })
+            console.log('..end..nightData',this.nightData)
             // localStorage.setItem('qingAccount',row.number)
           } catch (error) {
             console.log('error')
@@ -2143,6 +2205,12 @@ import _ from 'lodash'
               this.$message.warning('存在异常数据!')
             }
             that.noArriveData = res.data.data.data
+            this.nightData.forEach(function (item) {
+              if(item.index == row.index){
+                item.number = row.number
+                item.src = row.src
+              }
+            })
             // localStorage.setItem('qingAccount',row.number)
           } catch (error) {
             console.log('error')
@@ -2213,7 +2281,8 @@ import _ from 'lodash'
               }
             }
         }).then(res=>{
-          that.getHotel_info()
+          // that.getHotel_info()
+          console.log('已经查到')
           console.log('res.data',res.data)
           row.number = res.data.data.results.length
           // row.src = row.number == 0 ? '通过' : '异常'
@@ -2221,6 +2290,7 @@ import _ from 'lodash'
             // this.$message.warning('存在异常数据!')
           // }
           that.enterPreviewData = res.data.data.results
+          console.log('that.enterPreviewData',that.enterPreviewData)
         }).catch(error=>{
           this.$message.error(error)
         })
@@ -2334,7 +2404,6 @@ import _ from 'lodash'
       get_list_by_hotel(){
         return
         let that = this
-        // let url =  that.api.api_9022_9519+ '/v1/' + 'finance/pay_mode/get_list_by_hotel?page_size=999'
         let url =  that.api.api_9022_9519+ '/v1/' + 'finance/pay_mode/info_list?page_size=999'
         that.$axios({
           method : 'get',

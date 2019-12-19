@@ -10,7 +10,8 @@
               <!-- <el-checkbox style="margin-left: 15px; float: left; height: 50px;" :indeterminate="isIndeterminate" v-model="checkAll" @change="handleCheckAllChange">
                 预订共<span>4</span>间
               </el-checkbox> -->
-               <input  type='checkbox' class='input-checkbox more_class'  v-model='flag_checked' @click='selectCheckedAll'>详情
+               <!-- <input  type='checkbox' class='input-checkbox more_class'  v-model='flag_checked' @click='selectCheckedAll'> -->
+               详情
               <!-- <span style="margin-left: 20px">详情</span> -->
               <span style="float: right;margin-right: 10px">
                 <!-- <span style="margin-right: 10px">预收:</span><span style="color: red;">¥{{moneydesc.pay_amount}}</span> -->
@@ -27,12 +28,12 @@
             </div>
             </div> -->
               <ul v-for="(item,index) of endPayListParam.room_list" :key="index">
-                <li @click="getInfoByImportant(item,index)" :class="{activeColor: isActiveColor === index ? true : false}"  style="display: flex;justify-content:space-between; line-height: 40px; cursor: pointer;">
-                  <input type='checkbox'  name='checkboxinput' class='input-checkbox' v-model='checkboxList' :value="item[0]">
-                  <el-tag style="position: absolute;left: 16px;margin-top: 2px"  :disable-transitions="false">
+                <li @click="getInfoByImportant(item,index)" :class="{activeColor: isActiveColor === index ? true : false}"  style="display: flex;justify-content:space-between; align-items: center; cursor: pointer">
+                  <!-- <input type='checkbox'  name='checkboxinput' class='input-checkbox' v-model='checkboxList' :value="item[0]"> -->
+                  <el-tag :disable-transitions="false">
                     <span style="color: #4488E9">{{item.room_num}}</span>
                   </el-tag>
-                  <span style="color: #7AAAEF;">{{item.room_type}}</span>
+                  <span style="color: #7AAAEF">{{item.room_type}}</span>
                   <div style="margin-top: 5px;">
                      <el-button v-if="item.master_status == 1 || item.master_status == 2 || item.master_status == 3" size="mini" circle type="danger">
                       <span>退</span>
@@ -173,7 +174,7 @@
                   <el-checkbox label="consume">消费(账)</el-checkbox>
                 </el-checkbox-group>
               </el-row>
-              <el-table height="300" ref="table" :row-class-name="tableRowClassName" @selection-change="handleChargeChange" :data="tableData" :header-cell-style="{background:'#373d41', color: '#FFFFFF'}" style="width: 100%; margin-top: 20px">
+              <el-table size="mini" height="300" ref="table" :row-class-name="tableRowClassName" @selection-change="handleChargeChange" :data="tableData" :header-cell-style="{background:'#373d41', color: '#FFFFFF'}" style="width: 100%; margin-top: 20px">
                 <el-table-column
                   type="selection"
                   width="30">
@@ -225,7 +226,7 @@
                     <!-- <span v-if="scope.row.pay_status === 0 && scope.row.subject === 'transfer'">已到账</span> -->
                   </template>
                 </el-table-column>
-                <el-table-column prop="desc" label="备注"></el-table-column>
+                <!-- <el-table-column prop="desc" label="备注"></el-table-column> -->
                 <el-table-column prop="create_time" width="150" label="时间"></el-table-column>
                  <!-- <el-table-column prop="desc" label="备注">
                 </el-table-column> -->
@@ -1766,6 +1767,7 @@ export default {
       //   return data;
       // };
         return {
+          update_date: null, //更新当日价传递的日期
           roomNoList: [],
           cloneMasterGuest: [],//克隆的深拷贝的入住人数组
           cloneMainId: null,
@@ -2484,7 +2486,7 @@ export default {
         // let url = `http://192.168.2.165:9005/v2/checkin/update_price/`
         let scopeParam = {
           order_no: that.preBillLinkParam.order_no,
-          price_date: moment().format('YYYY-MM-DD'),
+          price_date: this.update_date, //这个更新的日期
           room_price: that.current_rate_price
         }
         that.$axios.post(url,scopeParam).then(res=>{
@@ -3143,18 +3145,32 @@ export default {
         // this.roomParam.oldPrice = row.
       },
         /**
-         *@current_rate_price 从多个数据里获取当日价  
+         *@current_rate_price 从多个数据里获取当日价 以营业日期来判断 
          */
         getRateCode_price_self(){
           console.log('this.preBillLinkParam.room_price',this.preBillLinkParam.room_price)
-          console.log('11',moment().format('YYYY-MM-DD'))
+          let biz_date = this.$store.state.biz_date //从store取营业日期
+          let biz_date_2 =  moment(biz_date, 'YYYY-MM-DD').valueOf(); //时间戳
+          let time = biz_date_2 - 24*60*60*1000
+          let before_date = moment(time).format('YYYY-MM-DD') //时间戳转换为日期字符串格式
           try {
-            let  temp = this.preBillLinkParam.room_price.filter(item=>item.price_date == moment().format('YYYY-MM-DD'))
+            let  temp = this.preBillLinkParam.room_price.filter(item=>item.price_date == biz_date)
             console.log('temp',temp)
-            if(temp){
+            if(temp.length > 0){
+              this.update_date =  biz_date
               this.current_rate_price = temp[0].room_price
             }else{
-              this.current_rate_price = 0
+              console.log('else-----')
+              console.log('before_date',before_date)
+              let  temp2 = this.preBillLinkParam.room_price.filter(item=>item.price_date == before_date)
+              console.log('temp2',temp2)
+              if(temp2.length > 0){
+                this.current_rate_price = temp2[0].room_price
+                this.update_date =  before_date
+              }else{
+                this.update_date =  biz_date
+                this.current_rate_price = 0
+              }
             }
           } catch (error) {
             console.log('入住超过期限查不到房价' + error)            
@@ -3482,10 +3498,11 @@ export default {
       },
       //控制tabel中每行颜色
       tableRowClassName({row, rowIndex}) {
-        if (row.subject==='pay') {
-          return 'warning-row';
-        } else{
-          return 'success-row';
+        console.log('row',row)
+        if (row.subject=='pay') {
+          return 'pay-row';
+        } else if (row.subject == 'consume'){
+          return 'consume-row';
         }
         return '';
       },
@@ -3584,22 +3601,8 @@ export default {
           this.$message.warning('余额为负或者0，不能进行退款!')
         }else{
           this.refunAccountDialog = true;
-          // this.refundParam.payReasonValue = this.previewEnterBill.payReasonValue
-          // this.refundParam.enterAccountCode = this.previewEnterBill.enterAccountCode //转换
-          // this.refundParam.payMode = row.related_pay_id.pay_mode_id.model_name + '-' + row.related_pay_id.pay_mode_id.id
-          // this.refundParam.payReasonValue = row.related_pay_id.code_pay_for_id.name + '-' + row.related_pay_id.code_pay_for_id.id
-          // this.refundParam.enterAccountCode = row.code_income_type_id.name + '-' + row.code_income_type_id.id
-          // this.refundParam.charge_id = row.id
-          // console.log('this.refundParam.payMode',this.refundParam.payMode.substr(0,this.refundParam.payMode.indexOf("-")))
-          // console.log('this.refundParam.payMode',this.refundParam.payMode)
-          // console.log('this.refundParam.payMode',this.refundParam.payMode.substr(this.refundParam.payMode.indexOf("-")+1,this.refundParam.payMode.length))
-          // if(row.related_pay_id.pay_amount <= row.account_id.balance){
-          //   this.maxRefundMoney = row.related_pay_id.pay_amount
-          // }else{
-          //   this.maxRefundMoney = row.account_id.balance
-          // }
-        this.maxRefundMoney = row.can_arrange //最大可退款金额
-        this.refundMoneyValue = row.can_arrange //赋值默认
+          this.maxRefundMoney = that.moneydesc.balance //最大可退款金额
+          this.refundMoneyValue = row.can_arrange //赋值默认
         }
       },
       //针对支付明细进行退款(包括第三方)
@@ -3607,17 +3610,19 @@ export default {
         let that = this
         console.log('this.refundRow',that.refundRow)
         let row = that.refundRow
-        if(that.refundMoneyValue > that.maxRefundMoney){
+        console.log('that.refundMoneyValue',that.refundMoneyValue)
+        console.log('that.maxRefundMoney',that.maxRefundMoney)
+        if(Number(that.refundMoneyValue) > Number(that.maxRefundMoney)){
           that.$message.warning('不能超过最大可退款额度!')
           return false
         }else{
-          if(that.refundMoneyValue){
+          if(that.refundMoneyValue && that.previewEnterBill.payReasonValue && that.previewEnterBill.enterAccountCode){
             // if(!this.validatePayData()){
-            //   return false
+              //   return false
             // }
             that.refund_pointByAccont(row)
           }else{
-            that.$message.warning('退款金额为必填项!')
+            that.$message.warning('退款金额、入账代码、退款方式为必填项!')
           }
         }
       },
@@ -3656,13 +3661,16 @@ export default {
       //联房=>确定并打印
       confirmLinkRoom(){
         console.log('this.linkvalue------------------',this.linkValue)
-        if(this.rightData.length=== 0){
+        if(this.linkValue.length > 1 &&  this.rightData.length=== 0){
           this.$message.warning('请先选择主账!')
           return
         }
         if(this.rightData.length>1){
           this.$message.warning('只能选择一间房间设为主账!')
           return
+        }
+        if(this.linkValue.length == 1){
+           this.rightData = this.linkValue  //一个的时候可以直接赋值
         }
         console.log('右边所有数据rightLinkList',this.rightLinkList)
         console.log(' this.rightData,设为主账数据',this.rightData)
@@ -4178,7 +4186,7 @@ export default {
           that.$axios.post(url,scopeParam).then(res=>{
             console.log('res.data.mess',res.data.message)
             if(res.data.message === 'success'){
-              if(this.consume_check_flag === true){//标记查房消费入账
+              if(this.consume_check_flag === true){//标记查房消费入账==>以前的逻辑,不用担忧
                 this.confirmChangeStatus()
                 that.enterBillDialog = false //关闭入账界面
                 this.pingAccount()
@@ -4981,34 +4989,34 @@ export default {
       },
       //新版本 ====>退房
       pingAccount(){
-        this.consume_checkRoom_price = 0
-        // if(this.endPayListParam.close_flag != null && this.endPayListParam.close_flag != ''){
-          //必须要强制平账
-          let forceValue = 0
-          // if(param){
-          //   this.consume_data = eval('('+param+')')
-          //   console.log('this.consume_data',this.consume_data)
-          //   this.consume_dialogVisible = true//查房产生的消费dialog
-          //   for(var item of this.consume_data){
-          //     this.consume_checkRoom_price = this.consume_checkRoom_price + item.num*item.price
-          //   }
-          // }else{
-          //   this.$message.warning('没有消费或者查房完成了,直接开始退房!')
-            if(this.moneydesc.balance != 0){
-              forceValue = 1
-              this.dialogVisible = true
-              console.log('进入进入弹出',this.dialogVisible)
-            }else{
-              console.log('进入进入弹出22',this.dialogVisible)
-              forceValue = 0
-              this.refundMoney(forceValue)
+        // 退房的时候要判断主房的时候解除联房  但特殊情况 =>有联房已退 则不需要解开直接退(条件is_main: true 其余is_main 都为false)
+        let room_no = this.preBillLinkParam.room_number
+        if(this.endPayListParam.room_list.length > 1){ //存在多个房间
+          let index = this.endPayListParam.room_list.findIndex(item=> (item.room_num == room_no && item.is_main)) //判断这个房间为主房
+          let otherlink_room = this.endPayListParam.room_list.filter(item=>item.room_num != room_no)
+          console.log('index',index)
+          console.log('otherlink_room',otherlink_room)
+          if(index > -1){
+            let other_index = otherlink_room.findIndex(item=>item.master_status == 0) //联房状态下 且  房子为在住状态
+            if(other_index > -1){
+              this.$message.error('该房间为主房,退房时请在编辑联房里先解除已联的房间或者退掉所有的联房房间!')
+              return
             }
-          // }
-          // console.log('this.endPayListParam.balance',this.endPayListParam.balance)
-          // console.log('forceValue',forceValue)
-        // }else{
-        //   this.$message.warning('请先结账，才能退房!')
-        // }
+          }
+        }
+        console.log('到这一步啦!')
+        this.consume_checkRoom_price = 0
+        //必须要强制平账
+        let forceValue = 0
+          if(this.moneydesc.balance != 0){
+            forceValue = 1
+            this.dialogVisible = true
+            console.log('进入进入弹出',this.dialogVisible)
+          }else{
+            console.log('进入进入弹出22',this.dialogVisible)
+            forceValue = 0
+            this.refundMoney(forceValue)
+          }
       },
       //查房产生的消费进行入账
       confirm_consume_account(param){
@@ -5434,7 +5442,7 @@ export default {
         },
         //子组件刷新更新父组件数据
         flushByLink(){
-          this.$emit('listenToFlushLink', '已经换房/退房/更改房态了了,更新房态图')
+          this.$emit('listenToFlushLink', '已经换房/退房/更改房态/夜审打开了,更新房态图/或者夜审')
         },
         //单=》选房号dialogtabel 并控制不可选房间号
         handleselect(selection, row){
@@ -6390,13 +6398,14 @@ export default {
     width: 130px;
   }
 </style>
-<style>
-  /*控制表格行中的颜色*/
-  .el-table .warning-row {
-    background: #E6E6FA;
+<style scoped>
+  /*控制表格行中的颜色==>深入影响*/
+  .el-table>>> .pay-row {
+    background: #F0FFFF;
   }
-  .el-table .success-row {
-    background: #FFFFFF;
+
+  .el-table>>> .consume-row {
+    background:#D3D3D3;
   }
 </style>
 
