@@ -81,7 +81,7 @@
                         :default-time="[startDate_kaishi, startDate_jiesu]"
                         type="datetimerange" range-separator="~" start-placeholder="开始日期" end-placeholder="结束日期" placeholder="选择日期">
                     </el-date-picker> -->
-                    <span v-if="preBillParam.master_base[0].master_lable == 0 || preBillParam.master_base[0].master_lable == 2">共 <span style="width: 80px">{{countDateRange}}</span> 晚</span>
+                    <span v-if="preBillParam.master_base[0].master_lable == 0 || preBillParam.master_base[0].master_lable == 2">共 <span style="width: 80px">{{countDate}}</span> 晚</span>
                     <!-- 保留至:<el-date-picker style="width: 10vw" v-model="value2" type="date" placeholder="选择日期"></el-date-picker> -->
                     </el-col>
                   </li>
@@ -777,6 +777,7 @@ import pictureDialog from './pictureDialog'
 export default {
     data(){
         return {
+          countDate: null,//计算时间
           remarkNewList: [],
           face_set: '',//获取face-set
           isLoading: false,
@@ -932,7 +933,7 @@ export default {
             charge_details: [],
           },
           return_accountParam:{},
-          new_startTime: '',
+          new_startTime: new Date(),
           new_endTime: '',
           startDate_kaishi: moment(new Date()).format('HH:mm:ss'),
           startDate_jiesu: moment(new Date()).format('HH:mm:ss'),
@@ -1015,7 +1016,6 @@ export default {
               value: '05'
             }],
             breakfastAllList: [],//早餐列表
-            countDate: '',//共几晚
             middle_remarkRow: '',
             addAndUpdate: true,//编辑新增标记
             remarkContent_value: '',//备注值
@@ -1278,8 +1278,7 @@ export default {
       QRCode
     },
     mounted(){
-      let that = this;
-      that.setNewtime()
+      // this.setNewtime()
     },
     watch: {
       show () {
@@ -1348,21 +1347,21 @@ export default {
     },
     computed:{
       //计算入离时间差天数  以 date_delta 为基准
-      /**
-       * @date_delta  以该值为基准,计算周期判断是0晚还是1晚
-       */
-      countDateRange(){
-        this.preBillParam.master_base[0].leave_time = [this.new_startTime,this.new_endTime]
-        console.log('zhuanhuan-----1',this.preBillParam.master_base[0].leave_time)
-        console.log('store.state.date_delta 周期时间 基准量',this.$store.state.date_delta)
-        try {
-          let start = moment(this.preBillParam.master_base[0].leave_time[0]).format('YYYY-MM-DD HH:mm:ss')
-          let end = moment(this.preBillParam.master_base[0].leave_time[1]).format('YYYY-MM-DD HH:mm:ss')
-          return this.datedifference(start, end)
-        } catch (error) {
-          console.log('error')
-        }
-      }
+      // /**
+      //  * @date_delta  以该值为基准,计算周期判断是0晚还是1晚
+      //  */
+      // countDateRange(){
+      //   this.preBillParam.master_base[0].leave_time = [this.new_startTime,this.new_endTime]
+      //   console.log('zhuanhuan-----1 这里是开始计算',this.preBillParam.master_base[0].leave_time)
+      //   console.log('store.state.date_delta 周期时间 基准量',this.$store.state.date_delta)
+      //   try {
+      //     let start = moment(this.preBillParam.master_base[0].leave_time[0]).format('YYYY-MM-DD HH:mm:ss')
+      //     let end = moment(this.preBillParam.master_base[0].leave_time[1]).format('YYYY-MM-DD HH:mm:ss')
+      //     return this.datedifference(start, end)
+      //   } catch (error) {
+      //     console.log('error')
+      //   }
+      // }
     },
     created(){
       // this.enterPreviewDialog = true
@@ -1371,10 +1370,28 @@ export default {
       // this.findHtNation()//民族获取
     },
     methods: {
+      /**
+       * @date_delta  以该值为基准,计算周期判断是0晚还是1晚
+       */
+      countDateRange(){
+        this.preBillParam.master_base[0].leave_time = [this.new_startTime,this.new_endTime]
+        console.log('zhuanhuan-----1 这里是开始计算',this.preBillParam.master_base[0].leave_time)
+        console.log('store.state.date_delta 周期时间 基准量',this.$store.state.date_delta)
+        try {
+          let start = moment(this.preBillParam.master_base[0].leave_time[0]).format('YYYY-MM-DD HH:mm:ss')
+          let end = moment(this.preBillParam.master_base[0].leave_time[1]).format('YYYY-MM-DD HH:mm:ss')
+          return this.datedifference(start, end)
+        } catch (error) {
+          console.log('error')
+        }
+      },
+      /**
+       * 暂时废弃
+       */
       setNewtime(){//默认显示今天
         this.new_startTime= moment(new Date()).format('YYYY-MM-DD HH:mm:ss')
         this.preBillParam.master_base[0].leave_time = [this.new_startTime,this.new_endTime]
-        console.log('zhuanhuan',this.preBillParam.master_base[0].leave_time)
+        console.log('zhuanhuan===开始计算',this.preBillParam.master_base[0].leave_time)
         // this.new_endTime= moment(new Date()).format('YYYY-MM-DD HH:mm:ss')
       },
       //获取图片param 子传父emit
@@ -3735,6 +3752,7 @@ export default {
           let base_date_delta = this.$store.state.date_delta
           //相同天的判断情况
           let day
+          // countDate
           if(new_date1 == new_date2){
             if(new_date2_end < base_date_delta){
               day = 0
@@ -3742,15 +3760,25 @@ export default {
               day = 1
             }
             console.log('day',day)
+            this.countDate = day
             return day
           }else{
             console.log('不同天')
+            console.log('sDate1--start',sDate1)
+            console.log('sDate2--end',sDate2)
             var date1 = new Date(sDate1)
             var date2 = new Date(sDate2)
             var s1 = date1.getTime(),s2 = date2.getTime();
             var total = (s2 - s1)/1000;
             day = parseInt(total / (24*60*60));//计算整数天数
-            day == 0 ? day = day + 1 : day
+            console.log('day最终',day)
+            // if(day == 0 || day == 1){
+            //   day = day + 1
+            // }else if(day > 1){
+              day = day + 1
+            // }
+            // day == 0 ? day = day + 1 : day = day + 1
+            this.countDate = day
             return day
           }
         },
@@ -3798,6 +3826,7 @@ export default {
         haveChangeTime(data){
           this.changeTime = true//改变了
           this.preBillParam.master_base[0].leave_time = [this.new_startTime,this.new_endTime] //进一步赋值
+          this.countDateRange() //进一步内部计算
           console.log('shijian改变',data)
         },
         //获取code对应房型数据
@@ -3822,23 +3851,6 @@ export default {
           this.preBillParam.master_base[0].rate_code = ''
           return
           //----------以下全部没用
-          if(this.preBillParam.master_base[0].master_lable != 1){
-          console.log('......this.preBillParam.master_base[0].master_lable2222',this.preBillParam.master_base[0].master_lable)
-            this.reSetData('非钟点房')
-            this.preBillParam.master_base[0].leave_time =[new Date() ,moment(new Date()).add(+1,'days').format('YYYY-MM-DD' + ' ' + this.no_hour_time)]
-            //房型为免费房的时候，房价为0==>有bug 要改成房价码市场码里有这个免费房，选择的时候置为0
-            if(this.preBillParam.master_base[0].master_lable == 4){
-              for(var item of this.preBillParam.master_base){
-                item.fix_rate = 0
-              }
-            }else{
-              for(var item of this.preBillParam.master_base){
-                item.fix_rate = ''//重新选择房价码
-              }
-            }
-          }else if(this.preBillParam.master_base[0].master_lable === 1){
-            this.preBillParam.master_base[0].master_type = 1//入住类型变为散客入住 当为钟点房的时候固定住
-          }
         },
         //点击市场码刷新房价码等数据
         flushRateCode(){
@@ -4745,10 +4757,13 @@ export default {
             // console.log('moment(new Date())',moment(new Date().format('YYY-MM-DD HH:mm:ss')))
             // var time2=moment().add(2,'hours').format('YYYY-MM-DD HH:mm:ss');
             // if(this.preBillParam.master_base[0].master_lable != 1){
-            if(this.changeTime === false){
-              this.preBillParam.master_base[0].leave_time =[new Date() ,moment(new Date()).add(+1,'days').format('YYYY-MM-DD' + ' ' + that.no_hour_time)]
+            console.log(this.changeTime,'判断时间开始')
+            if(!this.changeTime){
               this.new_endTime = moment(new Date()).add(+1,'days').format('YYYY-MM-DD' + ' ' + that.no_hour_time)
+              this.preBillParam.master_base[0].leave_time =[that.new_startTime ,that.new_endTime]
+              console.log('这里的时间对吗????',this.preBillParam.master_base[0].leave_time)
             }
+            this.countDateRange() //计算时间  这里计算
             // }else{
             //   this.preBillParam.master_base[0].leave_time =[new Date() ,time2]
             // }

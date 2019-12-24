@@ -1359,18 +1359,13 @@
         })
       },
       initWebSocket(){//初始化weosocket(必须)
-      console.log('111',localStorage.getItem('authorization'))
-        const wsuri = "ws://47.98.113.173:9115/ws/room/room_map_list/";    //请根据实际项目需要进行修改
+        console.log('111',localStorage.getItem('authorization'))
+        let authorization = localStorage.getItem('authorization')
+        const wsuri = `ws://47.98.113.173:9115/ws/room/room_map_list/?authorization=${authorization}`;    //请根据实际项目需要进行修改
         this.websock = new WebSocket(wsuri);      //新建一个webstock对象
-        // this.websock.onclose = this.websocketclose();
-        // this.websock.onmessage = this.websocketonmessage(); 
-        // this.websock.onopen = this.websocketonopen();     //打开连接 
-        this.websock.onopen = this.open
-        this.websock.onmessage = this.websocketonmessage
-        // this.websock.onopen = function(event) {
-        //   console.log("WebSocket is open now.",event);
-        // };
-        // this.websock.onerror = this.websocketonerror();
+        this.websock.onopen = this.open //打开连接 ==>内部发送数据
+        this.websock.onmessage = this.websocketonmessage //数据接收
+        this.websock.onerror = this.websocketonerror(); //发送失败 继续重新调
       },
       open: function () {
         console.log("socket连接成功")
@@ -1493,37 +1488,6 @@
             street_add : ''
           }]
       },
-      /**得到所有房间的数 */
-      getCardAllList(){
-        let that = this
-        let scopeParam = {
-          page : 1,
-          page_size : 300,
-        }
-        // let url = that.api.api_newPrice_9107 + '/v1/' + `room/room_status/get_room_map_list?page_size=1000`
-        let url =  that.api.api_newPrice_9107 + '/v1/' +  'room/room_status/get_room_map_list/page_size=1000'
-        that.$axios({
-           method : 'get',
-          url : url,
-          params: scopeParam
-        }).then(res=>{
-          if(res.data.message === 'success'){
-            let roomList = res.data.data.results
-            let count = res.data.data.room_state_count
-            //计算不同房态的房间数量
-            that.VCNumber = count['VC']
-            that.VDNumber = count['VD']
-            that.ODNumber = count['OD']
-            that.OONumber = count['OO']
-            that.OCNumber = count['OC']
-            that.OSNumber = 0
-            that.allNumber = that.VCNumber + that.VDNumber + that.ODNumber + that.OONumber + that.OCNumber + that.OSNumber
-          }else{
-            that.$message.error('获取房态列表失败!')
-          }
-        }).catch(error=>{
-        })
-      },
       //筛选预离的数据(需要重构数据)
       filterSelectData(param){
         let that = this
@@ -1641,7 +1605,6 @@
         }).then(res=>{
           if(res.data.message === 'success'){
             that.cardList = res.data.data.results
-            let roomList = res.data.data.results
             let count = res.data.data.room_state_count
             //计算不同房态的房间数量
             that.VCNumber = count['VC']

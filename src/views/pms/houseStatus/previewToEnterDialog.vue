@@ -85,11 +85,31 @@
                 <el-row style="margin-top: 10px">
                     <el-col :span="24">
                       <span style="display: inline-block">入离时间:</span>
-                      <el-date-picker  :disabled="preBillParam.reserve_base[0].rsv_lable == 1 ? true : false"  :picker-options="rangeDate"  
+                        <el-date-picker
+                        disabled
+                        v-model="new_startTime"
+                        type="datetime"
+                        placeholder="选择日期时间"
+                        value-format="yyyy-MM-dd HH:mm:ss"
+                        >
+                      </el-date-picker>
+                      -
+                      <el-date-picker
+                        :disabled="preBillParam.reserve_base[0].rsv_lable == 1 ? true : false"
+                        v-model="new_endTime"
+                        @change="haveChangeTime"
+                        type="datetime"
+                        value-format="yyyy-MM-dd HH:mm:ss"
+                        placeholder="选择离店时间"
+                        :picker-options="rangeDate"
+                        :clearable ="false"
+                      >
+                      </el-date-picker>
+                      <!-- <el-date-picker  :disabled="preBillParam.reserve_base[0].rsv_lable == 1 ? true : false"  :picker-options="rangeDate"  
                         :clearable ="false"
                         :default-time="[startDate_kaishi, startDate_jiesu]"
                         v-model="preBillParam.reserve_base[0].leave_time" type="datetimerange" range-separator="~" start-placeholder="开始日期" end-placeholder="结束日期" placeholder="选择日期">
-                      </el-date-picker> 
+                      </el-date-picker>  -->
                       <span v-if="preBillParam.reserve_base[0].rsv_lable == 0">共 <span style="width: 80px">{{countDateRange}}</span> 晚</span>
                     </el-col>
                 </el-row>
@@ -859,6 +879,8 @@ export default {
           charge_date: '',
           activeName: '1',
           orderTitle: '',
+          new_startTime: '',
+          new_endTime: '',
           startDate_kaishi: moment(new Date()).format('HH:mm:ss'),
           startDate_jiesu: moment(new Date()).format('HH:mm:ss'),
           card_input: true,
@@ -1416,9 +1438,14 @@ export default {
         //关键一步，登记有身份证号要清空<===================mark 在上一步已经清空
         this.getCardListInfo()//获取房子信息所有数据
         this.preBillParam = _.cloneDeep(this.parentInfoParam)
+        console.log(this.parentInfoParam,'this.parentInfoParam==================父传子aishi')
         this.orderTitle = `预定单[${this.preBillParam.reserve_base[0].order_no}]`
-        this.preBillParam.reserve_base[0].leave_time = [moment(this.preBillParam.reserve_base[0].arr_time).format('YYYY-MM-DD HH:mm:ss'),moment(this.preBillParam.reserve_base[0].leave_time).format('YYYY-MM-DD HH:mm:ss')]
+        // this.preBillParam.reserve_base[0].leave_time = [moment(this.preBillParam.reserve_base[0].arr_time).format('YYYY-MM-DD HH:mm:ss'),moment(this.preBillParam.reserve_base[0].leave_time).format('YYYY-MM-DD HH:mm:ss')]
+        this.new_startTime = moment(this.preBillParam.reserve_base[0].arr_time).format('YYYY-MM-DD HH:mm:ss')
+        this.new_endTime = moment(this.parentInfoParam.reserve_base[0].leave_time).format('YYYY-MM-DD HH:mm:ss')
+        this.preBillParam.reserve_base[0].leave_time = [this.new_startTime,this.new_endTime]
         this.rateCodeValue = this.preBillParam.reserve_base[0].rate_code //获取房价码
+        console.log('new_endTime',this.new_endTime)
         console.log(this.preBillParam,'this.preBillParam==================父传子')
         this.previewEnterBill.room_no_value = this.preBillParam.reserve_rate[0].dynamic_roomNumber[0]//申明默认房间号
         if(this.preBillParam.reserve_guest.length>1 || this.preBillParam.reserve_rate.length>1){
@@ -1430,16 +1457,9 @@ export default {
         this.getRateCode_list()
         this.getCanLiveRoom()
       },
-      //对象的watch
-      // parentParam: {
-      //     handler(newValue,oldValue){
-      //         console.log('new',newValue)
-      //         console.log('old',oldValue)
-      //     },
-      // },
-      // param(){
-      //     this.getData()
-      // }
+    },
+    mounted(){
+      this.setNewtime()
     },
     computed:{
       // sumMoney(){
@@ -1454,12 +1474,32 @@ export default {
         },
       //计算预离时间差天数
       countDateRange(){
-        let start = moment(this.preBillParam.reserve_base[0].leave_time[0]).format('YYYY-MM-DD HH:mm:ss')
-        let end = moment(this.preBillParam.reserve_base[0].leave_time[1]).format('YYYY-MM-DD HH:mm:ss')
-        return this.datedifference(start, end)
+        this.preBillParam.reserve_base[0].leave_time = [this.new_startTime,this.new_endTime]
+        console.log('zhuanhuan-----1',this.preBillParam.reserve_base[0].leave_time)
+        console.log('store.state.date_delta 周期时间 基准量',this.$store.state.date_delta)
+        try {
+          let start = moment(this.preBillParam.reserve_base[0].leave_time[0]).format('YYYY-MM-DD HH:mm:ss')
+          let end = moment(this.preBillParam.reserve_base[0].leave_time[1]).format('YYYY-MM-DD HH:mm:ss')
+          return this.datedifference(start, end)
+        } catch (error) {
+          console.log('error')
+        }
       }
     },
     methods: {
+        setNewtime(){//默认显示今天
+          // this.new_startTime= moment(new Date()).format('YYYY-MM-DD HH:mm:ss')
+          // this.preBillParam.reserve_base[0].leave_time = [this.new_startTime,this.new_endTime]
+          console.log('zhuanhuan',this.preBillParam.reserve_base[0].leave_time)
+          // this.new_endTime= moment(new Date()).format('YYYY-MM-DD HH:mm:ss')
+          // this.preBillParam.reserve_base[0].leave_time = [moment(this.preBillParam.reserve_base[0].arr_time).format('YYYY-MM-DD HH:mm:ss'),moment(this.preBillParam.reserve_base[0].leave_time).format('YYYY-MM-DD HH:mm:ss')]
+          // this.new_startTime = moment(this.preBillParam.reserve_base[0].arr_time).format('YYYY-MM-DD HH:mm:ss')
+          // this.new_endTime = moment(this.preBillParam.reserve_base[0].leave_time).format('YYYY-MM-DD HH:mm:ss')
+        },
+        haveChangeTime(data){
+          this.preBillParam.reserve_base[0].leave_time = [this.new_startTime,this.new_endTime] //进一步赋值
+          console.log('shijian改变',data)
+        },
       /**
        *@desc 取消预定 
        */
@@ -2113,7 +2153,8 @@ export default {
         let add_hours = list[0].check_out_time
         add_hours = add_hours !=null ? add_hours.slice(1,2) : ''
         let time2 = moment().add(param,'hours').format('YYYY-MM-DD HH:mm:ss')
-        this.preBillParam.reserve_base[0].leave_time =[new Date() ,time2]
+        this.new_endTime = time2//赋值时间
+        this.preBillParam.reserve_base[0].leave_time =[this.new_startTime,time2]
       },
       /**
        * 获取钟点房房价码<====实时更新
@@ -3619,7 +3660,8 @@ export default {
             var s1 = date1.getTime(),s2 = date2.getTime();
             var total = (s2 - s1)/1000;
             day = parseInt(total / (24*60*60));//计算整数天数
-            day == 0 ? day = day + 1 : day
+            console.log('day最终',day)
+            // day = day + 1
             return day
           }
         },

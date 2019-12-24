@@ -2643,6 +2643,7 @@ export default {
             //   return false
             // }
         }
+        return true
       },
       /**
        * @desc 新版上传公安

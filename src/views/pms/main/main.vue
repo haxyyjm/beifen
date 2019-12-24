@@ -130,7 +130,9 @@
                 </el-table-column> -->
                 <el-table-column prop="master_guest_list" label="在住人" :key="Math.random()" width="160" v-if="!rsc_peo_flag">
                   <template slot-scope="scope">
-                    <span >{{scope.row.master_guest_list.name}}、</span>
+                    <span v-for="(item,index) of scope.row.master_guest_list" :key="index">
+                      {{item.name + '、'}}
+                    </span>
                   </template>
                 </el-table-column>
                 <el-table-column prop="from_name" label="团队名">
@@ -156,7 +158,11 @@
                 </el-table-column>
                 <el-table-column prop="master_guest_list" width="140" label="联系电话" :key="Math.random()" v-if="!rsc_peo_flag">
                   <template slot-scope="scope">
-                    <span >{{scope.row.master_guest_list.telephone}}、</span>
+                    <span v-for="(item,index) of scope.row.master_guest_list" :key="index">
+                      <span v-if="item.telephone"> 
+                        {{item.telephone + '、'}}
+                      </span>
+                    </span>
                   </template>
                 </el-table-column>
                 <el-table-column prop="rsv_person_name" label="预定人" :key="Math.random()" v-if="rsc_peo_flag">
@@ -174,7 +180,14 @@
                 <el-table-column  label="房价">
                   <template slot-scope="scope">
                     <el-tooltip effect="light" placement="bottom">
-                      <div slot="content">{{scope.row.room_price_dict}}</div>
+                      <div slot="content">
+                        <ul style="display: inline-block" v-for="(item,index) of scope.row.room_price_dict" :key="index">
+                          <li  style="text-align: center;margin-right: 5px;margin-top: 5px">
+                            <div>{{item.price_date}}</div>
+                            <div style="color: rgb(243, 86, 93)">{{item.price + '元'}}</div>
+                          </li>
+                        </ul>
+                      </div>
                       <span style="color: #f3565d"> 
                         {{scope.row.room_price + '元'}}
                       </span>
