@@ -94,5 +94,5 @@ new Vue({
   store,
   pmsStore,
   el: '#app',
-  render: h => h(App)
+  render: h => h(App)//这里的 webpack只能通过render渲染 不能通过component
 })

@@ -7,7 +7,7 @@
           <div class="container-top">
             <div>
               <el-button type="primary" size="mini">新建</el-button>
-              <el-button type="primary" size="mini">保存</el-button>
+              <el-button type="primary" size="mini" @click="saveInfo">保存</el-button>
               <el-button type="primary" size="mini">账户</el-button>
               <el-button @click="isShow = false" type="primary" size="mini">入账</el-button>
               <el-button type="primary" size="mini">允许记账</el-button>
@@ -602,6 +602,15 @@ export default {
     this.availHeight = screen.availHeight - 180 + "px";
   },
   methods: {
+    /**保存 */
+    saveInfo(){
+      let that = this
+      let url,scopeParam
+      that.$axios.post(url,scopeParam).then(res=>{
+      }).catch(error=>{
+        this.$message.warning(error)
+      })
+    },
     handleTabClick() {}
   }
 };

@@ -30,7 +30,7 @@
                   &nbsp;&nbsp;&nbsp;市场码:
                   <el-select @change="flushRateCode" clearable @focus="getMarketSrc('market')"  v-model="preBillParam.reserve_base.code_market" style="width: 65%"  placeholder="请选择">
                       <el-option
-                        v-for="item in marketSrcList"
+                        v-for="item in marketList"
                         :key="item.id"
                         :label="item.descript"
                         :value="item.code">
@@ -41,7 +41,7 @@
                     <span style="padding-left: 15px">来源码:</span>
                     <el-select @focus="getMarketSrc('src')" clearable v-model="preBillParam.reserve_base.code_src" style="width: 78%"  placeholder="请选择">
                       <el-option
-                        v-for="item in marketSrcList"
+                        v-for="item in srcList"
                         :key="item.id"
                         :label="item.descript"
                         :value="item.code">
@@ -538,6 +538,8 @@ export default {
           return_accountParam_1: {},//开帐之后返回的param
           isAccout: true,
           isPay: true,
+          srcList: [],
+          marketList: [],
           marketSrcList: [],//市场码来源码数据
           selfSortArray: [],//自动排房
           payMoney: 0,
@@ -1769,6 +1771,16 @@ export default {
           if(this.is_addlive == false ){
             scopeParam.reserve_guest = [] //删掉这个空对象
           }
+          let  data_find
+          if(this.preBillParam.reserve_base.code_market == 'TD'){
+            scopeParam.reserve_base.from_type == 0
+          }else if (this.preBillParam.reserve_base.code_market == 'XYGS'){
+            scopeParam.reserve_base.from_type == 2
+          }else if(this.preBillParam.reserve_base.code_market == 'SMSK' && this.preBillParam.reserve_base.code_src == 'HY'){
+            scopeParam.reserve_base.from_type == 1
+          }
+          data_find  =this.srcList.find(item=>(item.code == this.preBillParam.reserve_base.code_src))
+          scopeParam.reserve_base.from_id = data_find.id 
           console.log('scopeParam',scopeParam)
           that.$axios.post(url,scopeParam).then(res=>{
             if(res.data.message === 'success'){
@@ -2628,8 +2640,11 @@ export default {
                 url : url,
                 params: params
             }).then(res=>{
-              that.marketSrcList = res.data.data.results
-              console.log('that.marketSrcList',that.marketSrcList)
+             if(param == 'market'){
+                 that.marketList = res.data.data.results
+               }else{
+                 that.srcList = res.data.data.results
+               }
             }).catch(error=>{
           })
         },

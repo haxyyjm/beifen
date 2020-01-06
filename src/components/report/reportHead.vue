@@ -9,7 +9,17 @@
                 :value="item.id">
             </el-option>
           </el-select> -->
-          日期:<el-date-picker size="mini" style="width: 15vw" v-model="charge_date" type="daterange" range-separator="-" start-placeholde="开始日期" end-placeholde="结束日期"></el-date-picker>
+          <span v-if="isDate_show == false">日期:<el-date-picker size="mini" :clearable=false style="width: 15vw" v-model="date_value" type="daterange" range-separator="-" start-placeholde="开始日期" end-placeholde="结束日期"></el-date-picker></span>
+          <span v-else>
+               <el-date-picker
+                value-format="yyyy-MM-dd"
+                size="mini"
+                v-model="date_value"
+                :clearable=false
+                type="date"
+                placeholder="选择日期">
+                </el-date-picker>
+          </span>
         </div>
         <div>
             <el-button type='primary' size="mini" >查询</el-button>
@@ -24,6 +34,7 @@
         name: "reportHead",
         data(){
             return{
+                isDate_show: false,
                 employeeValue: '',
                 startTime: '',
                 endTime: '',
@@ -32,7 +43,7 @@
                     reportData_count: 0,
                     hotel_name: ''
                 },
-                charge_date: '',
+                date_value: '',
                 options: [],
                 value: ''
             }
@@ -53,6 +64,11 @@
         //        this.findToParent()
         //     });  
         // },
+        mounted(){
+            console.log('this.$store.state.biz_date',this.$store.state.biz_date)
+            console.log('this.reportParam jinru',this.reportParam)
+            this.reportParam.id == 'dateYingye_id' ? this.date_value = this.$store.state.biz_date : this.date_value = [moment().format('YYYY-MM-DD'),moment().format('YYYY-MM-DD')]
+        },
         methods: {
             /**
              * @printObj 打印
@@ -64,9 +80,9 @@
                 console.log('print_element',print_element)
                 let printWindow;
                 let printContent = document.getElementById(print_element).innerHTML;
-                printWindow = window.open('','_blank','width=500,height=300,location=0,menubar=0,status=0,toolbar=0,scrollbars=1');
+                printWindow = window.open('','_blank','width=500,height=600,location=0,menubar=0,status=0,toolbar=0,scrollbars=1');
                 printWindow.document.write('<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /><meta http-equiv="Expires" content="0"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Cache-control" content="no-cache"><meta http-equiv="Cache" content="no-cache"><meta name="keywords" content="" /><meta name="description" content="" /><title></title></head><body>');
-                printWindow.document.write('<div style="width:100%; text-align: center; height:100%; overflow:hidden;">'+printContent+"</div>");
+                printWindow.document.write('<div style="width:100%; text-align: center; height:100%; ">'+printContent+"</div>");
                 printWindow.document.write("</body></html>");
                 printWindow.focus();//当前新建的窗口获得焦点
                 printWindow.document.close();//关闭新建窗口的文档输出流，这个是必须的，否则下面的打印语句无效
@@ -75,15 +91,20 @@
             },
             /**子传父查询得到的值传过去 */
             sendInfoToParent(){
+                this.reportData.hotel_name = this.$store.state.hotel_name //store里面数据赋值进去酒店名称
                 this.$emit('listenToChild',this.reportData)
             },
             //子组件自带方法查询tabel方法
             findToParent(){
-                console.log('this.charge_date',this.charge_date)
+                console.log('1111222',this.reportParam)
+                this.reportParam.id == 'dateYingye_id' ? this.isDate_show = true : this.isDate_show = false
+                //营业日期赋值
+                console.log('this.date_value======',this.date_value,)
+                console.log('this.isDate_show',this.isDate_show)
                 //处理时间
-                if(this.charge_date != null && this.charge_date != ''){
-                    this.startTime = moment(this.charge_date[0]).format('YYYY-MM-DD')
-                    this.endTime = moment(this.charge_date[1]).format('YYYY-MM-DD')
+                if(this.date_value != null && this.date_value != ''){
+                    this.startTime = moment(this.date_value[0]).format('YYYY-MM-DD')
+                    this.endTime = moment(this.date_value[1]).format('YYYY-MM-DD')
                 }else{
                     this.startTime = ''
                     this.endTime = ''
@@ -92,96 +113,109 @@
                 console.log('endTime',this.endTime)
                 console.log('this.reportParam.namethis.reportParam.name',this.reportParam.name)
                 switch (this.reportParam.name) {
-                    case 'AR账户收款明细表':
-                        this.getReport_shouDetailACount()
+                    case '营业日报表':
+                        this.getReport_dayYingye()//即为收款汇总
                         break;
-                    case '收银清单':
-                        this.getReport_shouACount()
-                        break;
-                    case '结账区间明细表':
-                        this.getReport_jieACount()
-                        break;
-                    case '催账报表':
-                        this.getReport_cuiACount()
-                        break;
-                     case 'AR账户入账明细表':
-                        this.getReport_arDetailACount()
-                        break;
-                    case 'AR账户入账汇总表':
-                        this.getReport_arEnterACount()
-                        break;
-                    case 'AR账户收款汇总表':
-                        this.getReport_arCountACount()
-                        break;
-                    case 'AR账户实时余额表':
-                        this.getReport_arBalance()
-                        break;
-                    case '换房改房价报表':
-                        this.getReport_changeRoom()
-                        break;
-                    case '本日续住报表':
-                        this.getReport_continueLive()
-                        break;
-                    case '本日将离客人报表':
-                        this.getReport_preLeaveRoom()
-                        break;
-                    case '本日离店客人报表':
-                        this.getReport_haveLeaveRoom()
-                        break;
-                    case '当前在住客人报表':
-                        this.getReport_currentLive()
-                        break;
-                    case '本日入住客人报表':
-                        this.getReport_dayLive()
-                        break;
-                    case '当前在住全日房报表':
-                        this.getReport_feeRoom(0)
-                        break;
-                    case '当前在住钟点房报表':
-                        this.getReport_feeRoom(1)
-                        break;
-                    case '当前在住夜宵房报表':
-                        this.getReport_feeRoom(2)
-                        break;
-                    case '当前在住常住房报表':
-                        this.getReport_feeRoom(3)
-                        break;
-                    case '当前在住免费房报表':
-                        this.getReport_feeRoom(4)
-                        break;
+                    case '营业日报（区间）表':
+                        this.getReport_YingyeInvoice()//即为收款汇总
+                        break;       
                     case '冲调账报表':
                         this.getReport_ctACount()
                         break;
                     case 'AR入账简表':
                         this.getReport_arACount()
                         break;
-                    case '销售员业绩汇总报表':
-                        this.getReport_xSCount()
+                    case 'AR账户入账明细表':
+                        this.getReport_arDetailACount()
                         break;
-                    case '前台入账明细':
-                        this.getReport_enterDetail()
+                    case 'AR账户实时余额表':
+                        this.getReport_arBalance()
                         break;
-                    case '冲账调账报表':
-                        this.getReport_chongDiao()
+                    case 'AR付款明细':
+                        this.getReport_shouDetailACount()
                         break;
-                    case '前台转账报表':
-                        this.getReport_receiveSummary()
+                     case 'AR收款简表':
+                        this.getReport_shouKuanCount()
                         break;
-                    case '前台收款明细':
-                        this.getReport_receiveDetail()
-                        break;
-                    case '前台入账简表':
-                        this.getReport_entrySimple()
-                        break;
-                    case '收银员交接表':
-                        this.getReport_cashierReport()//即为收款汇总
-                        break;
-                    case 'ar支付明细':
-                        this.getReport_arDetail()//即为收款汇总
-                        break;
-                    case 'ar支付汇总':
-                        this.getReport_arSummary()//即为收款汇总
-                        break;         
+                    //分割
+                    // case '收银清单':
+                    //     this.getReport_shouACount()
+                    //     break;
+                    // case '结账区间明细表':
+                    //     this.getReport_jieACount()
+                    //     break;
+                    // case '催账报表':
+                    //     this.getReport_cuiACount()
+                    //     break;
+                    // case 'AR账户入账汇总表':
+                    //     this.getReport_arEnterACount()
+                    //     break;
+                    // case 'AR账户收款汇总表':
+                    //     this.getReport_arCountACount()
+                    //     break;
+                    // case 'AR账户实时余额表':
+                    //     this.getReport_arBalance()
+                    //     break;
+                    // case '换房改房价报表':
+                    //     this.getReport_changeRoom()
+                    //     break;
+                    // case '本日续住报表':
+                    //     this.getReport_continueLive()
+                    //     break;
+                    // case '本日将离客人报表':
+                    //     this.getReport_preLeaveRoom()
+                    //     break;
+                    // case '本日离店客人报表':
+                    //     this.getReport_haveLeaveRoom()
+                    //     break;
+                    // case '当前在住客人报表':
+                    //     this.getReport_currentLive()
+                    //     break;
+                    // case '本日入住客人报表':
+                    //     this.getReport_dayLive()
+                    //     break;
+                    // case '当前在住全日房报表':
+                    //     this.getReport_feeRoom(0)
+                    //     break;
+                    // case '当前在住钟点房报表':
+                    //     this.getReport_feeRoom(1)
+                    //     break;
+                    // case '当前在住夜宵房报表':
+                    //     this.getReport_feeRoom(2)
+                    //     break;
+                    // case '当前在住常住房报表':
+                    //     this.getReport_feeRoom(3)
+                    //     break;
+                    // case '当前在住免费房报表':
+                    //     this.getReport_feeRoom(4)
+                    //     break;
+                    // case '销售员业绩汇总报表':
+                    //     this.getReport_xSCount()
+                    //     break;
+                    // case '前台入账明细':
+                    //     this.getReport_enterDetail()
+                    //     break;
+                    // case '冲账调账报表':
+                    //     this.getReport_chongDiao()
+                    //     break;
+                    // case '前台转账报表':
+                    //     this.getReport_receiveSummary()
+                    //     break;
+                    // case '前台收款明细':
+                    //     this.getReport_receiveDetail()
+                    //     break;
+                    // case '前台入账简表':
+                    //     this.getReport_entrySimple()
+                    //     break;
+                    // case '收银员交接表':
+                    //     this.getReport_cashierReport()//即为收款汇总
+                    //     break;
+                    // case 'ar支付明细':
+                    //     this.getReport_arDetail()//即为收款汇总
+                    //     break;
+                    // case 'ar支付汇总':
+                    //     this.getReport_arSummary()//即为收款汇总
+                    //     break;         
                     default:
                         break;
                 }
@@ -189,6 +223,41 @@
                     this.sendInfoToParent()
                 }, 1000);
             },
+            /**
+             *  营业日报表
+             */
+            getReport_dayYingye(){
+                console.log('jinru')
+                let that = this
+                let url = that.api.api_newPrice_9107+ '/v1/' + `report/comprehensive/biz_date_daily_report/`
+                let scopeParam = {
+                    biz_date:  that.date_value,
+                }
+                console.log('scopeParam',scopeParam)
+                that.$axios.post(url,scopeParam).then(res=>{
+                    that.reportData.reportData_list = res.data.data
+                    console.log('that.reportData.reportData_list==>明细',that.reportData.reportData_list)
+                }).catch(error=>{
+                    console.log(error)
+                })
+            },
+            /**
+             * 营业日报（区间）表
+             */
+            getReport_YingyeInvoice(){
+                let that = this
+                let url = that.api.api_newPrice_9107+ '/v1/' + `report/comprehensive/biz_date_daily_interval_report/`
+                let scopeParam = {
+                    start_biz_date: that.startTime,
+                    end_biz_date: that.endTime,
+                    page: that.reportParam.page_num,//当前页数
+                    page_size: that.reportParam.page_size,
+                }
+                that.$axios.post(url,scopeParam).then(res=>{
+                   that.reportData.reportData_list = res.data.data
+                })
+            },
+            //---------------分割
             //前台入账明细
             getReport_enterDetail(){
                 let that = this
@@ -201,7 +270,7 @@
                     page_size: that.reportParam.page_size,
                 }
                 that.$axios.post(url,scopeParam).then(res=>{
-                    this.getHotelInfo()
+                    
                     that.reportData.reportData_list = res.data.data.list
                     that.reportData.reportData_count = res.data.data.total_count
                     console.log('that.reportData.reportData_list==>明细',that.reportData.reportData_list)
@@ -218,7 +287,7 @@
                     ignore_date: 1//  是否忽略日期错误,调试用.
                 }
                 that.$axios.post(url,scopeParam).then(res=>{
-                    this.getHotelInfo()
+                    
                     that.reportData.reportData_list = res.data.data.list
                     that.reportData.reportData_count = res.data.data.total_count
                     console.log('that.reportData.reportData_list==>明细',that.reportData.reportData_list)
@@ -226,18 +295,35 @@
             },
             getReport_shouDetailACount(){
                 let that = this
-                let url = that.api.api_9022_9519+ '/v1/' + `report/account/ar_account_pay_details`
+                let url = that.api.api_newPrice_9107+ '/v1/' + `report/comprehensive/report_ar_account_pay_details/`
                 let scopeParam = {
-                    begin_date: that.startTime,
-                    end_date: that.endTime,
-                    page_num: that.reportParam.page_num,//当前页数
+                    start_biz_date: that.startTime,
+                    end_biz_date: that.endTime,
+                    page: that.reportParam.page_num,//当前页数
                     page_size: that.reportParam.page_size,
-                    ignore_date: 1//  是否忽略日期错误,调试用.
                 }
                 that.$axios.post(url,scopeParam).then(res=>{
-                    this.getHotelInfo()
-                    that.reportData.reportData_list = res.data.data.list
-                    that.reportData.reportData_count = res.data.data.total_count
+                    console.log('res....',res.data.data.results)
+                    that.reportData.reportData_list = res.data.data.results
+                    that.reportData.reportData_count = res.data.data.count
+                    // console.log('.....冲调账', localStorage.getItem('userInfo'))
+                    console.log('that.reportData.reportData_list==>明细',that.reportData.reportData_list)
+                })
+            },
+            getReport_shouKuanCount(){
+                let that = this
+                let url = that.api.api_newPrice_9107+ '/v1/' + `report/comprehensive/report_ar_pay_summary_by_date/`
+                let scopeParam = {
+                    start_biz_date: that.startTime,
+                    end_biz_date: that.endTime,
+                    page: that.reportParam.page_num,//当前页数
+                    page_size: that.reportParam.page_size,
+                }
+                that.$axios.post(url,scopeParam).then(res=>{
+                    console.log('res....',res.data.data.results)
+                    that.reportData.reportData_list = res.data.data.results
+                    that.reportData.reportData_count = res.data.data.count
+                    // console.log('.....冲调账', localStorage.getItem('userInfo'))
                     console.log('that.reportData.reportData_list==>明细',that.reportData.reportData_list)
                 })
             },
@@ -253,7 +339,7 @@
                     ignore_date: 1//  是否忽略日期错误,调试用.
                 }
                 that.$axios.post(url,scopeParam).then(res=>{
-                    this.getHotelInfo()
+                    
                     that.reportData.reportData_list = res.data.data.list
                     that.reportData.reportData_count = res.data.data.total_count
                     console.log('that.reportData.reportData_list==>明细',that.reportData.reportData_list)
@@ -270,7 +356,7 @@
                     ignore_date: 1//  是否忽略日期错误,调试用.
                 }
                 that.$axios.post(url,scopeParam).then(res=>{
-                    this.getHotelInfo()
+                    
                     that.reportData.reportData_list = res.data.data.list
                     that.reportData.reportData_count = res.data.data.total_count
                     console.log('that.reportData.reportData_list==>明细',that.reportData.reportData_list)
@@ -287,7 +373,7 @@
                     ignore_date: 1//  是否忽略日期错误,调试用.
                 }
                 that.$axios.post(url,scopeParam).then(res=>{
-                    this.getHotelInfo()
+                    
                     that.reportData.reportData_list = res.data.data.list
                     that.reportData.reportData_count = res.data.data.total_count
                     console.log('that.reportData.reportData_list==>明细',that.reportData.reportData_list)
@@ -295,18 +381,18 @@
             },
             getReport_arDetailACount(){
                 let that = this
-                let url = that.api.api_9022_9519+ '/v1/' + `report/account/ar_account_charge_detail`
+                let url = that.api.api_newPrice_9107+ '/v1/' + `report/comprehensive/report_ar_account_charge_details/`
                 let scopeParam = {
-                    begin_date: that.startTime,
-                    end_date: that.endTime,
-                    page_num: that.reportParam.page_num,//当前页数
+                    start_biz_date: that.startTime,
+                    end_biz_date: that.endTime,
+                    page: that.reportParam.page_num,//当前页数
                     page_size: that.reportParam.page_size,
-                    ignore_date: 1//  是否忽略日期错误,调试用.
                 }
                 that.$axios.post(url,scopeParam).then(res=>{
-                    this.getHotelInfo()
-                    that.reportData.reportData_list = res.data.data.list
-                    that.reportData.reportData_count = res.data.data.total_count
+                    console.log('res....',res.data.data.results)
+                    that.reportData.reportData_list = res.data.data.results
+                    that.reportData.reportData_count = res.data.data.count
+                    // console.log('.....冲调账', localStorage.getItem('userInfo'))
                     console.log('that.reportData.reportData_list==>明细',that.reportData.reportData_list)
                 })
             },
@@ -321,7 +407,7 @@
                     ignore_date: 1//  是否忽略日期错误,调试用.
                 }
                 that.$axios.post(url,scopeParam).then(res=>{
-                    this.getHotelInfo()
+                    
                     that.reportData.reportData_list = res.data.data.list
                     that.reportData.reportData_count = res.data.data.total_count
                     console.log('that.reportData.reportData_list==>明细',that.reportData.reportData_list)
@@ -338,43 +424,47 @@
                     ignore_date: 1//  是否忽略日期错误,调试用.
                 }
                 that.$axios.post(url,scopeParam).then(res=>{
-                    this.getHotelInfo()
+                    
                     that.reportData.reportData_list = res.data.data.list
                     that.reportData.reportData_count = res.data.data.total_count
                     console.log('that.reportData.reportData_list==>明细',that.reportData.reportData_list)
                 })
             },
+            /**
+             * ar账户实时余额表
+             */
             getReport_arBalance(){
                 let that = this
-                let url = that.api.api_9022_9519+ '/v1/' + `report/account/ar_account_balance_list`
+                let url = that.api.api_newPrice_9107+ '/v1/' + `report/comprehensive/report_ar_account_real_time/`
                 let scopeParam = {
-                    begin_date: that.startTime,
-                    end_date: that.endTime,
-                    page_num: that.reportParam.page_num,//当前页数
+                    start_biz_date: that.startTime,
+                    end_biz_date: that.endTime,
+                    page: that.reportParam.page_num,//当前页数
                     page_size: that.reportParam.page_size,
-                    ignore_date: 1//  是否忽略日期错误,调试用.
                 }
                 that.$axios.post(url,scopeParam).then(res=>{
-                    this.getHotelInfo()
-                    that.reportData.reportData_list = res.data.data.list
-                    that.reportData.reportData_count = res.data.data.total_count
+                    console.log('res....',res.data.data.results)
+                    that.reportData.reportData_list = res.data.data.results
+                    that.reportData.reportData_count = res.data.data.count
+                    // console.log('.....冲调账', localStorage.getItem('userInfo'))
                     console.log('that.reportData.reportData_list==>明细',that.reportData.reportData_list)
                 })
             },
+            // AR入账简表
             getReport_arACount(){
                 let that = this
-                let url = that.api.api_9022_9519+ '/v1/' + `report/account/ar_account_pay_summary_simple`
+                let url = that.api.api_newPrice_9107+ '/v1/' + `report/comprehensive/report_ar_charge_summary_by_date/`
                 let scopeParam = {
-                    begin_date: that.startTime,
-                    end_date: that.endTime,
-                    page_num: that.reportParam.page_num,//当前页数
+                    start_biz_date: that.startTime,
+                    end_biz_date: that.endTime,
+                    page: that.reportParam.page_num,//当前页数
                     page_size: that.reportParam.page_size,
-                    ignore_date: 1//  是否忽略日期错误,调试用.
                 }
                 that.$axios.post(url,scopeParam).then(res=>{
-                    this.getHotelInfo()
-                    that.reportData.reportData_list = res.data.data.list
-                    that.reportData.reportData_count = res.data.data.total_count
+                    console.log('res....',res.data.data.results)
+                    that.reportData.reportData_list = res.data.data.results
+                    that.reportData.reportData_count = res.data.data.count
+                    // console.log('.....冲调账', localStorage.getItem('userInfo'))
                     console.log('that.reportData.reportData_list==>明细',that.reportData.reportData_list)
                 })
             },
@@ -392,7 +482,6 @@
                 that.$axios.get(url,{
                     params: scopeParam
                 }).then(res=>{
-                    this.getHotelInfo()
                     console.log('jirnu===========',res.data)
                     that.reportData.reportData_list = res.data.data.results
                     that.reportData.reportData_count = res.data.data.count
@@ -412,7 +501,6 @@
                 that.$axios.get(url,{
                     params: scopeParam
                 }).then(res=>{
-                    this.getHotelInfo()
                     console.log('jirnu===========',res.data)
                     that.reportData.reportData_list = res.data.data.results
                     that.reportData.reportData_count = res.data.data.count
@@ -433,7 +521,6 @@
                 that.$axios.get(url,{
                     params: scopeParam
                 }).then(res=>{
-                    this.getHotelInfo()
                     console.log('jirnu===========',res.data)
                     that.reportData.reportData_list = res.data.data.results
                     that.reportData.reportData_count = res.data.data.count
@@ -453,7 +540,6 @@
                 that.$axios.get(url,{
                     params: scopeParam
                 }).then(res=>{
-                    this.getHotelInfo()
                     console.log('jirnu===========',res.data)
                     that.reportData.reportData_list = res.data.data.results
                     that.reportData.reportData_count = res.data.data.count
@@ -474,7 +560,6 @@
                 that.$axios.get(url,{
                     params: scopeParam
                 }).then(res=>{
-                    this.getHotelInfo()
                     console.log('jirnu===========',res.data)
                     that.reportData.reportData_list = res.data.data.results
                     that.reportData.reportData_count = res.data.data.count
@@ -495,7 +580,6 @@
                 that.$axios.get(url,{
                     params: scopeParam
                 }).then(res=>{
-                    this.getHotelInfo()
                     console.log('jirnu===========',res.data)
                     that.reportData.reportData_list = res.data.data.results
                     that.reportData.reportData_count = res.data.data.count
@@ -518,7 +602,6 @@
                 that.$axios.get(url,{
                     params: scopeParam
                 }).then(res=>{
-                    this.getHotelInfo()
                     console.log('jirnu===========',res.data)
                     that.reportData.reportData_list = res.data.data.results
                     that.reportData.reportData_count = res.data.data.count
@@ -527,31 +610,19 @@
             },
             getReport_ctACount(){
                 let that = this
-                let url = that.api.api_9022_9519+ '/v1/' + `report/account/arrange_operation_list`
+                let url = that.api.api_newPrice_9107+ '/v1/' + `report/comprehensive/report_arrange_detail_list/`
                 let scopeParam = {
-                    begin_date: that.startTime,
-                    end_date: that.endTime,
-                    page_num: that.reportParam.page_num,//当前页数
+                    start_biz_date: that.startTime,
+                    end_biz_date: that.endTime,
+                    page: that.reportParam.page_num,//当前页数
                     page_size: that.reportParam.page_size,
-                    ignore_date: 1//  是否忽略日期错误,调试用.
                 }
                 that.$axios.post(url,scopeParam).then(res=>{
-                    this.getHotelInfo()
-                    that.reportData.reportData_list = res.data.data.list
-                    that.reportData.reportData_count = res.data.data.total_count
+                    console.log('res....',res.data.data.results)
+                    that.reportData.reportData_list = res.data.data.results
+                    that.reportData.reportData_count = res.data.data.count
                     // console.log('.....冲调账', localStorage.getItem('userInfo'))
                     console.log('that.reportData.reportData_list==>明细',that.reportData.reportData_list)
-                })
-            },
-            //获取酒店信息(例如酒店名称等)
-            getHotelInfo(){
-                let that = this
-                let urerInfo = JSON.parse(localStorage.getItem('userInfo'))
-                let hotel_id = urerInfo['hotel_id']
-                let url = that.api.api_9022_9519+ '/v1/' + `common/hotel/get_info/` + hotel_id
-                that.$axios.get(url).then(res=>{
-                    console.log('res.data.data',res.data.data)
-                    that.reportData.hotel_name = res.data.data.short_name
                 })
             },
             //前台入账汇总

@@ -5,7 +5,7 @@
   "author": "Lena",
   "private": true,
   "scripts": {
-    "dev": "webpack-dev-server --inline --progress --config build/webpack.dev.conf.js",
+    "dev": "webpack-dev-server --open --inline --progress --config build/webpack.dev.conf.js",
     "start": "npm run dev",
     "build": "node build/build.js"
   },
@@ -26,7 +26,8 @@
     "vue-print-nb": "^1.4.0",
     "vue-resource": "^1.5.1",
     "vue-router": "^3.0.1",
-    "vuex": "^3.0.1"
+    "vuex": "^3.0.1",
+    "webpack-parallel-uglify-plugin": "^1.1.2"
   },
   "devDependencies": {
     "autoprefixer": "^7.1.2",

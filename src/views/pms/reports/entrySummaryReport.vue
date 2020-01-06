@@ -3,7 +3,7 @@
   <div style="width: calc(100% - 60px); margin: auto">
       <div style="border: 1px dashed; margin-top: 20px; margin-bottom: 20px; height: 50px">
           <el-row>
-            <h2 style="text-align: center; line-height: 50px">AR账户收款明细表</h2>
+            <h2 style="text-align: center; line-height: 50px">AR付款明细</h2>
             <span style="float: left; margin-top: -25px; margin-left: 18px">{{hotel_name}}</span>
             <span style="float: right; margin-top: -25px; margin-right: 18px">日期:&nbsp;{{todayDate}}</span>
           </el-row>
@@ -53,7 +53,7 @@
               tabel_reportData: [],
               todayDate: moment().format('YYYY-MM-DD'),
               reportParam: {
-                name: 'AR账户收款明细表',
+                name: 'AR付款明细',
                 id: 'arskdetail_id',
                 page_num: 1,
                 page_size: 15

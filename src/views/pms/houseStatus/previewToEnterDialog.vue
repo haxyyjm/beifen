@@ -61,7 +61,7 @@
                             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;市场码:
                             <el-select @focus="getMarketSrc('market')"  v-model="preBillParam.reserve_base[0].code_market" style="width: 40%"  placeholder="请选择">
                                 <el-option
-                                  v-for="item in marketSrcList"
+                                  v-for="item in marketList"
                                   :key="item.id"
                                   :label="item.descript"
                                   :value="item.code">
@@ -72,7 +72,7 @@
                             <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;来源码:</span>
                             <el-select  @focus="getMarketSrc('src')"  v-model="preBillParam.reserve_base[0].code_src" style="width: 40%"  placeholder="请选择">
                               <el-option
-                                v-for="item in marketSrcList"
+                                v-for="item in srcList"
                                 :key="item.id"
                                 :label="item.descript"
                                 :value="item.code">
@@ -624,10 +624,7 @@
                 <el-table-column  type="index" label="序号" fixed></el-table-column>
                 <el-table-column prop="card_name" label="姓名"></el-table-column>
                 <el-table-column prop="card_no" label="卡号"></el-table-column>
-                <el-table-column label="性别">
-                  <template slot-scope="scope">
-                    {{scope.row.sex==='1' ? '男' : '女'}}
-                  </template>
+                <el-table-column prop="sex_desc" label="性别">
                 </el-table-column>
                 <el-table-column prop="id_no" label="证件号码"></el-table-column>
                 <el-table-column  label="积分余额">
@@ -638,9 +635,9 @@
                 <el-table-column prop="phone" label="手机"></el-table-column>
                 <el-table-column prop="email" label="邮箱"></el-table-column>
                 <el-table-column prop="card_type" label="会员计划"></el-table-column>
-                <el-table-column prop="card_level" label="卡等级"></el-table-column>
+                <el-table-column prop="card_level_desc" label="卡等级"></el-table-column>
                 <el-table-column prop="date_end" label="有效期"></el-table-column>
-                <el-table-column prop="status" label="卡状态"></el-table-column>
+                <el-table-column prop="status_desc" label="卡状态"></el-table-column>
                 <el-table-column prop="iss_hotel" label="发行酒店"></el-table-column>
                 <el-table-column prop="remark" fixed="right" label="备注" ></el-table-column>
                 </el-table>
@@ -917,6 +914,8 @@ export default {
           authorizationDialog: false,
           policeComponentDialog: false,
           marketSrcList: [],
+          srcList: [],
+          marketList: [],
           rateCode_list: [],
           span_input_flag: false,
           extraParam:[],
@@ -2093,6 +2092,8 @@ export default {
               }else if(this.preBillParam.reserve_base[0].code_market  == 'XYGS' || this.preBillParam.reserve_base[0].master_type === 3 || 4){
                 this.rateCodeValue = row.rate_code
               }
+              this.preBillParam.reserve_base[0].rate_code = row.rate_code// 填充房价码选择框，有默认值
+              this.rateCodeValue = row.rate_code
               this.cardQueryDialog = false
               this.$message({
                 type: 'info',
@@ -2137,7 +2138,7 @@ export default {
           console.log('这里是处理钟点房的数据===>推出首日价')
           this.getRateCode_NewHourPrice() //获取所有房价==>判断要分为 钟点房和当日房 ===>其实这里是获得首日价
         }else{
-          console.log('跳转else选择房型一行',this.preBillParam.master_base)
+          console.log('跳转else选择房型一行',this.preBillParam.reserve_base)
           this.getRateCode_newPrice() //获取所有房价==>判断要分为 钟点房和当日房 ===>其实这里是获得首日价
         }
       },
@@ -2217,7 +2218,7 @@ export default {
           // console.log('item.fix_rate检测',item.fix_rate)
           // console.log('temprateValue',temprateValue)
           // console.log('111',temprateValue[key2])
-          // console.log('preBillParam.master_base检测',this.preBillParam.reserve_base)
+          // console.log('preBillParam.reserve_base检测',this.preBillParam.reserve_base)
           }).catch(error=>{
         })
       },
@@ -2228,7 +2229,7 @@ export default {
         console.log('进入--------------')
         // let key1 = param.room_type
         // let temprateValue = temprate[key1]
-        console.log('this.preBillParam.master_basekaishi',this.preBillParam)
+        console.log('this.preBillParam.reserve_basekaishi',this.preBillParam)
         console.log('handle<====',param)
         let key2 = moment(new Date()).format('YYYY-MM-DD') //对象嵌套对象里的key值
         // that.houseType_priceValue_1 = temprateValue[key2]
@@ -2254,7 +2255,7 @@ export default {
             }
           }
         }
-        console.log('this.preBillParam.master_base最终',this.preBillParam.reserve_base)
+        console.log('this.preBillParam.reserve_base最终',this.preBillParam.reserve_base)
       },
       //上传照片 父传子 但是没传
       handlePicture(item,index){
@@ -3106,7 +3107,7 @@ export default {
         twoArray.flat()
         let finalArray = [].concat.apply([], twoArray) //二维数组降维
         scopeParam.room_list = finalArray
-        scopeParam.room_list = scopeParam.room_list.filter(item=>item !='')//数组中‘’去掉
+        scopeParam.room_list = scopeParam.room_list.filter(item=>item !='' && item != null)//数组中‘’去掉
         console.log('scopeParamscopeParam=预定转入住',scopeParam)
         that.room_no_floor = []
         // scopeParam.reserve_base[0].room_price = '' //暂时
@@ -3208,8 +3209,19 @@ export default {
             obj[item.roomNo] = item.remark
           });
           scopeParam.remarkList = obj
+          let data_find
+          console.log('laiyuan,a',this.preBillParam.reserve_base[0].code_src)
+          if(this.preBillParam.reserve_base[0].code_market == 'TD'){
+            scopeParam.reserve_base[0].from_name == 0
+          }else if (this.preBillParam.reserve_base[0].code_market == 'XYGS'){
+            scopeParam.reserve_base[0].from_name == 2
+          }else if(this.preBillParam.reserve_base[0].code_market == 'SMSK' && this.preBillParam.reserve_base[0].code_src == 'HY'){
+            scopeParam.reserve_base[0].from_name == 1
+          }
+          data_find  =this.srcList.find(item=>(item.code == this.preBillParam.reserve_base[0].code_src))
+          console.log(this.srcList,'data_finddata_find',data_find)
+          scopeParam.reserve_base[0].from_id = data_find.id 
           console.log('scopeparam',scopeParam)
-          // return
           setTimeout(() => {
             that.$axios.post(url,scopeParam).then(res=>{
               if(res.data.message === 'success'){
@@ -3379,7 +3391,7 @@ export default {
             return false
           }
           for(var item of this.preBillParam.reserve_guest){
-            if(item.telephone !=''){
+            if(item.telephone){
               return util.validateTelNumber(item.telephone,'请输入正确手机格式',this)
             }
             if(!item.id_no){
@@ -4195,16 +4207,15 @@ export default {
         },
         validatePreData(){
           console.log('this.liveoptions_Value铺地暖',this.liveoptions_Value)
+          if(!this.preBillParam.reserve_base[0].code_src || !this.preBillParam.reserve_base[0].code_market ){
+            this.$message.warning('请选择市场码或者来源码!')
+            return
+          }
           if(this.liveoptions_Value.length>1){
             return util.validateBlank(this.previewEnterBill.room_no_value,'请选择主帐房',this)
           }else{
             return true
           }
-          return (
-            util.validateBlank(this.preBillParam.reserve_base[0].code_src,'请选择来源码',this)&&
-            util.validateBlank(this.preBillParam.reserve_base[0].code_market ,'请选择市场码',this)&&
-            util.validateBlank(this.preBillParam.reserve_base[0].rate_code,'请选择房价码',this)
-          )
         },
         //预定=》获取早餐list
         getBreakfastList(){ 
@@ -4505,10 +4516,10 @@ export default {
           //     }
           // }).catch((error)=>{
           // })
-          if(!this.preBillParam.reserve_base[0].code_src || !this.preBillParam.reserve_base[0].code_market ){
-            this.$message.warning('请选择市场码或者来源码!')
-            return
-          }
+          // if(!this.preBillParam.reserve_base[0].code_src || !this.preBillParam.reserve_base[0].code_market ){
+          //   this.$message.warning('请选择市场码或者来源码!')
+          //   return
+          // }
           let that = this
           let url = that.api.api_newPrice_9107+ '/v1/' + `room/rate_code/get_rate_code_list/`
           let scopeParam
@@ -4566,7 +4577,11 @@ export default {
                 url : url,
                 params: params
             }).then(res=>{
-              that.marketSrcList = res.data.data.results
+               if(param == 'market'){
+                 that.marketList = res.data.data.results
+               }else{
+                 that.srcList = res.data.data.results
+               }
               console.log('that.marketSrcList',that.marketSrcList)
             }).catch(error=>{
           })

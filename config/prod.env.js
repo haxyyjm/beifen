@@ -18,7 +18,7 @@ module.exports = {
   api_pay : '"https://pay.eloadspider.com"',//支付宝支付的线上接口
   api_icon : '"https://elevators.eloadspider.com"',//铁管家  对应的是8082
   api_newBill: '"https://bill2.crowncrystalhotel.com"', //以后要替换掉 新版本 本地
-  api_newPrice: '"https://47.98.113.173:9107"', //以后要替换掉 新版本 本地 rj
+  api_newPrice: '"http://47.98.113.173:9107"', //以后要替换掉 新版本 本地 rj
 
   // api_9101 : '"http://47.98.113.173:9107"',  //房价码的线下接口
   // api_9102 : '"http://47.98.113.173:9107"',  //会员的线下接口

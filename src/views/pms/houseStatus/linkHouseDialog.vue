@@ -681,7 +681,7 @@
                 </el-option>
               </el-select>
             </el-form-item>
-            <el-form-item label="退款方式:">
+            <!-- <el-form-item label="退款方式:">
               <el-select clearable @change="previewEnterBill.enterAccountCode=''" size="mini" style="width: 14vw; margin-top: 10px"  @focus="getPayReason()" placeholder="退款原因"  v-model="previewEnterBill.payReasonValue">
                 <el-option
                   v-for="item in this.payInfoList"
@@ -700,10 +700,10 @@
                   :value="item.id">
                 </el-option>
               </el-select>
-            </el-form-item>
+            </el-form-item> -->
             <el-form-item>
                <span style="margin-right: 24px">备注:</span>
-              <el-input type="textarea" v-model.trim="previewEnterBill.remark" size="mini" :rows="2" style="width: 20vw; margin-top: 10px;margin-left:10px"></el-input>
+              <el-input type="textarea" v-model.trim="previewEnterBill.remark" size="mini" :rows="2" style="width: 14vw; margin-top: 10px;margin-left:10px"></el-input>
             </el-form-item>
             <!-- <el-form-item label="备注:">
               <el-input type="textarea" :rows="4" style="width: 85%"></el-input>
@@ -732,7 +732,7 @@
           </el-form>
         </div>
         <div style="height: 40px">
-          <el-button style="float: right" type="primary"  @click="confirmContinueRoom">确定</el-button>
+          <el-button style="float: right" type="primary">确定</el-button>
         </div>
       </el-dialog>
       <!--编辑联房-->
@@ -960,7 +960,7 @@
             <el-form-item label="现离店日期:">
               <el-date-picker size="mini" disabled type="date" v-model="after_leave_time_1"></el-date-picker>
               <span>-</span>
-              <el-date-picker size="mini" type="date" v-model="after_leave_time_2"></el-date-picker>
+              <el-date-picker  :picker-options="rangeDate" size="mini" type="date" v-model="after_leave_time_2"></el-date-picker>
             </el-form-item>
             <!-- <el-form-item label="选择换房型:">
               <el-select  v-model="temp_value"  placeholder="请选择">
@@ -1353,6 +1353,8 @@
         <!--支付成功后显示的页面-->
         <el-dialog
           :visible.sync="dialog_succeed"
+          :close-on-click-modal = 'false'
+          @close="preview_enterBillDialog = false"
           width="40%">
           <ul>
             <li style="text-align: center" v-if="ihatetheqrcode">
@@ -1767,6 +1769,10 @@ export default {
       //   return data;
       // };
         return {
+          value_price: {},
+          rateAllPrice_list: [],//构造房价数组
+          cancle_order: true,
+          pay_order_id: '',
           update_date: null, //更新当日价传递的日期
           roomNoList: [],
           cloneMasterGuest: [],//克隆的深拷贝的入住人数组
@@ -2267,9 +2273,9 @@ export default {
           roomOccupyList: [],
           lockCss_active: false,//锁定状态
           rangeDate:{
-          disabledDate(time){
-              return time.getTime() < Date.now() - 8.64e7
-          }
+            disabledDate(time){
+                return time.getTime() < Date.now() - 8.64e7
+            }
           },
           isActive: false, // 样式true or false
           //线下======================
@@ -3508,9 +3514,30 @@ export default {
         return '';
       },
       flushTime(){
+        console.log('this.cancle_order',this.cancle_order)
+        if(this.cancle_order){
+          this.closeOrder() //这里要判断:不支付的话关,闭订单
+        }
         console.log('关掉')
         clearInterval(this.timer_src)
         clearInterval(this.timer_r)
+      },
+      /**
+       * @desc 关闭订单
+       */
+      closeOrder(){
+        let that = this
+        let url = that.api.api_newPrice_9107 + '/v1/accounts/cancel/'
+        let scopeParam = {
+          id: this.pay_order_id
+        }
+        that.$axios.post(url,scopeParam).then(res=>{
+          if(res.data.message == 'success'){
+            this.$message.info(res.data.data.info)
+          }
+        }).catch(errer=>{
+          console.log(error)
+        })
       },
       //开始切换=====>联房，主房===>得到相应的所有信息
       getInfoByImportant(item,index){
@@ -3594,7 +3621,7 @@ export default {
         let that = this
         this.preview_enter_flag = 0
         this.pay_refund_flag = 2,
-        console.log('row',row)
+        this.previewEnterBill.remark = '' //置空
         this.flushRefundData()
         this.refundRow = row
         console.log('that.moneydesc.balance',that.moneydesc.balance)
@@ -3602,7 +3629,7 @@ export default {
           this.$message.warning('余额为负或者0，不能进行退款!')
         }else{
           this.refunAccountDialog = true;
-          this.maxRefundMoney = that.moneydesc.balance //最大可退款金额
+          this.maxRefundMoney = row.can_arrange //最大可退款金额
           this.refundMoneyValue = row.can_arrange //赋值默认
         }
       },
@@ -3617,13 +3644,13 @@ export default {
           that.$message.warning('不能超过最大可退款额度!')
           return false
         }else{
-          if(that.refundMoneyValue && that.previewEnterBill.payReasonValue && that.previewEnterBill.enterAccountCode){
+          if(that.refundMoneyValue){
             // if(!this.validatePayData()){
               //   return false
             // }
             that.refund_pointByAccont(row)
           }else{
-            that.$message.warning('退款金额、入账代码、退款方式为必填项!')
+            that.$message.warning('退款金额为必填项!')
           }
         }
       },
@@ -3639,8 +3666,8 @@ export default {
           desc: this.previewEnterBill.remark,
           account: param.account,
           cashier: this.previewEnterBill.cashValue,
-          incoming_account_reason: this.previewEnterBill.payReasonValue,
-          incoming_account_code: this.previewEnterBill.enterAccountCode,
+          // incoming_account_reason: this.previewEnterBill.payReasonValue,
+          // incoming_account_code: this.previewEnterBill.enterAccountCode,
           charge_detail: param.id,//消费单id
         }
         console.log('scope==tuikuan',scopeParam)
@@ -3948,6 +3975,7 @@ export default {
         //     return
         //   }
         // }
+        this.pay_order_id = ''
         this.extraParam = []//置空操作
         console.log('...xinxi1',this.extraInformation)
         console.log('previewEnterBill.pre_author_id===>预授权id',this.previewEnterBill.pre_author_id)
@@ -3964,7 +3992,7 @@ export default {
         let params_obj={};
         //判断是不是有多余的参数
         console.log(this.extraInformation);
-        if(this.extraInformation.length > 0){
+        if(this.extraInformation && this.extraInformation.length > 0){
           console.log('if')
           for(let i of this.extraInformation){
             params_obj[i.fields_name] =i.acquiescence;
@@ -4011,6 +4039,8 @@ export default {
           }else{
             that.get_refund_obj = res.data.data.data
             let payment_id = res.data.data.data.id
+            this.pay_order_id = payment_id
+            console.log('....入预收弹出验证',)
             if(res.data.data.url){
               console.log('payment_id',payment_id)
               that.dialog_img = true;
@@ -4039,52 +4069,6 @@ export default {
           }
           }).catch(error=>{
             console.log(error)
-        })
-      },
-      getInfoByLinkUrl(url,description,payment_id,link_data){
-        console.log('iiiiiiiii',url,description,payment_id,link_data)
-        let that = this;
-        let params = {};
-        let obj={},
-        params_obj={};
-        //实现取值拼接json给后台的值
-        for(let item of description){
-          params[item.fields_name] = item.acquiescence
-        }
-        for(let i  of link_data){
-          if(i.parallelism === "pay_amount"){
-            params_obj[i.fields_name] = -Number(that.get_refund_obj[i.parallelism])*that.trading_unit;
-          }else {
-            params_obj[i.fields_name] = that.get_refund_obj[i.parallelism];
-          }
-        }
-        console.log('params_obj',params_obj)
-        console.log('params',params)
-        let merge_obj = Object.assign(obj,params,params_obj);
-        console.log('merge_obj',merge_obj)
-        console.log('.......',this.linkUrl)
-        console.log('进入得到二维码')
-        console.log('url',url)
-        that.$axios({
-          url: url,
-          method: "post",
-          data: merge_obj,
-        }).then(res=>{
-          if(res.data.message == 'success'){
-            if(res.data.data.qr_img_b64){
-              that.img_src = "data:image/png;base64," + res.data.data.qr_img_b64;
-              console.log(that.img_src);
-              that.dialog_img = true;
-              that.img_wz = true;
-              if(that.img_src){
-                that.check_paid(that.call_back_url,payment_id);//查询二维码支付是否成功
-              }
-            }else {
-              that.check_paid(that.call_back_url,payment_id);//查询二维码支付是否成功
-            }
-          }else{
-            this.$message.error(error)
-          }
         })
       },
       /**通过扫码枪，需要第三方才能支付扫码后确定*/
@@ -4236,6 +4220,7 @@ export default {
         this.previewEnterBill.billInfo =this.preBillLinkParam.master_guest.length > 0 ? this.preBillLinkParam.room_number + '-' + this.preBillLinkParam.master_guest[0].name : this.preBillLinkParam.room_number
         // this.getpayInfoListByAccount2() //按主帐id批量查看消费明细==>收支记录 /v1/finance/charge_detail/get_by_account_ids
         this.preview_enterBillDialog = true;
+        this.cancle_order = true//重置值
         console.log('dadafilter=================',this.tableData)
       },
       //刷新调账页面dialog
@@ -5231,10 +5216,17 @@ export default {
        * 续住或者提前离店
        */
       confirmContinueRoom(){
+        this.resolveRateCodeAll()//得到房价对象
+        console.log('dengdai---等待',this.value_price)
+      },
+      /**
+       *@desc 真正执行异步方法
+       */
+      continueRoom(){
         let that = this
         let total_continue_day
         let url= that.api.api_newBill_9204 + '/v2/' + `depend_ex/extend_check/`
-        // let url= `http://192.168.2.224:9005/v1/depend_ex/extend_check/`
+        // let url= `http://192.168.2.165:9005/v2/depend_ex/extend_check/`
         let start = moment(this.preBillLinkParam.leave_time).format('YYYY-MM-DD HH:mm:ss')
         let end = moment(this.after_leave_time_2).format('YYYY-MM-DD 14:00:00')
         console.log('..',start.slice(0,10))
@@ -5245,13 +5237,22 @@ export default {
           total_continue_day = this.datedifference(start, end)
         }
         let scopeParam = {
-          order_no: this.preBillLinkParam.order_no,
-          chang_leave_time: moment(this.after_leave_time_2).format('YYYY-MM-DD 14:00:00'),
-          total_continue_day: total_continue_day,//暂时
-          total_day: null,
-          remark: this.remark_continue,
+          continued_room: {
+            order_no: this.preBillLinkParam.order_no,
+            chang_leave_time: moment(this.after_leave_time_2).format('YYYY-MM-DD 14:00:00'),
+            total_continue_day: total_continue_day,//暂时
+            total_day: null,
+            remark: this.remark_continue,
+          },
+          master_rtrate:[{
+            rate_code: this.preBillLinkParam.rate_code,
+            price_date: this.$store.state.biz_date,
+            price: this.value_price
+          }]
         }
+        console.log('end scopeParam',scopeParam)
         that.$axios.post(url,scopeParam).then(res=>{
+          console.log('进入续住')
           if(res.data.message === 'success'){
             that.continueLiveDialog = false
             that.leaveDialog = false
@@ -5263,7 +5264,41 @@ export default {
           }
           // this.getEnterInfoByRoom(this.preBillLinkParam.room_no) //更新数据 失效
           }).catch(error=>{
+            this.$message.error(error)
         })
+      },
+      /**
+       * @desc 处理房价获取每天对应的房价码
+       */
+      resolveRateCodeAll(){
+         let that = this
+          let url = that.api.api_newPrice_9107 + '/v1/' +  `room/rate_code/get_rate_code/`
+          let scopeParam ={
+            rate_code: this.preBillLinkParam.rate_code,
+            // begin_date:  moment(new Date(item.master_base[0].arr_time)).format('YYYY-MM-DD'),
+            begin_date: this.$store.state.biz_date, //需要请求营业日期的
+            end_date: moment(this.after_leave_time_2).format('YYYY-MM-DD'),
+            room_type_list: []
+          }
+          that.$axios.post(url,scopeParam).then(res=>{
+            this.rateAllPrice_list = res.data.data.price
+            console.log('this.rateAllPrice_list===start',this.rateAllPrice_list)
+            console.log('...房型英文描述',this.preBillLinkParam.room_type_descript_en)
+            for (let key in this.rateAllPrice_list) {
+              if (this.preBillLinkParam.room_type_descript_en == key) {
+                this.value_price = this.rateAllPrice_list[key]
+              }
+            }
+            delete this.value_price['room_type']
+            if(this.value_price){
+              this.continueRoom()
+            }else{
+              this.$message.error('房价code没有获取!')
+            }
+            console.log('this.value_price',this.value_price)
+          }).catch(error=>{
+            console.log(error)
+          })
       },
       handleEnterPeople(){
         this.cloneMasterGuest = _.cloneDeep(this.preBillLinkParam.master_guest)
@@ -5584,6 +5619,7 @@ export default {
               console.log(res);
               if (res.data.message == 'success') {
                 if(res.data.data.info == true){
+                  that.cancle_order = false
                   that.dialog_img = false;
                   that.dialog_succeed = true;//成功或者失败的页面
                   that.ihatetheqrcode = true;
@@ -5593,14 +5629,17 @@ export default {
                   clearInterval(that.circulation)
                   that.timer=0;
                 }else if(res.data.data.info == false){
+                  console.log('进入info-------')
                   that.whether(payment_id);
                   if (that.timer >= 60) {
                     clearInterval(that.circulation);
                     if (res.data.data.is_success === true) {
+                      that.cancle_order = false
                       that.dialog_img = false;
                       that.dialog_succeed = true;//成功或者失败的页面
                       that.ihatetheqrcode = true;
                     } else {
+                      that.cancle_order = false
                       that.dialog_img = false;
                       that.dialog_succeed = true;//成功或者失败的页面
                       that.ihatetheqrcode = false;
@@ -5646,6 +5685,7 @@ export default {
           let that = this;
           that.dialog_succeed=false;//成功或者失败的页面
           that.dialog_img = false
+          that.cancle_order = false
           that.preview_enterBillDialog = false //入预收关闭 另加add
           that.jieAccountDialog = false
           //如果付款成功

@@ -1211,6 +1211,7 @@
           that.hotelInfo = res.data.data.results[0]
           this.$store.state.biz_date = this.hotelInfo.biz_date
           this.$store.state.date_delta = this.hotelInfo.date_delta
+          this.$store.state.hotel_name = this.hotelInfo.full_name
           console.log(res.data.data.results[0])
         }).catch(error=>{
           that.$message.error(error)

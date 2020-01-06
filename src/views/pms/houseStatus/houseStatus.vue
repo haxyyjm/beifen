@@ -2573,13 +2573,13 @@
       //锁房置维修获取维修原因option
       getRepairReason(){
         let that = this
-        let parent_code = 'room_lock_reason'
-        let url = that.api.api_code_9103 + '/v1/'+ 'system/settings/get_code_base_sys_list/'
+        let parent_code = 'room_maint_reason'
+        let url = that.api.api_code_9103 + '/v1/'+ 'system/settings/get_code_base_list/'
         that.$axios({
           method : 'get',
           url : url,
           params:{
-            parent_code : 'room_lock_reason'
+            parent_code : 'room_maint_reason'
           }
         }).then(res=>{
           that.repairReasonList = res.data.data.results

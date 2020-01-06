@@ -356,10 +356,7 @@
                 <el-table-column  type="index" label="序号" fixed></el-table-column>
                 <el-table-column prop="card_name" label="姓名"></el-table-column>
                 <el-table-column prop="card_no" label="卡号"></el-table-column>
-                <el-table-column label="性别">
-                  <template slot-scope="scope">
-                    {{scope.row.sex==='1' ? '男' : '女'}}
-                  </template>
+                <el-table-column prop="sex_desc" label="性别">
                 </el-table-column>
                 <el-table-column prop="id_no" label="证件号码"></el-table-column>
                 <el-table-column  label="积分余额">
@@ -370,9 +367,9 @@
                 <el-table-column prop="phone" label="手机"></el-table-column>
                 <el-table-column prop="email" label="邮箱"></el-table-column>
                 <el-table-column prop="card_type" label="会员计划"></el-table-column>
-                <el-table-column prop="card_level" label="卡等级"></el-table-column>
+                <el-table-column prop="card_level_desc" label="卡等级"></el-table-column>
                 <el-table-column prop="date_end" label="有效期"></el-table-column>
-                <el-table-column prop="status" label="卡状态"></el-table-column>
+                <el-table-column prop="status_desc" label="卡状态"></el-table-column>
                 <el-table-column prop="iss_hotel" label="发行酒店"></el-table-column>
                 <el-table-column prop="remark" fixed="right" label="备注" ></el-table-column>
                 </el-table>
@@ -1054,7 +1051,7 @@ export default {
                 exp_sta: '11', //备注
                 account_id: null,
                 team_id: 2,
-                team_name: '2',
+                team_name: '',
                 biz_date: '',
                 // rsv_type_id: 22,
                 order_no: '123',
@@ -2688,6 +2685,8 @@ export default {
               }else if(this.preBillParam.master_base[0].code_market  == 'XYGS' || this.preBillParam.master_base[0].master_type === 3 || 4){
                 this.rateCodeValue = row.rate_code
               }
+              this.preBillParam.master_base[0].rate_code = row.rate_code// 填充房价码选择框，有默认值
+              this.rateCodeValue = row.rate_code
               this.cardQueryDialog = false
               this.$message({
                 type: 'info',
@@ -2907,7 +2906,7 @@ export default {
                 // modify_user_id: 0,
                 account_id: null,
                 team_id: 2,
-                team_name: '2',
+                team_name: '',
                 biz_date: '',
                 // rsv_type_id: 22,
                 order_no: '123',
@@ -3435,7 +3434,7 @@ export default {
           twoArray.flat()
           let finalArray = [].concat.apply([], twoArray) //二维数组降维
           scopeParam.room_list = finalArray
-          scopeParam.room_list = scopeParam.room_list.filter(item=>item !='')//数组中‘’去掉
+          scopeParam.room_list = scopeParam.room_list.filter(item=>item !='' && item != null)//数组中‘’去掉
           //开始组装楼层数据==>每个房间对应
           for(var item of scopeParam.master_guest){
             for(var itemm of this.cardList){
@@ -3533,6 +3532,20 @@ export default {
           });
           scopeParam.master_base[0].master_type = scopeParam.master_base[0].master_lable //这里因为混乱原理直接在这里赋值啦
           scopeParam.remarkList = obj
+          console.log('preBillParam.master_base[0]',this.preBillParam.master_base[0].code_market)
+          console.log('preBillParam.code_src[0]',this.preBillParam.master_base[0].code_src)
+          console.log('marketSrcList',this.marketSrcList)
+          // item.code == 'HY' || 
+          let  data_find
+          if(this.preBillParam.master_base[0].code_market == 'TD'){
+            scopeParam.master_base[0].from_type == 0
+          }else if (this.preBillParam.master_base[0].code_market == 'XYGS'){
+            scopeParam.master_base[0].from_type == 2
+          }else if(this.preBillParam.master_base[0].code_market == 'SMSK' && this.preBillParam.master_base[0].code_src == 'HY'){
+            scopeParam.master_base[0].from_type == 1
+          }
+          data_find  =this.marketSrcList.find(item=>(item.code == this.preBillParam.master_base[0].code_src))
+          scopeParam.master_base[0].from_id = data_find.id 
           console.log('scopeparam222',scopeParam)
           setTimeout(() => {
             that.$axios.post(url,scopeParam).then(res=>{
@@ -3654,7 +3667,7 @@ export default {
                   }
                 }
                 this.rate_other_list = rate_other_list
-                item.master_rtrate = this.rate_other_list
+                item.master_rtrate = this.rate_other_list //fuzhicopy
                 this.truePostEnter(item)
                 console.log('组装后的==>rate_other_list',this.rate_other_list) 
                 // need_rateAllPrice_Object = need_rateAllPrice_Object.concat(rate_other_list)
@@ -4324,7 +4337,7 @@ export default {
             fix_rate: 0,//房价码
             account_id: null,
             team_id: 2,
-            team_name: '2',
+            team_name: '',
             biz_date: '2018-12-01 10:10:01',
             // rsv_type_id: 22,
             order_no: '123',

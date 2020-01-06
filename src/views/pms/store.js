@@ -5,6 +5,7 @@ Vue.use(Vuex)
 export default new Vuex.Store({
     state: {
         biz_date: '',
-        date_delta: ''
+        date_delta: '',
+        hotel_name: '',//酒店名称
     },
 })

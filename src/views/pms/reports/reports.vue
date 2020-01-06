@@ -36,8 +36,8 @@
             <el-menu-item index="1-2"><router-link to="/reports/cashierNoReport">AR入账简表</router-link></el-menu-item>
             <el-menu-item index="1-3"><router-link to="/reports/entryDetailReport">AR账户实时余额表</router-link></el-menu-item>
             <el-menu-item index="1-4"><router-link to="/reports/entrySimpleReport">AR账户收款汇总表</router-link></el-menu-item>
-            <el-menu-item index="1-5"><router-link to="/reports/entrySummaryReport">AR收款明细表</router-link></el-menu-item>
-            <el-menu-item index="1-7"><router-link to="/reports/receiveDetailReport">AR入账汇总表</router-link></el-menu-item>
+            <el-menu-item index="1-5"><router-link to="/reports/entrySummaryReport">AR付款明细</router-link></el-menu-item>
+            <el-menu-item index="1-7"><router-link to="/reports/receiveDetailReport">AR收款简表</router-link></el-menu-item>
             <el-menu-item index="1-8"><router-link to="/reports/receiveSummaryReport">AR入账明细报表</router-link></el-menu-item>
             <el-menu-item index="1-9"><router-link to="/reports/chongDiaoReport">催账报表</router-link></el-menu-item>
             <el-menu-item index="1-10"><router-link to="/reports/resolveSummaryReport">结账区间明细报表</router-link></el-menu-item>
@@ -51,7 +51,7 @@
             <span>2.综合报表</span>
           </template>
           <el-menu-item-group>
-            <el-menu-item index="2-7"><router-link to="/reports/resolveDetailReport">营业收入统计报表</router-link></el-menu-item>
+            <el-menu-item index="2-7"><router-link to="/reports/resolveDetailReport">营业日报（区间）表</router-link></el-menu-item>
             <el-menu-item index="2-8"><router-link to="/reports/arDetail">营业日报表</router-link></el-menu-item>
             <el-menu-item index="2-9"><router-link to="/reports/arSummary">销售员业绩汇总报表</router-link></el-menu-item>
             <el-menu-item index="2-1"><router-link to="/reports/dateReport">销售分析汇总表</router-link></el-menu-item>
