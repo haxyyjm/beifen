@@ -89,7 +89,18 @@ import Ironsteward from '@/views/ironsteward/ironsteward/ironsteward'
 /**
  * 点击OTA进入的页面
  */
-import OtaInfo from '@/views/otaInfo/otaInfo/otaInfo'
+/**ota直连*/
+import Connectioncommon from '@/views/connection/common/home'
+import Connection from '@/views/connection/connection'
+import Orderform from '@/views/connection/order-form'
+import OtaRoomType from '@/views/connection/room-type'
+import OtaConfiguration from '@/views/connection/configuration'
+import OtaDeploy from '@/views/connection/deploy'
+import  OtaCorporation from '@/views/connection/corporation'
+import Product from '@/views/connection/product'
+import Otaset from '@/views/connection/ota-set'
+import Reptile from '@/views/connection/reptile'
+import Reportota from '@/views/connection/ota-report'
 /**
  * 点击会管家进入的路由
  */
@@ -1685,27 +1696,81 @@ let router = new Router({
       }]
     },
     /**点击ota进入的路由 */
+    /**
+     * ota直连
+     * */
     {
-      path: '/otaInfo',
-      type: 'ironhome',
-      name: 'otaInfo_page',
-      redirect: '/otaInfo',
-      component: Ironhome,//头部文件
+      path: '/connection',
+      type: 'home',
+      name: 'connection',
+      redirect: '/connection',
+      component: Connectioncommon,
       menuShow: true,
       children: [{
-        path: '/otaInfo',
-        component: RightContent,
+        path: '/connection',
+        component: Connection,
         // component: Home,
-        name: 'otaInfo_update', // 当前路由的name
+        name: 'connection_update', // 当前路由的name
         leaf: true, // 只有一个节点
         iconCls: 'iconfont icon-home', // 图标样式class
         menuShow: true,
-        children: [{
-          path: '/otaInfo',
-          component: Ironsteward,
-          name: 'OTA',
-          menuShow: true
-        }, ]
+        children: [
+          {
+            path: '/connection/order-form',
+            component: Orderform,
+            name: '订单',
+            menuShow: true
+          },
+          {
+            path: '/connection/corporation',
+            component: OtaCorporation,
+            name: '公司',
+            menuShow: true
+          },
+          {
+            path: '/connection/room-type',
+            component: OtaRoomType,
+            name: '房型',
+            menuShow: true
+          },
+          {
+            path: '/connection/configuration',
+            component: OtaConfiguration,
+            name: '调价',
+            menuShow: true
+          },
+          {
+            path: '/connection/deploy',
+            component: OtaDeploy ,
+            name: '配置',
+            menuShow: true
+          },
+          {
+            path: '/connection/product',
+            component:Product,
+            name: '产品',
+            menuShow: true
+          },
+          {
+            path: '/connection/ota-set',
+            component:Otaset,
+            name: '设置',
+            menuShow: true
+          },
+          {
+            path: '/connection/reptile',
+            component: Reptile,
+            name: '爬虫报错',
+            menuShow: true
+          },
+          {
+            path: '/connection/ota-report',
+            component:Reportota,
+            name: '报表',
+            menuShow: true
+          },
+
+        ]
       }]
     },
     {

@@ -21,11 +21,14 @@
           style="width: 100%;margin-top: 60px">
           <el-table-column label="序号" type="index"></el-table-column>
           <el-table-column prop="arranged_amount" label="调账金额"></el-table-column>
-          <el-table-column prop="room_number" label="房间号"></el-table-column>
-          <el-table-column prop="biz_date" label="财务日期"></el-table-column>
-          <el-table-column prop="gen_time" label="调账时间"></el-table-column>
+          <el-table-column prop="balance_after_arranged" label="剩余金额"></el-table-column>、
+          <el-table-column prop="account.room_num" label="房间号"></el-table-column>
+          <el-table-column prop="account.biz_date" label="财务日期"></el-table-column>
+          <el-table-column prop="modify_time" label="调账时间"></el-table-column>
+          <el-table-column prop="account.market_code_desc" label="市场码"></el-table-column>
+          <el-table-column prop="account.source_code_desc" label="来源码"></el-table-column>
           <el-table-column prop="desc" label="备注"></el-table-column>
-          <el-table-column prop="gen_user" label="操作人"></el-table-column>
+          <el-table-column prop="modify_user" label="操作人"></el-table-column>
         </el-table>
       </el-row>
       <el-pagination

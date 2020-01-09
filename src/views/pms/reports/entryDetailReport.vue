@@ -21,15 +21,11 @@
           style="width: 100%;margin-top: 60px">
           <el-table-column label="序号" type="index"></el-table-column>
           <el-table-column prop="name" label="名字" width="180"></el-table-column>
-          <el-table-column prop="pay_sum" label="支付"></el-table-column>
-          <el-table-column prop="charge_sum" label="消费"></el-table-column>
-          <el-table-column prop="balance" label="余额"></el-table-column>
-          <el-table-column label="是否停用">
-            <template slot-scope="scope">
-              <span v-if="scope.row.status == 0">否</span>
-              <span v-else>是</span>
-            </template>
-          </el-table-column>
+          <el-table-column prop="account.pay_amount" label="支付"></el-table-column>
+          <el-table-column prop="account.total_consumption" label="消费"></el-table-column>
+          <el-table-column prop="account.balance" label="余额"></el-table-column>
+          <el-table-column prop="account.total_refund" label="退款金额"></el-table-column>
+          <el-table-column prop="ar_status_desc" label="ar状态"></el-table-column>
         </el-table>
       </el-row>
       <el-pagination

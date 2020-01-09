@@ -20,10 +20,14 @@
           :header-cell-style="{background:'#303A41',color:'white'}"
           style="width: 100%;margin-top: 60px">
           <el-table-column label="序号" type="index"></el-table-column>
-          <el-table-column prop="project" label="项目代码"></el-table-column>
-          <el-table-column prop="pay_amount" label="付款金额"></el-table-column>
+          <el-table-column prop="ar_account_name" label="ar账户名称"></el-table-column>
+          <el-table-column prop="room_num" label="房间号"></el-table-column>
+          <el-table-column prop="incoming_account_reason_desc" label="入账原因"></el-table-column>
+          <el-table-column prop="incoming_account_code_desc" label="入账代码"></el-table-column>
+          <el-table-column prop="account.pay_amount" label="付款金额"></el-table-column>
           <el-table-column prop="charge_amount" label="消费金额"></el-table-column>
-          <el-table-column prop="gen_time" label="操作时间"></el-table-column>
+          <el-table-column prop="account.balance" label="余额"></el-table-column>
+          <el-table-column prop="modify_time" label="操作时间"></el-table-column>
           <el-table-column prop="desc" label="备注"></el-table-column>
         </el-table>
       </el-row>

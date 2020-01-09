@@ -21,7 +21,11 @@
           style="width: 100%;margin-top: 60px">
           <el-table-column label="序号" type="index"></el-table-column>
           <el-table-column prop="ar_account_name" label="ar名称" width="180"></el-table-column>
-          <el-table-column prop="pay_amount" label="金额"></el-table-column>
+          <el-table-column prop="incoming_account_reason_desc" label="入账原因"></el-table-column>
+          <el-table-column prop="incoming_account_code_desc" label="入账代码"></el-table-column>
+          <el-table-column prop="account.pay_amount" label="付款金额"></el-table-column>
+          <el-table-column prop="pay_status_desc" label="付款状态"></el-table-column>
+          <el-table-column prop="charge_amount" label="消费金额"></el-table-column>
           <el-table-column prop="pay_mode" label="支付方式"></el-table-column>
           <el-table-column prop="biz_date" label="日期"></el-table-column>
           <el-table-column prop="desc" label="备注"></el-table-column>

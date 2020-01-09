@@ -24,11 +24,13 @@
         <div>
             <el-button type='primary' size="mini" >查询</el-button>
             <el-button type='primary' size="mini" @click="printObj()">打印</el-button>
-            <!-- <el-button type='primary'>导出Pdf</el-button> -->
+            <!-- <el-button type='primary' size="mini" @click="exportExcel">导出Excel</el-button> -->
         </div>
       </div>
 </template>
 <script>
+import xlsxUtil from '../../common/xlsxUtil.js'
+import fileSaver from 'file-saver'
     import moment from 'moment'
     export default {
         name: "reportHead",
@@ -94,6 +96,15 @@
                 this.reportData.hotel_name = this.$store.state.hotel_name //store里面数据赋值进去酒店名称
                 this.$emit('listenToChild',this.reportData)
             },
+            exportExcel(){
+                 switch (this.reportParam.name) {
+                    case 'AR账户实时余额表':
+                    this.getReport_arBalance()
+                    break;
+                    default:
+                    break;
+                 }
+            },
             //子组件自带方法查询tabel方法
             findToParent(){
                 console.log('1111222',this.reportParam)
@@ -156,39 +167,39 @@
                     // case 'AR账户实时余额表':
                     //     this.getReport_arBalance()
                     //     break;
-                    // case '换房改房价报表':
-                    //     this.getReport_changeRoom()
-                    //     break;
-                    // case '本日续住报表':
-                    //     this.getReport_continueLive()
-                    //     break;
-                    // case '本日将离客人报表':
-                    //     this.getReport_preLeaveRoom()
-                    //     break;
-                    // case '本日离店客人报表':
-                    //     this.getReport_haveLeaveRoom()
-                    //     break;
-                    // case '当前在住客人报表':
-                    //     this.getReport_currentLive()
-                    //     break;
-                    // case '本日入住客人报表':
-                    //     this.getReport_dayLive()
-                    //     break;
-                    // case '当前在住全日房报表':
-                    //     this.getReport_feeRoom(0)
-                    //     break;
-                    // case '当前在住钟点房报表':
-                    //     this.getReport_feeRoom(1)
-                    //     break;
-                    // case '当前在住夜宵房报表':
-                    //     this.getReport_feeRoom(2)
-                    //     break;
-                    // case '当前在住常住房报表':
-                    //     this.getReport_feeRoom(3)
-                    //     break;
-                    // case '当前在住免费房报表':
-                    //     this.getReport_feeRoom(4)
-                    //     break;
+                    case '换房改房价报表':
+                        this.getReport_changeRoom()
+                        break;
+                    case '本日续住报表':
+                        this.getReport_continueLive()
+                        break;
+                    case '本日将离客人报表':
+                        this.getReport_preLeaveRoom()
+                        break;
+                    case '本日离店客人报表':
+                        this.getReport_haveLeaveRoom()
+                        break;
+                    case '当前在住客人报表':
+                        this.getReport_currentLive()
+                        break;
+                    case '本日入住客人报表':
+                        this.getReport_dayLive()
+                        break;
+                    case '当前在住全日房报表':
+                        this.getReport_feeRoom(0)
+                        break;
+                    case '当前在住钟点房报表':
+                        this.getReport_feeRoom(1)
+                        break;
+                    case '当前在住夜宵房报表':
+                        this.getReport_feeRoom(2)
+                        break;
+                    case '当前在住常住房报表':
+                        this.getReport_feeRoom(3)
+                        break;
+                    case '当前在住免费房报表':
+                        this.getReport_feeRoom(4)
+                        break;
                     // case '销售员业绩汇总报表':
                     //     this.getReport_xSCount()
                     //     break;
@@ -320,9 +331,8 @@
                     page_size: that.reportParam.page_size,
                 }
                 that.$axios.post(url,scopeParam).then(res=>{
-                    console.log('res....',res.data.data.results)
-                    that.reportData.reportData_list = res.data.data.results
-                    that.reportData.reportData_count = res.data.data.count
+                    that.reportData.reportData_list = res.data.data.data
+                    // that.reportData.reportData_count = res.data.data.count
                     // console.log('.....冲调账', localStorage.getItem('userInfo'))
                     console.log('that.reportData.reportData_list==>明细',that.reportData.reportData_list)
                 })
@@ -448,7 +458,42 @@
                     that.reportData.reportData_count = res.data.data.count
                     // console.log('.....冲调账', localStorage.getItem('userInfo'))
                     console.log('that.reportData.reportData_list==>明细',that.reportData.reportData_list)
+                    console.log('.............进入一个')
+                    // this.exportData = this.getExportData(this.reportData.reportData_list )
+                    // this.generateFile(this.exportData)
                 })
+            },
+            // 获取需要导出的数据
+            getExportData (array) {
+                console.log('进入二个')
+                console.log('array',array)
+                const result = []
+                for (let i = 0; i < array.length; i++) {
+                    let temp = {}
+                    temp['序号'] = i + 1
+                    temp['店铺名称'] = array[i].ar_status_desc
+                    temp['店铺logo'] = array[i].create_user
+                    temp['租户名称'] = array[i].ar_status
+                    temp['租户编号'] = array[i].remark
+                    temp['店铺类别'] = array[i].mainCategory
+                    temp['楼层'] = array[i].credit_card
+                    temp['店铺号'] = array[i].incoming_account_codes
+                    result.push(temp)
+                }
+                return result
+            },
+            // 生成导出文件
+            generateFile (data) {
+                if (!data || data.length === 0) {
+                    this.$message({
+                    message: '暂无数据',
+                    type: 'warning'
+                    })
+                    return
+                }
+                const wbout = xlsxUtil.jsonToExcel(data, 'Sheet1')
+                const fileName = 'AR账户实时余额表' + moment().format('YYYYMMDDHHmmss') + '.xlsx'
+                fileSaver.saveAs(new Blob([wbout], {type: 'application/octet-stream'}), fileName)
             },
             // AR入账简表
             getReport_arACount(){
@@ -461,9 +506,8 @@
                     page_size: that.reportParam.page_size,
                 }
                 that.$axios.post(url,scopeParam).then(res=>{
-                    console.log('res....',res.data.data.results)
-                    that.reportData.reportData_list = res.data.data.results
-                    that.reportData.reportData_count = res.data.data.count
+                    that.reportData.reportData_list = res.data.data.data
+                    // that.reportData.reportData_count = res.data.data.count
                     // console.log('.....冲调账', localStorage.getItem('userInfo'))
                     console.log('that.reportData.reportData_list==>明细',that.reportData.reportData_list)
                 })

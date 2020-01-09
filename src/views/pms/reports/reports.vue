@@ -32,13 +32,13 @@
             <span>1.财务报表</span>
           </template>
           <el-menu-item-group  :default-active="this.$route.path" router mode="horizontal">
-            <el-menu-item index="1-1"><router-link to="/reports/cashierReport">冲调帐报表</router-link></el-menu-item>
-            <el-menu-item index="1-2"><router-link to="/reports/cashierNoReport">AR入账简表</router-link></el-menu-item>
-            <el-menu-item index="1-3"><router-link to="/reports/entryDetailReport">AR账户实时余额表</router-link></el-menu-item>
+            <el-menu-item index="1-1"><router-link to="/reports/cashierReport"><span class="flag_class">*</span>冲调帐报表</router-link></el-menu-item>
+            <el-menu-item index="1-2"><router-link to="/reports/cashierNoReport"><span class="flag_class">*</span>AR入账简表</router-link></el-menu-item>
+            <el-menu-item index="1-3"><router-link to="/reports/entryDetailReport"><span class="flag_class">*</span>AR账户实时余额表</router-link></el-menu-item>
             <el-menu-item index="1-4"><router-link to="/reports/entrySimpleReport">AR账户收款汇总表</router-link></el-menu-item>
-            <el-menu-item index="1-5"><router-link to="/reports/entrySummaryReport">AR付款明细</router-link></el-menu-item>
-            <el-menu-item index="1-7"><router-link to="/reports/receiveDetailReport">AR收款简表</router-link></el-menu-item>
-            <el-menu-item index="1-8"><router-link to="/reports/receiveSummaryReport">AR入账明细报表</router-link></el-menu-item>
+            <el-menu-item index="1-5"><router-link to="/reports/entrySummaryReport"><span class="flag_class">*</span>AR付款明细</router-link></el-menu-item>
+            <el-menu-item index="1-7"><router-link to="/reports/receiveDetailReport"><span class="flag_class">*</span>AR收款简表</router-link></el-menu-item>
+            <el-menu-item index="1-8"><router-link to="/reports/receiveSummaryReport"><span class="flag_class">*</span>AR入账明细报表</router-link></el-menu-item>
             <el-menu-item index="1-9"><router-link to="/reports/chongDiaoReport">催账报表</router-link></el-menu-item>
             <el-menu-item index="1-10"><router-link to="/reports/resolveSummaryReport">结账区间明细报表</router-link></el-menu-item>
             <el-menu-item index="1-10"><router-link to="/reports/shouYinBill">收银清单</router-link></el-menu-item>
@@ -51,8 +51,8 @@
             <span>2.综合报表</span>
           </template>
           <el-menu-item-group>
-            <el-menu-item index="2-7"><router-link to="/reports/resolveDetailReport">营业日报（区间）表</router-link></el-menu-item>
-            <el-menu-item index="2-8"><router-link to="/reports/arDetail">营业日报表</router-link></el-menu-item>
+            <el-menu-item index="2-7"><router-link to="/reports/resolveDetailReport"><span class="flag_class">*</span>营业日报（区间）表</router-link></el-menu-item>
+            <el-menu-item index="2-8"><router-link to="/reports/arDetail"><span class="flag_class">*</span>营业日报表</router-link></el-menu-item>
             <el-menu-item index="2-9"><router-link to="/reports/arSummary">销售员业绩汇总报表</router-link></el-menu-item>
             <el-menu-item index="2-1"><router-link to="/reports/dateReport">销售分析汇总表</router-link></el-menu-item>
             <el-menu-item index="2-2"><router-link to="/reports/dateCodeReport">销售分析明细表</router-link></el-menu-item>
@@ -73,18 +73,18 @@
               <el-menu-item index="3-12"><router-link to="/reports/selfReport">指定日期免费房报表</router-link></el-menu-item>
               <el-menu-item index="3-13"><router-link to="/reports/previewReport">指定日期自用房报表</router-link></el-menu-item>
               <el-menu-item index="3-14"><router-link to="/reports/yaHouseReport">免费升级明细表</router-link></el-menu-item>
-              <el-menu-item index="3-1"><router-link to="/reports/loginReport">当前在住免费房报表</router-link></el-menu-item>
-              <el-menu-item index="3-2"><router-link to="/reports/cardReport">当前在住全日房报表</router-link></el-menu-item>
-              <el-menu-item index="3-3"><router-link to="/reports/onLiveReport">当前在住钟点房报表</router-link></el-menu-item>
-              <el-menu-item index="3-4"><router-link to="/reports/historyReport">当前在住夜宵房报表</router-link></el-menu-item>
-              <el-menu-item index="3-20"><router-link to="/reports/longLiveReport">当前在住常住房报表</router-link></el-menu-item>
-              <el-menu-item index="3-5"><router-link to="/reports/onPriceReport">当前在住客人报表</router-link></el-menu-item>
+              <el-menu-item index="3-1"><router-link to="/reports/loginReport"><span class="flag_class">*</span>当前在住免费房报表</router-link></el-menu-item>
+              <el-menu-item index="3-2"><router-link to="/reports/cardReport"><span class="flag_class">*</span>当前在住全日房报表</router-link></el-menu-item>
+              <el-menu-item index="3-3"><router-link to="/reports/onLiveReport"><span class="flag_class">*</span>当前在住钟点房报表</router-link></el-menu-item>
+              <el-menu-item index="3-4"><router-link to="/reports/historyReport"><span class="flag_class">*</span>当前在住夜宵房报表</router-link></el-menu-item>
+              <el-menu-item index="3-20"><router-link to="/reports/longLiveReport"><span class="flag_class">*</span>当前在住常住房报表</router-link></el-menu-item>
+              <el-menu-item index="3-5"><router-link to="/reports/onPriceReport"><span class="flag_class">*</span>当前在住客人报表</router-link></el-menu-item>
               <el-menu-item index="3-6"><router-link to="/reports/tempReport">当前在住客人余额报表</router-link></el-menu-item>
-              <el-menu-item index="3-7"><router-link to="/reports/resolveBillReport">换房改房价报表</router-link></el-menu-item>
-              <el-menu-item index="3-8"><router-link to="/reports/continueReport">本日续住报表</router-link></el-menu-item>
-              <el-menu-item index="3-8"><router-link to="/reports/operationReport">本日将离客人报表</router-link></el-menu-item>
-              <el-menu-item index="3-9"><router-link to="/reports/previewLeaveReport">本日离店客人报表</router-link></el-menu-item>
-              <el-menu-item index="3-10"><router-link to="/reports/exceptionReport">本日入住客人报表</router-link></el-menu-item>
+              <el-menu-item index="3-7"><router-link to="/reports/resolveBillReport"><span class="flag_class">*</span>换房改房价报表</router-link></el-menu-item>
+              <el-menu-item index="3-8"><router-link to="/reports/continueReport"><span class="flag_class">*</span>本日续住报表</router-link></el-menu-item>
+              <el-menu-item index="3-8"><router-link to="/reports/operationReport"><span class="flag_class">*</span>本日将离客人报表</router-link></el-menu-item>
+              <el-menu-item index="3-9"><router-link to="/reports/previewLeaveReport"><span class="flag_class">*</span>本日离店客人报表</router-link></el-menu-item>
+              <el-menu-item index="3-10"><router-link to="/reports/exceptionReport"><span class="flag_class">*</span>本日入住客人报表</router-link></el-menu-item>
               <el-menu-item index="3-15"><router-link to="/reports/previewRecordReport">本日入住散客报表</router-link></el-menu-item>
               <el-menu-item index="3-16"><router-link to="/reports/previewAlyReport">本日入住团队成员报表</router-link></el-menu-item>
               <el-menu-item index="3-17"><router-link to="/reports/datePreviewReport">当前在住早餐明细表</router-link></el-menu-item>
@@ -252,6 +252,9 @@
 }
 .RightCotent{
   width: calc(100% - 250px);
+}
+.flag_class{
+  color: #409EFF;
 }
 </style>
 

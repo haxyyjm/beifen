@@ -15,7 +15,7 @@
             </div>
             <div>
               <el-button type="primary" size="mini">打印</el-button>
-              <el-button type="primary" size="mini">刷新</el-button>
+              <el-button type="primary" size="mini" @click="flushData">刷新</el-button>
               <el-button type="primary" size="mini">退出</el-button>
             </div>
           </div>
@@ -24,13 +24,13 @@
             <ul>
               <li class="pingxing">
                 <span>团名:</span>
-                <el-input size="mini">
+                <el-input size="mini" v-model="team_param.team_name">
                   <template slot="append">档案</template>
                 </el-input>
               </li>
               <li class="pingxing">
                 <span>团队代码:</span>
-                <el-input size="mini"></el-input>
+                <el-input size="mini" v-model="team_param.team_code"></el-input>
               </li>
               <li class="special">
                 <div class="pingxing">
@@ -580,6 +580,11 @@
 export default {
   data() {
     return {
+      //创建团队的对象
+      team_param: {
+        team_code: '',
+        team_name: '',
+      },
       radio_1:1,
       radio_2:1,
       radio_3:1,
@@ -607,9 +612,17 @@ export default {
       let that = this
       let url,scopeParam
       that.$axios.post(url,scopeParam).then(res=>{
-      }).catch(error=>{
-        this.$message.warning(error)
+        }).catch(error=>{
+      //如果保存成功之后,就把对象清空
+      this.$message.warning(error)//
+      // this.team_param = {} //清空对象
       })
+    },
+    /**
+     * @desc 清空团队对象
+     */
+    flushData(){
+      this.team_param = {}
     },
     handleTabClick() {}
   }

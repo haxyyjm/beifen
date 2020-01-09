@@ -20,9 +20,8 @@
           :header-cell-style="{background:'#303A41',color:'white'}"
           style="width: 100%;margin-top: 60px">
           <el-table-column label="序号" type="index" ></el-table-column>
-          <el-table-column prop="project" label="项目代码"></el-table-column>
-          <el-table-column prop="pay_sum" label="付款合计"></el-table-column>
-          <el-table-column prop="charge_sum" label="消费合计"></el-table-column>
+          <el-table-column prop="desc" label="方式"></el-table-column>
+          <el-table-column prop="amount" label="金额"></el-table-column>
           <el-table-column prop="count" label="笔数"></el-table-column>
         </el-table>
       </el-row>

@@ -703,7 +703,7 @@
             </el-form-item> -->
             <el-form-item>
                <span style="margin-right: 24px">备注:</span>
-              <el-input type="textarea" v-model.trim="previewEnterBill.remark" size="mini" :rows="2" style="width: 14vw; margin-top: 10px;margin-left:10px"></el-input>
+              <el-input type="textarea" v-model="previewEnterBill.remark" size="mini" :rows="2" style="width: 14vw; margin-top: 10px;margin-left:10px"></el-input>
             </el-form-item>
             <!-- <el-form-item label="备注:">
               <el-input type="textarea" :rows="4" style="width: 85%"></el-input>
@@ -1158,7 +1158,8 @@
                   </el-select>
                 </li>
                 <li>
-                  <span style="margin-left: 28px">金额:</span><el-input type="text" v-model.trim="previewEnterBill.money" size="mini" style="width: 20vw; margin-top: 10px;margin-left:10px"></el-input>
+                  <span style="margin-left: 28px">金额:</span>
+                  <el-input type="text" v-model.trim="previewEnterBill.money" size="mini" style="width: 20vw; margin-top: 10px;margin-left:10px"></el-input>
                 </li>
                  <li>
                   <span style="margin-left: 28px">备注:</span><el-input type="textarea" v-model.trim="previewEnterBill.remark" size="mini" :rows="2" style="width: 20vw; margin-top: 10px;margin-left:10px"></el-input>

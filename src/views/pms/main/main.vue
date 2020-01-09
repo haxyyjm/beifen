@@ -144,17 +144,7 @@
                 </el-table-column>
                 <el-table-column prop="room_type" label="房型" :key="Math.random()" v-if="room_type_flag">
                 </el-table-column>
-                <el-table-column prop="rt_rate" width="140" label="预定房间类型" :key="Math.random()" v-if="room_type_array_flag">
-                  <template slot-scope="scope">
-                    <span>房间类型：</span><span v-for="(col,index) in scope.row.rt_rate">{{col.room_type}}、</span>
-                  </template>
-                </el-table-column>
                 <el-table-column prop="room_number" label="在住房间号" :key="Math.random()" v-if="room_type_flag">
-                </el-table-column>
-                <el-table-column prop="rt_rate" width="140" label="预定房间号" :key="Math.random()" v-if="room_type_array_flag">
-                  <template slot-scope="scope">
-                    <span v-for="(col,index) in scope.row.rt_rate">{{col.room_number}}、</span>
-                  </template>
                 </el-table-column>
                 <el-table-column prop="master_guest_list" width="140" label="联系电话" :key="Math.random()" v-if="!rsc_peo_flag">
                   <template slot-scope="scope">
@@ -175,7 +165,9 @@
                 </el-table-column>
                 <el-table-column prop="rate_code" label="房价码">
                 </el-table-column>
-                <el-table-column prop="room_status" label="房态">
+                <el-table-column prop="code_market_desc" label="市场码">
+                </el-table-column>
+                <el-table-column prop="code_src_desc" label="来源码">
                 </el-table-column>
                 <el-table-column  label="房价">
                   <template slot-scope="scope">

@@ -20,10 +20,9 @@
           :header-cell-style="{background:'#303A41',color:'white'}"
           style="width: 100%;margin-top: 60px">
           <el-table-column label="序号" type="index"></el-table-column>
-          <el-table-column prop="pay_mode" label="支付方式"></el-table-column>
-          <el-table-column prop="pay_amount" label="支付金额"></el-table-column>
-          <el-table-column prop="real_pay" label="实际支付"></el-table-column>
-          <el-table-column prop="sum" label="小计"></el-table-column>
+          <el-table-column prop="amount" label="金额"></el-table-column>
+          <el-table-column prop="desc" label="房费"></el-table-column>
+          <el-table-column prop="count" label="笔数"></el-table-column>
         </el-table>
       </el-row>
       <el-pagination
