@@ -536,6 +536,13 @@ let router = new Router({
           menuShow: true
         },
         {
+          path: '/reports/setting',
+          component: () =>
+          import('@/views/pms/reports/setting'),
+          name: 'setting',
+          menuShow: true,
+        },
+        {
           path: '/reports/longLiveReport',
           component: () =>
             import('@/views/pms/reports/longLiveReport'),

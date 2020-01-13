@@ -389,7 +389,7 @@
               免费升级<el-switch style="margin-left: 5px"  v-model="switchValue" active-color="#13ce66" active-text="是" inactive-text="否" active-value="1" inactive-value="0" inactive-color="#EAECF0"></el-switch> 
             </el-row> -->
             <el-row style="margin-top: 40px">
-                <img style="cursor: pointer; width:90px; height: 32px; display: inline-block; margin-bottom: -11px" @click="cardImport" src="../../../assets/images/pms/houseStatus/cardImport.png">
+                <img style="cursor: pointer; width:90px; height: 32px; display: inline-block; margin-bottom: -11px" @click="readCard" src="../../../assets/images/pms/houseStatus/cardImport.png">
                 <!-- <el-button style="height: 50px; width: 150px; margin-left: 12px" type="info">物品</el-button> -->
                 <el-button size="small" style="width: 80px" type="primary" @click="remarkDialog = true; resolveRemarkList()">备注</el-button>
                 <!-- <el-button style="height: 50px; width: 100px" type="info" @click="preview_billDialog = false">预约发票</el-button> -->
@@ -2565,11 +2565,27 @@ export default {
         // console.log('====开始传入证件照片===')
         // console.log('准备传入证件照片',this.preBillParam.reserve_guest)
       },
+       readCard(){
+        // http://ispider.eloadspider.com/v1/room/room_lock/scanning_id_card/
+         console.log('jinru--------------------')
+          // this.preBillLinkParam.room_type_name
+          let that = this
+          let url = that.api.api_newPrice_9107 + '/v1/' +  `room/room_lock/scanning_id_card/`
+          that.$axios.post(url).then(res=>{
+            if(res.data.message == 'success'){
+              let url = res.data.data.url
+              this.cardImport(url)
+            }else{
+              this.$message.warning('服务错误!')
+            }
+            }).catch(error=>{
+          })
+      },
       //证件导入功能 自动填充入住人信息
-      cardImport(){
+      cardImport(url){
         let that = this
         // that.cardInfoDialog = true //读卡器失败就不打开dialog
-        let url = `http://127.0.0.1:32727/?startTime=2019-04-18%2009:12:49&endTime=2019-4-19%2012:00:00&type=5&IDC_Factory=HuaShiDianZi_IDC_Card&IDC_ComPort=1001&roomNo=undefined&lockNo=undefined&guestNum=undefined&Lock_EnableLock=True&Lock_Factory=LockSDK_Card&Lock_ComPort=USB&Lock_ReaderType=RF50&Lock_SysCode=&Lock_HotelCode=1703936&Lock_CancelCard=True&Lock_WriteCardNum=10&Lock_ElevatorlsTrue=True&Lock_BeforeHour=0&Lock_AfterHour=0&jsonp=angular.callbacks._0`
+        // let url = `http://127.0.0.1:32727/?startTime=2019-04-18%2009:12:49&endTime=2019-4-19%2012:00:00&type=5&IDC_Factory=HuaShiDianZi_IDC_Card&IDC_ComPort=1001&roomNo=undefined&lockNo=undefined&guestNum=undefined&Lock_EnableLock=True&Lock_Factory=LockSDK_Card&Lock_ComPort=USB&Lock_ReaderType=RF50&Lock_SysCode=&Lock_HotelCode=1703936&Lock_CancelCard=True&Lock_WriteCardNum=10&Lock_ElevatorlsTrue=True&Lock_BeforeHour=0&Lock_AfterHour=0&jsonp=angular.callbacks._0`
         // let url = `http://127.0.0.1:32727/?startTime=2019-04-18%2009:12:49&endTime=2019-4-19%2012:00:00&type=5&IDC_Factory=JingLunDianZi_IDC&IDC_ComPort=1001&roomNo=undefined&lockNo=undefined&guestNum=undefined&Lock_EnableLock=True&Lock_Factory=LockSDK_Card&Lock_ComPort=USB&Lock_ReaderType=RF50&Lock_SysCode=&Lock_HotelCode=1703936&Lock_CancelCard=True&Lock_WriteCardNum=10&Lock_ElevatorlsTrue=True&Lock_BeforeHour=0&Lock_AfterHour=0&jsonp=angular.callbacks._0`
         url = url.replace('angular.callbacks._0','userHandler') //替换
         // let url = `http://127.0.0.1:32727/?startTime=2019-04-18%2009:12:49&endTime=2019-4-19%2012:00:00&type=5&IDC_Factory=HuaShiDianZi_IDC_Card&IDC_ComPort=1001&roomNo=undefined&lockNo=undefined&guestNum=undefined&Lock_EnableLock=True&Lock_Factory=LockSDK_Card&Lock_ComPort=USB&Lock_ReaderType=RF50&Lock_SysCode=&Lock_HotelCode=1703936&Lock_CancelCard=True&Lock_WriteCardNum=10&Lock_ElevatorlsTrue=True&Lock_BeforeHour=0&Lock_AfterHour=0`

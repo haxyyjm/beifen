@@ -60,6 +60,11 @@
         <el-table-column prop="account.balance" label="余额"></el-table-column>
         <el-table-column prop="account.usable_pre_authorized" label="信用"></el-table-column>
         <el-table-column prop="create_user_name" label="销售员"></el-table-column>
+        <el-table-column  label="操作">
+          <template slot-scope="scope">
+            <el-button type="primary" size="mini" @click="toThird(scope.row)">转入PMS</el-button>
+          </template>
+        </el-table-column>
       </el-table>
       <!--分页-->
       <el-pagination
@@ -141,6 +146,83 @@ export default {
   },
   methods: {
     /**
+     * @desc 转入PMS 可能还会转入其他第三方
+     */
+    toThird(param){
+      console.log('param',param)
+      let that = this;
+            // let room_no = '';
+            // let lock_no = ''
+            // let lock_arrary = {}
+            // lock_arrary[room_no] = lock_no
+            let check_guest = 
+                [{
+                    room_floor: 5,
+                    arr_time: param.arr_time,
+                    leave_time: param.leave_time,
+                    room_number: '',
+                    id_code: "01",
+                    id_no: '',
+                    name: param.rsv_person_name,
+                    sex: '01',
+                    telephone: param.telephone_master,
+                    pic_sign: '', //人脸照片
+                    street_add: 'china', //地址
+                }]
+            let master_base = {
+                    rsv_type: '',
+                    market: '',
+                    channel: '',
+                    room_amount: 1,
+                    fix_rate: '',
+                    master_lable: 0, //判断是否为全日房
+                    master_type: 1, //判断是否散客入住
+                    arr_time: param.arr_time,
+                    leave_time: param.leave_time,
+                    room_type: param.rsv_type_desc,
+                    code_name: '',
+                    room_number: '',
+                    biz_date: param.biz_date,
+                    adult_num: 2,
+                    code_market_id: param.code_market,
+                    code_src_id: param.code_src,
+                    rate_code: param.rate_code,
+                    card_no:  '',
+                    order_id: param.order_no //将订单号传过去
+            };
+            let scopeParam = {
+              room_list: [],
+              lock_arrary: [],
+              master_base: master_base,
+              check_guest: check_guest,
+              machineCode: 'SJK'
+            }
+            console.log('scopeParam',scopeParam)
+            return
+            that.$axios({
+                method: 'post',
+                url: that.api.api_zt + 'checkin/nobooking_checkin/',
+                data: scopeParam
+            }).then((res) => {
+                console.info("李文龙入住接口返回===============")
+                console.info(JSON.stringify(res));
+                if (res.data.message === 'success') {
+                    that.regist_id = res.data.regist_id;
+                    sessionStorage.setItem('regist_id', that.regist_id);
+                    //进行中台入账
+                    this.zt_pay_by_charges()
+                } else {
+                    instance('入住失败，请联系工作人员')
+                    //进行mis系统的记录失败，办理退款的相关业务
+                    
+                    //进行解锁操作
+                    this.unlock_room_error();
+                }
+            }).catch((err) => {
+                console.error(err);
+            })
+    },
+    /**
      * @remark 订单列表
      */
     getData() {
@@ -151,10 +233,9 @@ export default {
       url = that.api.api_newPrice_9107 + `/v1/ordering/reserve_base_list/?page_size=${that.pagination.pageSize}&page=${that.pagination.pageNumber}&code_src=${this.ota_value}`
       : url = that.api.api_newPrice_9107 + `/v1/ordering/reserve_base_list/?page_size=${that.pagination.pageSize}&page=${that.pagination.pageNumber}`
       that.$axios({
-          url: url,
-          method: "get"
-        })
-        .then(res => {
+        url: url,
+        method: "get"
+      }).then(res => {
           //console.log(res.data.data.total_count);
           if (res.data.message === "success") {
             that.all_list = res.data.data.results;
