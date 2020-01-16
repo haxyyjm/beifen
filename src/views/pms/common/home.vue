@@ -155,9 +155,9 @@
     <el-dialog class="houseTypeClass" width="20%" title="卡操作" :visible.sync="cardVisible">
         <div style="height: 40px;">
           <el-row style="text-align: center">
-            <el-button type="primary" @click="readCard()">读卡</el-button>
+            <el-button type="primary" @click="activateCard()">读卡</el-button>
             <!-- <el-button type="primary" @click="handleWriteCard()">销卡</el-button> -->
-            <el-button type="primary" @click="handleWriteCard()">写卡</el-button>
+            <el-button type="primary" disabled @click="handleWriteCard()">写卡</el-button>
           </el-row>
         </div>
         <!-- <span slot="footer" class="dialog-footer">
@@ -672,35 +672,80 @@
           console.error();
         })
       },
+      //激活 读卡操作
+      activateCard(){
+        let that = this
+        let url = that.api.api_newPrice_9107 + '/v1/' + `room/room_lock/activate_card/`
+        let scopeParam ={
+          operate_type: 1,//1, "读卡"), (2, "写卡"), (4, "销卡"),
+          start_time: '2020-01-01 00:00:00',
+          end_time: '2020-01-01 00:00:00',
+          room_no: 0,
+          guest_no: 0,
+          reference_id: 0
+        }
+        that.$axios.post(url,scopeParam).then(res=>{
+         if(res.data.message == 'success'){
+           console.log('res,,',res.data.data.id)
+            let resUrl = res.data.data.url
+            let id = res.data.data.id
+            //  that.$http.jsonp(resUrl, {
+            //   }).then(function (res) {
+            //     console.log(res);
+            //   }).catch(error=>{
+            //     console.error(error)
+            //   })
+            //  that.$http.jsonp(resUrl).success(function(data){
+            //    console.log(data,'shuju')
+            //  })
+            this.readCard(resUrl)
+            // this.updateCard(id)
+          }else{
+            that.$message.error('本地服务没开启!')
+          }
+        }).catch(error=>{
+          that.$message.warning('后台发生错误!')
+        })
+      },
       /**
        * @readCard  读卡操作
        */
       //读卡操作
-      readCard(){
-        console.log('..enter 开始读卡')
+      readCard(url){
+        console.log('..enter 开始读卡',url)
         let that = this
         // that.cardInfoDialog = true //读卡器失败就不打开dialog
-        let url = `http://127.0.0.1:32727/?startTime=2019-04-18%2009:12:49&endTime=2019-4-19%2012:00:00&type=1&roomNo=undefined&lockNo=undefined&guestNum=undefined&Lock_EnableLock=True&Lock_Factory=LockSDK_Card&Lock_ComPort=USB&Lock_ReaderType=RF57&Lock_SysCode=&Lock_HotelCode=1703936&Lock_CancelCard=True&Lock_WriteCardNum=10&Lock_ElevatorlsTrue=True&Lock_BeforeHour=0&Lock_AfterHour=0&jsonp=angular.callbacks._0`
         url = url.replace('angular.callbacks._0','userHandler') //替换
+        // let url = `http://127.0.0.1:32727/?startTime=2019-04-18%2009:12:49&endTime=2019-4-19%2012:00:00&type=1&roomNo=undefined&lockNo=undefined&guestNum=undefined&Lock_EnableLock=True&Lock_Factory=LockSDK_Card&Lock_ComPort=USB&Lock_ReaderType=RF57&Lock_SysCode=&Lock_HotelCode=1703936&Lock_CancelCard=True&Lock_WriteCardNum=10&Lock_ElevatorlsTrue=True&Lock_BeforeHour=0&Lock_AfterHour=0&jsonp=angular.callbacks._0`
         that.$http.jsonp(url,{
+          jsonp: 'callback',//可省略
           jsonpCallback: "userHandler"
         }).then(res =>{
-          console.log('res.......',res.data.Data,res.data.Data.LockNo)
-          console.log('res.data.Data.LockNo.slice(2)',res.data.Data.LockNo.slice(2))
-          if(res.data.Data.LockNo.length<9){
-            let param = '8' + res.data.Data.LockNo.slice(2)
-            console.log('param',param)
-            if(res.data.Result === true){
-              this.$message.success('读卡成功!')//跳转页面
-              this.getEnterInfoByRoom(param)//根据房间号跳转
-            }else{
-              that.$message.warning('读卡失败!')
-            }
+          if(res.data.Result === true){
+            this.$message.success('读卡成功!')//跳转页面
+             this.getOrderByLockNo(res.data.Data.LockNo)
+            // this.getEnterInfoByRoom(param)//根据房间号跳转
           }else{
-            that.$message.warning('此卡为空卡!')
+            that.$message.warning('读卡失败!')
           }
         }).catch(error=>{
           console.error();
+        })
+      },
+      //根据锁号获取订单号
+      getOrderByLockNo(lockNo){
+        console.log('lockNo',lockNo)
+        let that = this
+        let url = that.api.api_newPrice_9107 + '/v1/' + `room/room_lock/get_room_no_by_lock_no/`
+        let scopeParams = {
+          lock_no: lockNo
+        }
+        console.log('kaishi--获取',lockNo)
+        that.$axios.post(url,scopeParams).then(res=>{
+          console.log('res----订单号',res.data.data.master_base_data)
+          this.getEnterInfoByRoom(res.data.data.master_base_data)
+        }).catch(error=>{
+          console.log(error)
         })
       },
       //进入写卡销卡界面进行操作
@@ -736,12 +781,13 @@
         
       },
       getEnterInfoByRoom(param){
+        console.log('最终调用',param)
         let scopeParams = {
-          room_number: param
+          order_no: param.order_no  //改成通过订单号来获取详情了
         };
         let that = this
         // let url = `http://192.168.2.224:9005/v1/checkin/all_master_info/`
-        let url = that.api.api_bill_9202 + '/v1/' + `checkin/all_master_info/`
+        let url = that.api.api_newBill_9204 + '/v2/' + `checkin/all_master_info/`
         that.$axios({
           method : 'get',
           url : url,

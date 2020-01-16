@@ -226,7 +226,7 @@
                     <!-- <span v-if="scope.row.pay_status === 0 && scope.row.subject === 'transfer'">已到账</span> -->
                   </template>
                 </el-table-column>
-                <!-- <el-table-column prop="desc" label="备注"></el-table-column> -->
+                <el-table-column prop="modify_user_name" label="操作人"></el-table-column>
                 <el-table-column prop="create_time" width="150" label="时间"></el-table-column>
                  <!-- <el-table-column prop="desc" label="备注">
                 </el-table-column> -->
@@ -4787,10 +4787,10 @@ export default {
             this.zhicard(resUrl,id)
             // this.updateCard(id)
           }else{
-            that.message.error('本地服务没开启!')
+            that.$message.error('本地服务没开启!')
           }
         }).catch(error=>{
-            console.error();
+          that.$message.warning('后台发生错误!')
         })
       },
       updateCard(id){

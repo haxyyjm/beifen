@@ -1820,7 +1820,6 @@
                 // for(var item of this.enterInfoBillParam.master_guest){
                 //   array.push({name: item.name})
                 // }
-                console.log('恩嫩嫩嗯嗯de 进入')
                 // this.linInfoParam = {}
                 // that.linkHouseFornVisible = false //联房列表关闭
                 console.log('that.linInfoParam............',that.linInfoParam,that.enterInfoBillParam)

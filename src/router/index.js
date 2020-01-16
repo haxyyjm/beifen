@@ -536,10 +536,17 @@ let router = new Router({
           menuShow: true
         },
         {
-          path: '/reports/setting',
+          path: '/reports/reportContent/:id',
+          component: () =>
+          import('@/views/pms/reports/reportContent'),
+          name: 'reportContent',
+          menuShow: true,
+        },
+        {
+          path: '/reports/reportSetting/:id',
           component: () =>
           import('@/views/pms/reports/setting'),
-          name: 'setting',
+          name: 'reportSetting',
           menuShow: true,
         },
         {

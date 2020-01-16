@@ -3776,6 +3776,8 @@ export default {
           let new_date2 = moment(sDate2).format('YYYY-MM-DD')
           let new_date1_end = moment(sDate1).format('HH:mm:ss')
           let new_date2_end = moment(sDate2).format('HH:mm:ss')
+          // new_date1 =  '2020-01-16',
+          // new_date1_end = '12:43:36'
           console.log('new_date1',new_date1,new_date1_end)
           console.log('new_date2',new_date2,new_date2_end)
           let base_date_delta = this.$store.state.date_delta
@@ -4763,7 +4765,7 @@ export default {
           })
           console.log('this.liveoptions_Value',this.liveoptions_Value)
         },
-          //根据房型得到对应房价码
+          //根据房型得到对应房价码  watch里具有监听 可以计算时间差
         getRateCode_price(item,param){
           console.log('item,param==普通的',item,param)
           let that = this
