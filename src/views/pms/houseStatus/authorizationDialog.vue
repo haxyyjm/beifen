@@ -139,7 +139,9 @@
         },
         watch: {
             show () {
-                this.visible = this.show;
+              this.visible = this.show;
+              this.authorizationList = []
+              this.findAuthorizationList()
             },
             //对象的watch
             parentInfoParam(){
@@ -148,7 +150,7 @@
             },
         },
         computed:{
-        },
+          },
         created(){
         },
         methods: {

@@ -56,14 +56,14 @@
               <!--房态信息 开始图标筛选-->
               <div style="display: flex; justify-content: space-between; line-height: 40px;margin-top: 20px">
                 <div>
-                  <div class="boxStyle" @click="filterData('VC')"><div class='littleBox box1'></div><span class="oneLineStyle" @click="filterData('VC')" :class="{activeBlue: isActiveBlue_j}">净房[<span>{{VCNumber}}</span>]</span></div>
-                  <div class="boxStyle" @click="filterData('VD')"><div class='littleBox box2'></div><span class="oneLineStyle" @click="filterData('VD')" :class="{activeBlue: isActiveBlue_z}">脏房[<span>{{VDNumber}}</span>]</span></div>
-                  <div class="boxStyle" @click="filterData('OD')"><div class='littleBox box3'></div><span class="oneLineStyle" @click="filterData('OD')" :class="{activeBlue: isActiveBlue_check}">住脏[<span>{{ODNumber}}</span>]</span></div>
+                  <div class="boxStyle" @click="filterData('VC')"><div v-if="colorList.filter(item=>item.code == 'VC')[0]" class='littleBox' :style="{backgroundColor: colorList.filter(item=>item.code == 'VC')[0].color}"></div><span class="oneLineStyle" @click="filterData('VC')" :class="{activeBlue: isActiveBlue_j}">净房[<span>{{VCNumber}}</span>]</span></div>
+                  <div class="boxStyle" @click="filterData('VD')"><div v-if="colorList.filter(item=>item.code == 'VD')[0]" class='littleBox' :style="{backgroundColor: colorList.filter(item=>item.code == 'VD')[0].color}"></div><span class="oneLineStyle" @click="filterData('VD')" :class="{activeBlue: isActiveBlue_z}">脏房[<span>{{VDNumber}}</span>]</span></div>
+                  <div class="boxStyle" @click="filterData('OD')"><div v-if="colorList.filter(item=>item.code == 'OD')[0]" class='littleBox' :style="{backgroundColor: colorList.filter(item=>item.code == 'OD')[0].color}"></div><span class="oneLineStyle" @click="filterData('OD')" :class="{activeBlue: isActiveBlue_check}">住脏[<span>{{ODNumber}}</span>]</span></div>
                 </div>
                 <div>
-                  <div class="boxStyle" @click="filterData('OO')"><div class='littleBox box5'></div><span class="oneLineStyle" @click="filterData('OO')" :class="{activeBlue: isActiveBlue_w}">维修[<span>{{OONumber}}</span>]</span></div>
-                  <div class="boxStyle" @click="filterData('OC')"><div class='littleBox box7'></div><span class="oneLineStyle" @click="filterData('OC')" :class="{activeBlue: isActiveBlue_enter}">住净[<span>{{OCNumber}}</span>]</span></div>
-                  <div class="boxStyle" @click="filterData('OS')"><div class='littleBox box4'></div><span class="oneLineStyle" @click="filterData('OS')" :class="{activeBlue: isActiveBlue_suoding}">锁定[<span>{{OSNumber}}</span>]</span></div>
+                  <div class="boxStyle" @click="filterData('OO')"><div v-if="colorList.filter(item=>item.code == 'OO')[0]" class='littleBox' :style="{backgroundColor: colorList.filter(item=>item.code == 'OO')[0].color}"></div><span class="oneLineStyle" @click="filterData('OO')" :class="{activeBlue: isActiveBlue_w}">维修[<span>{{OONumber}}</span>]</span></div>
+                  <div class="boxStyle" @click="filterData('OC')"><div v-if="colorList.filter(item=>item.code == 'OC')[0]" class='littleBox' :style="{backgroundColor: colorList.filter(item=>item.code == 'OC')[0].color}"></div><span class="oneLineStyle" @click="filterData('OC')" :class="{activeBlue: isActiveBlue_enter}">住净[<span>{{OCNumber}}</span>]</span></div>
+                  <!-- <div class="boxStyle" @click="filterData('OS')"><div v-if="colorList.filter(item=>item.code == 'OS')[0]" class='littleBox' :style="{backgroundColor: colorList.filter(item=>item.code == 'OS')[0].color}"></div><span class="oneLineStyle" @click="filterData('OS')" :class="{activeBlue: isActiveBlue_suoding}">锁定[<span>{{OSNumber}}</span>]</span></div> -->
                 </div>
               </div>
               <div style="height: 40px; margin-top: 20px; line-height: 40px; background-color: #EEEEEE; width: calc(100% + 30px); margin-left: -15px">
@@ -181,7 +181,7 @@
           <div style="display: flex;flex-wrap: wrap;width: 100%;" v-for="(data,index) of newCardList" :key="index">
             <el-col  :span="2" class="right-card"  v-for="(item, index) of data" :key="index">
               <!-- 净房 -->
-              <div @click="cardClick(item,index)" :class="{trueMark: item.is_halt}" @mouseover="hoverIndex = index" @mouseout="hoverIndex = -1"  v-if="item.room_state === 'VC'"  class="boxActive">
+              <div @click="cardClick(item,index)" :class="{trueMark: item.is_halt}" @mouseover="hoverIndex = index" @mouseout="hoverIndex = -1"  v-if="item.room_state === 'VC'" :style="{backgroundColor: colorList.filter(item=>item.code == 'VC')[0].color}" class="boxActive">
                 <div  style="display: flex; justify-content: space-between;">
                   <span style="font-size: 14px">{{item.room_type_name}}</span>
                   <!-- <span>11</span> -->
@@ -194,7 +194,7 @@
                 </div>
               </div>
               <!-- 入住房 住净-->
-              <div  @click="cardClick(item,index)" :class="{trueMark: item.is_halt}" @mouseover="hoverIndex = index" @mouseout="hoverIndex = -1" v-if="item.room_state === 'OC'"  class="boxActive_6">
+              <div  @click="cardClick(item,index)" :class="{trueMark: item.is_halt}" @mouseover="hoverIndex = index" @mouseout="hoverIndex = -1" v-if="item.room_state === 'OC'" :style="{backgroundColor: colorList.filter(item=>item.code == 'OC')[0].color}"  class="boxActive_6">
                 <div  style="display: flex; justify-content: space-between;">
                   <span style="font-size: 14px">{{item.room_type_name}}</span>
                   <!-- <span>11</span> -->
@@ -207,7 +207,7 @@
                 </div>
               </div>
               <!-- 脏房 -->
-              <div  @click="cardClick(item,index)" :class="{trueMark: item.is_halt}" @mouseover="hoverIndex = index" @mouseout="hoverIndex = -1" v-if="item.room_state === 'VD'"  class="boxActive_3">
+              <div  @click="cardClick(item,index)" :class="{trueMark: item.is_halt}" @mouseover="hoverIndex = index" @mouseout="hoverIndex = -1" v-if="item.room_state === 'VD'" :style="{backgroundColor: colorList.filter(item=>item.code == 'VD')[0].color}" class="boxActive_3">
                 <div  style="display: flex; justify-content: space-between;">
                   <span style="font-size: 14px">{{item.room_type_name}}</span>
                   <!-- <span>11</span> -->
@@ -220,7 +220,7 @@
                 </div>
               </div>
               <!-- 检查 住脏-->
-              <div  @click="cardClick(item,index)" :class="{trueMark: item.is_halt}" @mouseover="hoverIndex = index" @mouseout="hoverIndex = -1" v-if="item.room_state === 'OD'"  class="boxActive_2">
+              <div  @click="cardClick(item,index)" :class="{trueMark: item.is_halt}" @mouseover="hoverIndex = index" @mouseout="hoverIndex = -1" v-if="item.room_state === 'OD'" :style="{backgroundColor: colorList.filter(item=>item.code == 'OD')[0].color}" class="boxActive_2">
                 <div  style="display: flex; justify-content: space-between;">
                   <span style="font-size: 14px">{{item.room_type_name}}</span>
                   <!-- <span>11</span> -->
@@ -233,7 +233,7 @@
                 </div>
               </div>
               <!-- 维修 -->
-              <div  @click="cardClick(item,index)" :class="{trueMark: item.is_halt}" @mouseover="hoverIndex = index" @mouseout="hoverIndex = -1" v-if="item.room_state === 'OO'"  class="boxActive_4">
+              <div  @click="cardClick(item,index)" :class="{trueMark: item.is_halt}" @mouseover="hoverIndex = index" @mouseout="hoverIndex = -1" v-if="item.room_state === 'OO'" :style="{backgroundColor: colorList.filter(item=>item.code == 'OO')[0].color}" class="boxActive_4">
                 <div  style="display: flex; justify-content: space-between;">
                   <span style="font-size: 14px">{{item.room_type_name}}</span>
                   <!-- <span>11</span> -->
@@ -246,7 +246,7 @@
                 </div>
               </div>
               <!-- 锁定房间 -->
-              <div  @click="cardClick(item,index)" :class="{trueMark: item.is_halt}" @mouseover="hoverIndex = index" @mouseout="hoverIndex = -1" v-if="item.room_state === 'OS'"  class="boxActive_5">
+              <div  @click="cardClick(item,index)" :class="{trueMark: item.is_halt}" @mouseover="hoverIndex = index" @mouseout="hoverIndex = -1" v-if="item.room_state === 'OS'" :style="{backgroundColor: colorList.filter(item=>item.code == 'OS')[0].color}" class="boxActive_5">
                 <div  style="display: flex; justify-content: space-between;">
                   <span style="font-size: 14px">{{item.room_type_name}}</span>
                   <!-- <span>11</span> -->
@@ -499,7 +499,7 @@
                   </div>
                 </div>
                 <!-- 浮动框的v-if====> 维修-->
-                <div v-if="item.room_state === 'OO'"   style="width: 350px; height: 80px; ">
+                <div v-if="item.room_state === 'OO'"   style="width: 350px; height: 100px;">
                   <div class="pop_state">
                     <div><el-button type="primary" round size="mini">{{item.room_no}}</el-button>{{item.building_name}}&nbsp;{{item.room_type}}</div>
                     <div>
@@ -508,7 +508,19 @@
                       </el-row>
                     </div>
                   </div>
-                  <div style="position:absolute; top:50px; right:160px; width:100px; font-size:16px;">该房修理中</div>
+                  <div v-if="item.OO_room_status" style="position:absolute; top:50px; right:160px; font-size:12px;color: #8e8e8e; line-height: 20px">
+                    <el-row>开始时间:{{item.OO_room_status.start_time}}</el-row>
+                    <el-row>结束时间:{{item.OO_room_status.end_time}}</el-row>
+                    <el-row>维修原因:{{item.OO_room_status.room_state_change_reason_desc}}</el-row>
+                  </div>
+                    <!-- <div  class="pop_bottom">
+                      <div style="margin-top: 5px;color: #8e8e8e; width: 60%;height: 100%">
+                        <el-row>开始时间</el-row>
+                    </div>
+                    <div style="margin-top: 5px;color: #8e8e8e; width: 60%;height: 100%">
+                        <el-row>结束时间</el-row>
+                    </div>
+                  </div> -->
                 </div>
                  <!-- pop浮动框的v-if====> 锁房-->
                 <div v-if="item.room_state === 'OS'"   style="width: 350px; height: 80px; ">
@@ -525,7 +537,7 @@
                 </div>
               </div>
               <!-- 小方块即房间的v-if===>start 净房-->
-              <div v-if="item.room_state === 'VC'"  slot="reference"  @mouseover="hoverIndex = index;mouseOver()" @mouseout="hoverIndex = -1;mouseOut()"    :class="{popoverActive: activeClassName == index && isActive, lockCss: activeClassName == index && lockCss_active, hoverActive: true}"   @dblclick="item.room_state_extra[7] == '1' ? sendPreviewEnter(item) : sendPreview(item);flushData()"  class="boxActive">
+              <div v-if="item.room_state === 'VC'"  slot="reference"  @mouseover="hoverIndex = index;mouseOver()" @mouseout="hoverIndex = -1;mouseOut()"    :class="{popoverActive: activeClassName == index && isActive, lockCss: activeClassName == index && lockCss_active, hoverActive: true}"   @dblclick="item.room_state_extra[7] == '1' ? sendPreviewEnter(item) : sendPreview(item);flushData()"  class="boxActive" :style="{backgroundColor: colorList.filter(item=>item.code == 'VC')[0].color}">
                 <!--单个房间(小方块)第一行-->
                 <div  style="display: flex; justify-content: space-between;">
                     <span style="font-size: 14px">{{item.room_type_name}}</span>
@@ -549,7 +561,7 @@
                 </div>
               </div>
             <!-- card入住房 住净-->
-             <div v-if="item.room_state === 'OC'"  @mouseover="hoverIndex = index;"   slot="reference" :class="{popoverActive: activeClassName == index && isActive,lockCss: activeClassName == index && lockCss_active, hoverActive: true}"   @dblclick="openOrderInfo(item)"  class="boxActive_6">
+             <div v-if="item.room_state === 'OC'"  @mouseover="hoverIndex = index;"   slot="reference" :class="{popoverActive: activeClassName == index && isActive,lockCss: activeClassName == index && lockCss_active, hoverActive: true}"   @dblclick="openOrderInfo(item)"  class="boxActive_6" :style="{backgroundColor: colorList.filter(item=>item.code == 'OC')[0].color}">
                 <!--单个房间(小方块)第一行-->
                 <div  style="display: flex; justify-content: space-between;">
                     <span style="font-size: 14px">{{item.room_type_name}}</span>
@@ -574,7 +586,7 @@
                 </div>
             </div>
                <!-- card入住房 住脏-->
-             <div v-if="item.room_state === 'OD'"  @mouseover="hoverIndex = index;"  slot="reference" :class="{popoverActive: activeClassName == index && isActive,lockCss: activeClassName == index && lockCss_active, hoverActive: true}"   @dblclick="openOrderInfo(item)"  class="boxActive_2">
+             <div v-if="item.room_state === 'OD'"  @mouseover="hoverIndex = index;"  slot="reference" :class="{popoverActive: activeClassName == index && isActive,lockCss: activeClassName == index && lockCss_active, hoverActive: true}"   @dblclick="openOrderInfo(item)"  class="boxActive_2" :style="{backgroundColor: colorList.filter(item=>item.code == 'OD')[0].color}">
                 <!--单个房间(小方块)第一行-->
                 <div  style="display: flex; justify-content: space-between;">
                     <span style="font-size: 14px">{{item.room_type_name}}</span>
@@ -599,7 +611,7 @@
                 </div>
               </div>
               <!-- card脏房 -->
-             <div v-if="item.room_state === 'VD'"  @mouseover="hoverIndex = index;mouseOver()"   slot="reference" :class="{popoverActive: activeClassName == index && isActive, lockCss: activeClassName == index && lockCss_active, hoverActive: true}"    class="boxActive_3">
+             <div v-if="item.room_state === 'VD'"  @mouseover="hoverIndex = index;mouseOver()"   slot="reference" :class="{popoverActive: activeClassName == index && isActive, lockCss: activeClassName == index && lockCss_active, hoverActive: true}"    class="boxActive_3" :style="{backgroundColor: colorList.filter(item=>item.code == 'VD')[0].color}">
                 <!--单个房间(小方块)第一行-->
                 <div  style="display: flex; justify-content: space-between;">
                     <span style="font-size: 14px">{{item.room_type_name}}</span>
@@ -615,7 +627,7 @@
                 </div>
               </div>
               <!-- card锁定房间 -->
-             <div v-if="item.room_state === 'OS'"  @mouseover="hoverIndex = index;mouseOver()" slot="reference" :class="{popoverActive: activeClassName == index && isActive,  hoverActive: true}"    class="boxActive_5">
+             <div v-if="item.room_state === 'OS'"  @mouseover="hoverIndex = index;mouseOver()" slot="reference" :class="{popoverActive: activeClassName == index && isActive,  hoverActive: true}"    class="boxActive_5" :style="{backgroundColor: colorList.filter(item=>item.code == 'OS')[0].color}">
                 <!--单个房间(小方块)第一行-->
                 <div  style="display: flex; justify-content: space-between;">
                     <span style="font-size: 14px">{{item.room_type_name}}</span>
@@ -631,7 +643,7 @@
                 </div>
               </div>
               <!-- 维修 -->
-             <div v-if="item.room_state === 'OO'"  @mouseover="hoverIndex = index;mouseOver()"  slot="reference" :class="{popoverActive: activeClassName == index && isActive,lockCss: activeClassName == index && lockCss_active,  hoverActive: true}"   @dblclick="openOrderInfo()"  class="boxActive_4">
+             <div v-if="item.room_state === 'OO'"  @mouseover="hoverIndex = index;mouseOver()"  slot="reference" :class="{popoverActive: activeClassName == index && isActive,lockCss: activeClassName == index && lockCss_active,  hoverActive: true}"   @dblclick="openOrderInfo()"  class="boxActive_4" :style="{backgroundColor: colorList.filter(item=>item.code == 'OO')[0].color}">
                 <!--单个房间(小方块)第一行-->
                 <div  style="display: flex; justify-content: space-between;">
                   <span style="font-size: 14px">{{item.room_type_name}}</span>
@@ -831,6 +843,7 @@
     name: 'firstIndex',
     data(){
       return {
+        colorList: [],
         hotelInfo: {},
         clickOrHover: 'hover',
         newCardList: [],
@@ -1313,6 +1326,7 @@
     created(){
       this.getCardList() //获取入住信息
       this.getHotel_info()//
+      this.getColorInfo()
       // this.getFloor()//获取楼层
       // this.getRoomType()
       // this.enterFormVisible = true
@@ -1343,6 +1357,19 @@
       }
 		},
     methods: {
+      /**
+       * 获取方块颜色
+       */
+      getColorInfo(){
+        let that = this
+        let url = that.api.api_newPrice_9107+ '/v1/' + `room/room_status/get_code_room_state_list/`
+        that.$axios.get(url).then(res=>{
+          console.log('color',res.data.data.results)
+          this.colorList = res.data.data.results
+        }).catch(error=>{
+          that.$message.error(error)
+        })
+      },
       /**
        * 获取酒店信息
        */

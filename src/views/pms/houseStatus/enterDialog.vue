@@ -3806,7 +3806,7 @@ export default {
             // if(day == 0 || day == 1){
             //   day = day + 1
             // }else if(day > 1){
-              day = day + 1
+              day = day
             // }
             // day == 0 ? day = day + 1 : day = day + 1
             this.countDate = day

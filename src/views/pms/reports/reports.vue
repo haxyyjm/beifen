@@ -66,7 +66,7 @@
        */
       getRepost_list(){
         let that = this
-        let url = 'http://47.98.113.173:9115'  + '/v1/' + `report/unified_interface_list/`
+        let url = that.api.api_newPrice_9107  + '/v1/' + `report/unified_interface_list/`
         that.$axios.get(url).then(res=>{
             if(res.data.message == 'success'){
                 that.repost_all_list_obj = res.data.data

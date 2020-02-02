@@ -35,8 +35,9 @@
       :visible.sync="dialogVisible"
       width="30%"
     >
-      code:<input class="input-style" type="text" />
-      desc:<input class="input-style" type="text" />
+      code:<input class="input-style dialog-input" v-model="code_param" type="text" />
+      <br/>
+      desc:<input class="input-style dialog-input" v-model="desc_param" type="text" />
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible = false">取 消</el-button>
         <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
@@ -132,6 +133,8 @@ export default {
       }
     ]
     return {
+      code_param: '',
+      desc_param: '',
       dialogVisible: false,
       response_data: [], //返回得数组
       //树形结构展示 所有数据
@@ -348,6 +351,11 @@ export default {
 
 <style lang="less">
     .input-style {height: 20px;width: 140px;}
+    .dialog-input{
+      height: 30px;
+      width: 220px;
+      margin-top: 20px;
+    }
     .through-panel-body {
         padding-top:12px;
         width: 100%;

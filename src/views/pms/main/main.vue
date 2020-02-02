@@ -718,7 +718,7 @@
                       that.RevPar = 0;
                     }
                   }else if(i.name === '预计收入'){
-                      that.predict_earn = i.price;
+                      that.predict_earn = i.price.toFixed(2);
                   }
                }
                for(let i of res.data.data.room_count){

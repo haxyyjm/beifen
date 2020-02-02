@@ -87,20 +87,41 @@
                   <!-- <el-button type="info" round  size="small">转全天房</el-button> -->
                   <el-button type="info" :disabled="banDisable()" @click="leaveDialog = true;handleDate()" round  size="mini">提前离店</el-button>
                   <el-button type="info" :disabled="banDisable()" @click="continueLiveDialog = true; handleDate()" round  size="mini">续住</el-button>
-                  <!-- <el-button type="info" round  size="small">无等待</el-button> -->
                   <el-button type="info" :disabled="banDisable()" round @click="enterPersonVisible = true;handleEnterPeople()"  size="mini">+入住人</el-button>
+                  <el-button type="info" :disabled="banDisable()" @click="priceDialog = true;" round  size="small">价格修改</el-button>
                 </el-row>
                 <!--转全天房-->
                 <div  style="display: flex">
                   <div style="width: 55%;height:140px;display: flex;align-items:center;flex-wrap: wrap">
                     <!-- <div>订单状态：<span style="color: #9FBDF2 ">入住</span></div> -->
-                    <div class="panduan">市场码:<span>{{market_src}}</span></div>
+                    <div class="panduan">
+                      <!-- 市场码:<span>{{market_src}}</span> -->
+                      市场码:
+                      <el-select @change="preBillLinkParam.code_src = ''" @focus="getMarketSrc('market')" size="mini" style="width: 70%" v-model="preBillLinkParam.code_market">
+                          <el-option
+                            v-for="item in marketList"
+                            :key="item.id"
+                            :label="item.descript"
+                            :value="item.code">
+                          </el-option>
+                      </el-select>
+                    </div>
                     <div class="panduan">来源码:
-                      {{enter_src}}
+                      <!-- {{enter_src}} -->
+                      <el-select @change="handleUpdateAll" @focus="getMarketSrc('src')" size="mini" style="width: 70%"  v-model="preBillLinkParam.code_src">
+                          <el-option
+                            v-for="item in srcList"
+                            :key="item.id"
+                            :label="item.descript"
+                            :value="item.code">
+                          </el-option>
+                        </el-select>
                     </div>
                     <!-- <div>房型：<span>{{preBillLinkParam.room_type}}</span></div> -->
                     <div class="panduan">
-                      当日价:<el-input  size="mini" style="color: #f3565d;width: 70px;"  @blur="span_input_flag = false;update_price()" v-model="current_rate_price"></el-input>
+                      当日价:
+                      <!-- <el-input  size="mini" style="color: #f3565d;width: 70px;"  @blur="span_input_flag = false;update_price()" v-model="current_rate_price"></el-input> -->
+                      <span style="color: #f3565d;">{{current_rate_price}}元</span>
                     </div>
                     <!-- <div v-show="!span_input_flag">
                       当日价:
@@ -121,7 +142,7 @@
                       <span style="font-weight: 600">备注:</span>
                     </div>
                     <div style="flex: 1">
-                      <el-input placeholder="暂无"  @blur="handleRemark" resize="none" v-model="preBillLinkParam.remark_id_list" type="textarea" :rows="4"></el-input>
+                      <el-input placeholder="暂无"  @blur="handleUpdateAll" resize="none" v-model="preBillLinkParam.remark_id_list" type="textarea" :rows="4"></el-input>
                     </div>
                   </div>
                   <div style="width: 20%;height:140px;padding-top: 1vw;display: flex;flex-wrap: wrap;flex-direction: row;">
@@ -338,7 +359,7 @@
                   <el-table-column prop="modify_user.user_name" label="操作人"></el-table-column>
                   <el-table-column label="操作">
                     <template slot-scope="scope">
-                      <el-button :disabled="banDisable()" @click="remarkDialog = true; addAndUpdate = false; handleRemarkInfo(scope.row)" type="text" size="small">编辑</el-button>
+                      <el-button :disabled="banDisable()" @click="remarkDialog = true; addAndUpdate = false; handleUpdateAllInfo(scope.row)" type="text" size="small">编辑</el-button>
                       <el-button :disabled="banDisable()" @click="deleteRemarkInfo(scope.row)" type="text" size="small">注销</el-button>
                     </template>
                   </el-table-column>
@@ -375,6 +396,28 @@
                   <el-table-column prop="create_user_name" label="操作人"></el-table-column>
               </el-table>
              </el-tab-pane>
+             <!-- <el-tab-pane label="价格修改" name="8">
+                <el-table height="350" :data="preBillLinkParam.room_price" :header-cell-style="{background:'#373d41', color: '#FFFFFF'}" style="width: 100%">
+                  <el-table-column  prop="price_date" label="日期">
+                    <template slot-scope="scope">
+                      <i class="el-icon-time"></i>
+                      <span style="margin-left: 10px">{{ scope.row.price_date }}</span>
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="星期">
+                    <template slot-scope="scope">
+                      {{getDay(scope.row)}}
+                    </template>
+                  </el-table-column>
+                  <el-table-column prop="room_price" label="价格">
+                    <template slot-scope="scope">
+                      <el-input size="mini" style="width: 150px"
+                        @blur="update_price(scope.row)"
+                        v-model="scope.row.room_price"></el-input>
+                    </template>
+                  </el-table-column>
+                </el-table>
+             </el-tab-pane> -->
           </el-tabs>
         </el-col>
       </el-row>
@@ -574,6 +617,35 @@
         </div>
         <div slot="footer" class="dialog-footer">
           <el-button type="danger"  @click="settingDialog=false">保存</el-button>
+        </div>
+      </el-dialog>
+      <el-dialog class="houseTypeClass" width="50%"   title="价格修改" :visible.sync="priceDialog" :modal="true">
+        <div  style="height: 400px">
+          <el-table height="350" :data="preBillLinkParam.room_price" :header-cell-style="{background:'#373d41', color: '#FFFFFF'}" style="width: 100%">
+              <el-table-column  prop="price_date" label="日期">
+                <template slot-scope="scope">
+                  <i class="el-icon-time"></i>
+                  <span style="margin-left: 10px">{{ scope.row.price_date }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column label="星期">
+                <template slot-scope="scope">
+                  {{getDay(scope.row)}}
+                </template>
+              </el-table-column>
+              <el-table-column prop="room_price" label="价格">
+                <template slot-scope="scope">
+                  <el-input size="mini" style="width: 150px"
+                    @blur="update_price(scope.row)"
+                    v-model="scope.row.room_price"></el-input>
+                </template>
+              </el-table-column>
+              <!-- <el-table-column label="操作">
+                <template slot-scope="scope">
+                  <el-button type="text" size="mini" @click="handleUpdate_price(scope.row)">更新价格</el-button>
+                </template>
+              </el-table-column> -->
+            </el-table>
         </div>
       </el-dialog>
       <!-- ==========================================================分割========================================================================================================= -->
@@ -1275,7 +1347,7 @@
                             </el-option>
                           </el-select>
                 </li> -->
-                <li>
+                <li v-show="!fee_check_flag">
                   <span>付款方式:</span>
                   <el-select clearable size="mini" @change="enterBill.enterAccountCode=''" style="width: 20vw; margin-top: 10px;margin-left:10px"  @focus="getPayReason()" placeholder="付款原因"  v-model="previewEnterBill.payReasonValue">
                     <el-option
@@ -1287,7 +1359,7 @@
                   </el-select>
                 </li>
                 <li>
-                <li>
+                <li v-show="!fee_check_flag">
                   入账代码:<el-select clearable  @focus="getIncomingAccount()"  v-model="enterBill.enterAccountCode" size="mini" style="width: 20vw; margin-top: 10px;margin-left:10px"  placeholder="请选择">
                             <el-option
                               v-for="item in incomingAccoutList"
@@ -1546,6 +1618,9 @@
               <li>
                 <span>手工： 手工输入房费</span>
               </li>
+              <li>
+                <span>钟点房： 输入钟点房费</span>
+              </li>
               <!-- <li>
                 <span>不加收： 不加收房费，按现有费用结账</span>
               </li> -->
@@ -1555,7 +1630,8 @@
             <el-button size="mini" type="primary" @click="confirmFee('全天')">全天</el-button>
             <el-button size="mini" type="primary" @click="confirmFee('半天')">半天</el-button>
             <el-button size="mini" type="primary" @click="confirmFee('手工')">手工</el-button>
-            <el-button style="margin-right: 25%;" size="mini" type="primary" @click="confirmFee('不加收')">不加收</el-button>
+            <el-button size="mini" type="primary" @click="confirmFee('钟点')">钟点房</el-button>
+            <el-button size="mini" type="primary" @click="confirmFee('不加收')">不加收</el-button>
           </span>
         </el-dialog>
         <!--zpj拉过来的账务-->
@@ -1881,6 +1957,7 @@ export default {
           invoiceList: [],
           marketSrcList: [],//来源吗list
           marketList: [],
+          srcList: [],
           enter_src: '',//客户来源
           market_src: '',
           billParam: {},
@@ -2135,6 +2212,7 @@ export default {
             // parentInfoParam: {},
             radio1: 1,
             enterPersonVisible: false,//入住人
+            priceDialog: false,//价格修改
             updateLinkInfoVisible: false,
             updateTimeVisible: false,
             updateOrderVisible: false,
@@ -2484,17 +2562,54 @@ export default {
         }
       },
       /**
+       * 匹配对应日期 星期
+       */
+      getDay(row){
+       let day =  moment(row.price_date).weekday()
+       switch (day) {
+        case 0:
+          return '星期天';
+          break;
+        case 1:
+          return '星期一';
+          break;
+        case 2:
+          return '星期二';
+          break;
+        case 3:
+          return '星期三';
+          break;
+        case 4:
+          return '星期四';
+          break;
+        case 5:
+          return '星期五';
+          break;
+        case 6:
+          return '星期六';
+          break;
+         default:
+           break;
+       }
+      },
+      /**
+       * 更新日期所对应的房价
+       */
+      handleUpdate_price(param){
+
+      },
+      /**
        * @desc 更新房价
       */
-      update_price(){
+      update_price(param){
         //current_rate_price
         let that = this
         let url = that.api.api_newBill_9204 + '/v2/' + `checkin/update_price/`
         // let url = `http://192.168.2.165:9005/v2/checkin/update_price/`
         let scopeParam = {
           order_no: that.preBillLinkParam.order_no,
-          price_date: this.update_date, //这个更新的日期
-          room_price: that.current_rate_price
+          price_date: param.price_date, //这个更新的日期
+          room_price: param.room_price
         }
         that.$axios.post(url,scopeParam).then(res=>{
 
@@ -3072,14 +3187,21 @@ export default {
         });
       },
       //处理备注
-      handleRemark(){
+      handleUpdateAll(){
         console.log('鼠标丢失触发')
         let that = this
-        // let url = 'http://192.168.2.165:9005/v2/checkin/update_mark/'
-        let url = that.api.api_newBill_9204 + '/v2/checkin/update_mark/'
+        if(!this.preBillLinkParam.code_src || !this.preBillLinkParam.code_market){
+          this.$message.warning('市场码来源码不能为空!')
+          return
+        }
+        let url = that.api.api_newBill_9204 + '/v2/checkin/update_checkin_order/'
+        // let url = 'http://192.168.2.165:9005/v2/checkin/update_checkin_order/'
         let scopeParam ={
-          order_no: this.preBillLinkParam.order_no,
-          remark: this.preBillLinkParam.remark_id_list
+          account_id: this.preBillLinkParam.account_id,
+          // order_no: this.preBillLinkParam.order_no,
+          remark_id_list: this.preBillLinkParam.remark_id_list,
+          code_market: this.preBillLinkParam.code_market,
+          code_src: this.preBillLinkParam.code_src,
         }
         that.$axios.post(url,scopeParam).then(res=>{
             // console.log('res',res)
@@ -4731,6 +4853,8 @@ export default {
           console.log('jinruruuu')
           this.getCardInfo()//查看房卡
           // this.billDialog = true
+        }else if(row.name == '8'){
+          console.log('价格修改')
         }
       },
       //获取房卡记录
@@ -5178,6 +5302,12 @@ export default {
           this.previewEnterBill.payReasonValue = 5//5
           this.enterBill.money= ''
           this.enterBill.enterAccountCode = 19//14
+        }else if(param==='钟点'){
+          this.fee_check_flag = true
+          this.enterBillDialog = true
+          this.previewEnterBill.payReasonValue = 3//5
+          this.enterBill.money= ''
+          this.enterBill.enterAccountCode = 15//14
         }else{
           this.room_fee_dialog = false
         }
@@ -5201,14 +5331,15 @@ export default {
         console.log('time',moment().format('YYYY-MM-DD HH:mm:ss'))
         let now_date = moment().format('YYYY-MM-DD HH:mm:ss')
         let leave_time = this.preBillLinkParam.leave_time
-        //超过离房时间了
-        if(now_date > leave_time){
-          console.log('jinru-')
-          this.room_fee_dialog = true
-          this.getPayReason()//再查一遍默认选择值
-          this.getIncomingAccount()//再查一遍默认选择值
-          this.previewEnterBill.payReasonValue = 5 //默认付款方式
-        }
+        //超过离房时间了 这里的判断不要
+        // if(now_date > leave_time){
+        //   console.log('jinru-')
+        //   this.room_fee_dialog = true
+        //   this.getPayReason()//再查一遍默认选择值
+        //   this.getIncomingAccount()//再查一遍默认选择值
+        //   this.previewEnterBill.payReasonValue = 5 //默认付款方式
+        // }
+        this.room_fee_dialog = true
         this.flushPreviewEnterBill()
         this.jieAccountTitle = '结账'
         this.jieAccountDialog = true
@@ -5923,7 +6054,7 @@ export default {
         //市场码来源码
         getMarketSrc(param){
           let that = this
-          that.marketSrcList = []
+          that.srcList = []
           let url =  that.api.api_code_9103+ '/v1/' + 'system/settings/get_code_base_sys_list/'
           let params = {}
           //src 代表市场码
@@ -5944,20 +6075,15 @@ export default {
           }
           that.$axios({
             method : 'get',
-                url : url,
-                params: params
+            url : url,
+            params: params
             }).then(res=>{
               if(param == 'src'){
-                that.marketSrcList = res.data.data.results
-                try {
-                  this.enter_src = this.marketSrcList.filter(item=> item.code == this.preBillLinkParam.code_src)[0].descript
-                } catch (error) {
-                  console.log('error')                
-                }
+                that.srcList = res.data.data.results
+                // this.enter_src = this.marketSrcList.filter(item=> item.code == this.preBillLinkParam.code_src)[0].descript
               }else{
-                  that.marketList = res.data.data.results
-                  this.market_src = this.marketList.filter(item=> item.code == this.preBillLinkParam.code_market)[0].descript
-
+                that.marketList = res.data.data.results
+                // this.market_src = this.marketList.filter(item=> item.code == this.preBillLinkParam.code_market)[0].descript
               }
               console.log('that.marketSrcList',that.marketSrcList)
             }).catch(error=>{
@@ -6096,7 +6222,7 @@ export default {
     color: #F56C6C;
   }
   .roomfeeClass{
-    height: 200px;
+    height: 230px;
     border: 1px solid #dedede;
     .fee_ul li{
       margin-top: 20px;
