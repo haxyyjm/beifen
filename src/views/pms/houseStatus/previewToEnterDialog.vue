@@ -2625,6 +2625,7 @@ export default {
             that.cardInfoParam.birthday = res.data.Data.Birthday
             that.cardInfoParam.nation = res.data.Data.Nation
             that.validateId_no(that.cardInfoParam)//验证身份证方法
+            that.validateBlackId_no(that.cardInfoParam)// 验证黑名单方法 
             that.cardInfoDialog = true
             console.log('开始上传公安照片')
             that.takePhoto(that.police_img_src)
@@ -2635,6 +2636,34 @@ export default {
         }).catch(error=>{
           console.error();
         })
+      },
+      /**
+       * 验证该人是否在黑名单内
+       */
+      validateBlackId_no(param){
+         let scopeParam = {
+            card_id: param.cardNo || param.card_id,
+            nation: param.nation || '汉族',
+            gender: param.sex || '男性'
+          }
+          let that =this;
+          this.$axios({
+            url: `http://organ.crowncrystalhotel.com` + "/v1/organization/ht/black_list/customer_black_list_filter/",
+            method: "post",
+            data: scopeParam
+          }).then(res=>{
+            if(res.data.message === 'success'){
+              console.log('res.data.in_black_list',res.data.in_black_list)
+              if(res.data.in_black_list == true){
+                this.$message.warning('该人已被纳入公安黑名单!')
+                that.cardInfoDialog = false //不打开dialog
+                return false
+              }else{
+                return true
+              }
+            }
+            return true
+          })
       },
         //验证是否存在已经住人的房间继续刷卡住人
         validateId_no(param,param2){
